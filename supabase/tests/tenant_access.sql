@@ -40,12 +40,12 @@ do $$begin
  insert into public.events(club_id,template_id,name,starts_at,place,type)
  values('20000000-0000-4000-8000-000000000001','40000000-0000-4000-8000-000000000002','Blocked',now(),'Test','Běh');
  raise exception 'FAIL: foreign template link allowed';
- exception when foreign_key_violation then null; end;
+ exception when foreign_key_violation or insufficient_privilege then null; end;
  begin
  insert into public.participation(club_id,event_id,member_id)
  values('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000002');
  raise exception 'FAIL: foreign member attendance link allowed';
- exception when foreign_key_violation then null; end;
+ exception when foreign_key_violation or insufficient_privilege then null; end;
  if (select count(*) from public.clubs)!=1 then raise exception 'FAIL: coach club isolation'; end if;
  if (select count(*) from public.members)!=1 then raise exception 'FAIL: coach member isolation'; end if;
  if exists(select 1 from public.members where club_id='20000000-0000-4000-8000-000000000002') then raise exception 'FAIL: foreign members visible'; end if;

@@ -14,10 +14,10 @@ def sql(statement):return docker('exec','-i',name,'psql','-U','postgres','-v','O
 try:
  docker('run','-d','--name',name,'-e','POSTGRES_HOST_AUTH_METHOD=trust','postgres:17-alpine',capture_output=True)
  for attempt in range(30):
-  try:docker('exec',name,'pg_isready','-U','postgres',capture_output=True);break
+  try:docker('exec',name,'pg_isready','-h','127.0.0.1','-U','postgres',capture_output=True);break
   except subprocess.CalledProcessError:sleep(1)
  else:raise RuntimeError('PostgreSQL did not start')
- tests=['tenant_access','club_management','journal_photos','race_results','distinct_races','member_access','training_capacity','training_groups']
+ tests=['tenant_access','club_management','journal_photos','race_results','distinct_races','member_access','training_capacity','training_groups','event_tasks']
  files=[root/'supabase/tests/local-bootstrap.sql',*sorted((root/'supabase/migrations').glob('*.sql')),*[root/f'supabase/tests/{test}.sql' for test in tests]]
  for file in files:
   try:sql(file.read_text())

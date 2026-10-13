@@ -24,6 +24,21 @@ do $$begin
   delete from public.events where id='50000000-0000-4000-8000-000000000001';raise exception 'FAIL event deletion left a photo behind';
  exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
 end $$;
+update public.events set status='cancelled' where id='50000000-0000-4000-8000-000000000001';
+do $$begin
+ begin
+  insert into storage.objects(bucket_id,name) values('club-photos','20000000-0000-4000-8000-000000000001/50000000-0000-4000-8000-000000000001/60000000-0000-4000-8000-000000000005.jpg');raise exception 'FAIL cancelled event upload allowed';
+ exception when insufficient_privilege then null;end;
+end $$;
+update public.events set status='scheduled' where id='50000000-0000-4000-8000-000000000001';
+insert into storage.objects(bucket_id,name)
+ select 'club-photos','20000000-0000-4000-8000-000000000001/50000000-0000-4000-8000-000000000001/'||gen_random_uuid()::text||'.jpg' from generate_series(1,19);
+do $$begin
+ if (select count(*) from storage.objects)<>20 then raise exception 'FAIL photo capacity';end if;
+ begin
+  insert into storage.objects(bucket_id,name) values('club-photos','20000000-0000-4000-8000-000000000001/50000000-0000-4000-8000-000000000001/60000000-0000-4000-8000-000000000004.jpg');raise exception 'FAIL 21st photo accepted';
+ exception when insufficient_privilege then null;end;
+end $$;
 select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}',true);
 do $$begin
  if exists(select 1 from storage.objects) then raise exception 'FAIL member photo visibility';end if;

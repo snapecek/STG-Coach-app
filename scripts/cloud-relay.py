@@ -9,7 +9,7 @@ class Handler(BaseHTTPRequestHandler):
   if self.path=='/__health':
    self.send_response(200);self.end_headers();self.wfile.write(b'ok');return
   body=self.rfile.read(int(self.headers.get('Content-Length','0')))
-  headers={k:v for k,v in self.headers.items() if k.lower() in ['apikey','authorization','content-type','prefer','x-client-info','accept','accept-profile','content-profile']}
+  headers={k:v for k,v in self.headers.items() if k.lower() in ['apikey','authorization','content-type','prefer','x-client-info','accept','accept-profile','content-profile','cache-control','pragma']}
   req=urllib.request.Request(base+self.path,method=self.command,data=body if body else None,headers=headers)
   try:
    with urllib.request.urlopen(req,timeout=25) as r: status=r.status;payload=r.read();response_headers=dict(r.headers)
@@ -17,7 +17,7 @@ class Handler(BaseHTTPRequestHandler):
   except Exception: status=502;payload=b'{"message":"Relay failed"}';response_headers={'Content-Type':'application/json'}
   self.send_response(status)
   for k,v in response_headers.items():
-   if k.lower() in ['content-type','content-range','preference-applied']:self.send_header(k,v)
+   if k.lower() in ['content-type','content-range','preference-applied','cache-control','expires','etag','last-modified','vary','age']:self.send_header(k,v)
   self.end_headers();self.wfile.write(payload)
  do_GET=handle_request;do_POST=handle_request;do_PATCH=handle_request;do_DELETE=handle_request;do_OPTIONS=handle_request
 ThreadingHTTPServer(('127.0.0.1',8770),Handler).serve_forever()

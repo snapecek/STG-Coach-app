@@ -1,9 +1,10 @@
+import {removeAllEventPhotos} from './photos';
 import type {SupabaseClient} from '@supabase/supabase-js';
 import {dates} from './domain';
 import type {ClubAccess} from './supabase';
 export type MemberRow={id:string;club_id:string;name:string;kind:'member'|'guest';removed_at:string|null;purge_after:string|null};
 export type TemplateRow={id:string;club_id:string;name:string;type:string;place:string;minutes:number;plan:string};
-export type EventRow={id:string;club_id:string;template_id:string|null;name:string;starts_at:string;place:string;type:string;plan:string;duration_minutes:number;event_kind:'training'|'race';status:'scheduled'|'cancelled';actual_notes:string;completed_at:string|null;completed_by:string|null};
+export type EventRow={id:string;club_id:string;template_id:string|null;name:string;starts_at:string;place:string;type:string;plan:string;duration_minutes:number;event_kind:'training'|'race';status:'scheduled'|'cancelled';actual_notes:string;completed_at:string|null;completed_by:string|null;actual_duration_minutes:number|null;perceived_effort:number|null;equipment:string[]};
 export type ParticipationRow={club_id:string;event_id:string;member_id:string;response:'yes'|'no'|'maybe'|null;attended:boolean|null;confirmed_by:string|null};
 export type ClubData={members:MemberRow[];templates:TemplateRow[];events:EventRow[];participation:ParticipationRow[]};
 export const emptyClubData=():ClubData=>({members:[],templates:[],events:[],participation:[]});
@@ -40,7 +41,7 @@ export async function loadClubData(client:SupabaseClient,club:ClubAccess,signal?
  const [members,templates,events,participation]=await Promise.all([
   canManage(club)?readAll<MemberRow>('members','id,club_id,name,kind,removed_at,purge_after'):Promise.resolve([]),
   readAll<TemplateRow>('templates','id,club_id,name,type,place,minutes,plan'),
-  readAll<EventRow>('events','id,club_id,template_id,name,starts_at,place,type,plan,duration_minutes,event_kind,status,actual_notes,completed_at,completed_by'),
+  readAll<EventRow>('events','id,club_id,template_id,name,starts_at,place,type,plan,duration_minutes,event_kind,status,actual_notes,completed_at,completed_by,actual_duration_minutes,perceived_effort,equipment'),
   canManage(club)?readAll<ParticipationRow>('participation','club_id,event_id,member_id,response,attended,confirmed_by'):Promise.resolve([])
  ]);
  return {members,templates,events:events.sort((a,b)=>a.starts_at.localeCompare(b.starts_at)),participation};
@@ -56,7 +57,7 @@ export async function addTemplate(client:SupabaseClient,club:ClubAccess,input:Pi
 export async function addEvents(client:SupabaseClient,club:ClubAccess,template:TemplateRow,date:string,time:string,count:number,options:{kind?:'training'|'race';name?:string}={}){
  staff(club);const rows=buildEventRows(club.id,template,date,time,count).map(row=>({...row,event_kind:options.kind||'training',name:options.name?.trim()?text(options.name,'Název',80):row.name}));await verify(client);
  // One insert statement: the whole repeated series succeeds or fails together.
- return checked<EventRow[]>(await client.from('events').insert(rows).select('id,club_id,template_id,name,starts_at,place,type,plan,duration_minutes,event_kind,status,actual_notes,completed_at,completed_by'),'Tréninky se nepodařilo uložit.');
+ return checked<EventRow[]>(await client.from('events').insert(rows).select('id,club_id,template_id,name,starts_at,place,type,plan,duration_minutes,event_kind,status,actual_notes,completed_at,completed_by,actual_duration_minutes,perceived_effort,equipment'),'Tréninky se nepodařilo uložit.');
 }
 export async function saveParticipation(client:SupabaseClient,club:ClubAccess,eventId:string,memberId:string,patch:{response:ParticipationRow['response']}|{attended:boolean}){
  staff(club);const userId=await verify(client);
@@ -65,7 +66,7 @@ export async function saveParticipation(client:SupabaseClient,club:ClubAccess,ev
  // Send only the changed fields: RSVP must not overwrite actual attendance (or vice versa).
  return checked<ParticipationRow>(await client.from('participation').upsert(row,{onConflict:'event_id,member_id'}).select('club_id,event_id,member_id,response,attended,confirmed_by').single(),'Účast se nepodařilo uložit.');
 }
-const eventColumns='id,club_id,template_id,name,starts_at,place,type,plan,duration_minutes,event_kind,status,actual_notes,completed_at,completed_by';
+const eventColumns='id,club_id,template_id,name,starts_at,place,type,plan,duration_minutes,event_kind,status,actual_notes,completed_at,completed_by,actual_duration_minutes,perceived_effort,equipment';
 const templateColumns='id,club_id,name,type,place,minutes,plan';
 export async function archiveMember(client:SupabaseClient,club:ClubAccess,memberId:string,restore=false){
  staff(club);await verify(client);return checked<MemberRow>(await client.rpc('archive_club_member',{target_club:club.id,target_member:memberId,restore}),'Člena se nepodařilo archivovat nebo obnovit.');
@@ -77,8 +78,11 @@ export async function editTemplate(client:SupabaseClient,club:ClubAccess,id:stri
 export async function deleteTemplate(client:SupabaseClient,club:ClubAccess,id:string){
  staff(club);await verify(client);return checked<{id:string}>(await client.from('templates').delete().eq('club_id',club.id).eq('id',id).select('id').single(),'Šablonu se nepodařilo smazat.');
 }
-export async function updateEvent(client:SupabaseClient,club:ClubAccess,id:string,patch:Partial<Pick<EventRow,'name'|'starts_at'|'place'|'type'|'plan'|'duration_minutes'|'event_kind'|'status'|'actual_notes'>>){
+export async function updateEvent(client:SupabaseClient,club:ClubAccess,id:string,patch:Partial<Pick<EventRow,'name'|'starts_at'|'place'|'type'|'plan'|'duration_minutes'|'event_kind'|'status'|'actual_notes'|'actual_duration_minutes'|'perceived_effort'|'equipment'>>){
  staff(club);if(patch.duration_minutes!==undefined&&(!Number.isInteger(patch.duration_minutes)||patch.duration_minutes<5||patch.duration_minutes>480))throw new Error('Délka musí být 5 až 480 minut.');
+ if(patch.actual_duration_minutes!==undefined&&patch.actual_duration_minutes!==null&&(!Number.isInteger(patch.actual_duration_minutes)||patch.actual_duration_minutes<1||patch.actual_duration_minutes>1440))throw new Error('Skutečná délka musí být 1 až 1440 minut.');
+ if(patch.perceived_effort!==undefined&&patch.perceived_effort!==null&&(!Number.isInteger(patch.perceived_effort)||patch.perceived_effort<1||patch.perceived_effort>10))throw new Error('Náročnost musí být 1 až 10.');
+ if(patch.equipment!==undefined&&(patch.equipment.length>30||patch.equipment.some(tag=>!tag.trim()||tag.length>40)))throw new Error('Zadejte nejvýše 30 pomůcek, každou do 40 znaků.');
  if(patch.name!==undefined)patch={...patch,name:text(patch.name,'Název',80)};
  if(patch.actual_notes!==undefined&&patch.actual_notes.length>5000)throw new Error('Skutečný průběh je příliš dlouhý.');
  await verify(client);return checked<EventRow>(await client.from('events').update(patch).eq('club_id',club.id).eq('id',id).select(eventColumns).single(),'Událost se nepodařilo změnit.');
@@ -88,7 +92,7 @@ export async function completeEvent(client:SupabaseClient,club:ClubAccess,id:str
  if(!row.completed_at)throw new Error('Událost nebyla dokončena. Obnovte data a zkontrolujte její stav.');return row;
 }
 export async function deleteEvent(client:SupabaseClient,club:ClubAccess,id:string){
- staff(club);await verify(client);return checked<{id:string}>(await client.from('events').delete().eq('club_id',club.id).eq('id',id).select('id').single(),'Událost se nepodařilo smazat.');
+ staff(club);await verify(client);await removeAllEventPhotos(client,club.id,id);return checked<{id:string}>(await client.from('events').delete().eq('club_id',club.id).eq('id',id).select('id').single(),'Událost se nepodařilo smazat.');
 }
 export async function createClubEvents(client:SupabaseClient,club:ClubAccess,input:{template_id:string|null;name:string;place:string;type:string;plan:string;duration_minutes:number;event_kind:'training'|'race';date:string;time:string;count:number}){
  staff(club);if(!Number.isInteger(input.duration_minutes)||input.duration_minutes<5||input.duration_minutes>480||input.plan.length>5000)throw new Error('Zkontrolujte délku a plán.');

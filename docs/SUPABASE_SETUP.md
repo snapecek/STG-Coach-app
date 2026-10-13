@@ -11,7 +11,7 @@ Tato etapa ověřuje přihlášení a členství v klubu. Cloudová evidence je 
 
 ## 2. Připravte databázi
 
-V novém prázdném projektu otevřete **SQL Editor** a spusťte obsah `supabase/migrations/202610120001_initial.sql` jednou a potom `supabase/migrations/202610130002_club_management.sql` jednou. Pokud první migrace již existuje, spouštějte pouze novou druhou. Případně použijte Supabase CLI a `supabase db push` podle README. Nespouštějte migraci opakovaně ručně: vytváří tabulky a politiky, není idempotentní. Pokud migrace selže, neposílejte další dotazy naslepo; sdělte chybu bez tajných hodnot.
+V novém prázdném projektu otevřete **SQL Editor** a spusťte obsah `supabase/migrations/202610120001_initial.sql` jednou a potom `supabase/migrations/202610130002_club_management.sql` jednou. Potom aplikujte `supabase/migrations/202610130003_journal_photos.sql` pro strukturovaný deník a soukromé fotografie. Spouštějte pouze migrace, které ještě nebyly aplikované. Případně použijte Supabase CLI a `supabase db push` podle README. Nespouštějte migraci opakovaně ručně: vytváří tabulky a politiky, není idempotentní. Pokud migrace selže, neposílejte další dotazy naslepo; sdělte chybu bez tajných hodnot.
 
 Potom můžete ve stejném prázdném vývojovém projektu spustit `supabase/tests/tenant_access.sql`. Test dočasně vytvoří fiktivní uživatele a kluby, ověří role a vše vrátí pomocí ROLLBACK. Výsledek bez chyby znamená průchod uvedených databázových kontrol, nikoliv ověření UI ani fotografií.
 
@@ -53,4 +53,4 @@ Ověřte nesprávné heslo, účet bez klubu, účet se dvěma kluby a odhláše
 
 ## Další etapa
 
-Cloudový adaptér a testy zápisů jsou implementované. Editace, rušení/mazání událostí a šablon, kalendář, archivace členů a dokončení tréninků jsou implementované. Další krok: ověřit dva skutečné účty s různými kluby a Storage, ověřit aktivní cron job stg-member-retention a doplnit auditní historii. Teprve po jejich průchodu lze plánovat použití skutečných členských údajů. Fotografie, reset hesla, pozvánky, MFA a samoobslužné RSVP člena zůstávají dalšími úkoly.
+Cloudový adaptér a testy zápisů jsou implementované. Editace, rušení/mazání událostí a šablon, kalendář, archivace členů a dokončení tréninků jsou implementované. Další krok: ověřit dva skutečné účty s různými kluby a Storage, ověřit aktivní cron job stg-member-retention a doplnit auditní historii. Teprve po jejich průchodu lze plánovat použití skutečných členských údajů. Reset hesla, pozvánky, MFA a samoobslužné RSVP člena zůstávají dalšími úkoly.

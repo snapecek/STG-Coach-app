@@ -82,6 +82,9 @@ try:
     past=(datetime.now(timezone.utc)-timedelta(days=2)).isoformat()
     status,_=request('/rest/v1/events?id=eq.'+events[0],'PATCH',{'status':'scheduled','starts_at':past,'actual_notes':'Fiktivní skutečný průběh'},'return=representation')
     expect(status==200,'obnovení události a uložení skutečného průběhu')
+    status,rows=request('/rest/v1/events?id=eq.'+events[0],'PATCH',{'actual_duration_minutes':75,'perceived_effort':7,'equipment':['gumy','bosu']},'return=representation')
+    expect(status==200 and rows[0]['actual_duration_minutes']==75 and rows[0]['perceived_effort']==7 and rows[0]['equipment']==['gumy','bosu'],'uložení strukturovaného deníku, náročnosti a pomůcek')
+
     status,members=request('/rest/v1/members?select=id,removed_at&club_id=eq.'+club)
     expect(status==200,'načtení očekávaného seznamu pro kontrolu docházky')
     for row in members:
@@ -90,6 +93,11 @@ try:
             expect(status in [200,201],'potvrzení absence pouze ve fiktivní testovací události')
     status,rows=request('/rest/v1/events?id=eq.'+events[0],'PATCH',{'completed_at':datetime.now(timezone.utc).isoformat()},'return=representation')
     expect(status==200 and rows[0]['completed_at'] is not None and rows[0]['completed_by']==uid,'dokončení události s ověřenou docházkou a průběhem')
+    status,rows=request('/rest/v1/events?id=eq.'+events[0],'PATCH',{'actual_duration_minutes':80},'return=representation')
+    expect(status==200 and rows[0]['completed_at'] is None,'změna strukturovaného deníku znovu otevře událost')
+    status,_=request('/rest/v1/events?id=eq.'+events[0],'PATCH',{'completed_at':datetime.now(timezone.utc).isoformat()},'return=representation')
+    expect(status==200,'opakované dokončení po změně deníku')
+
     status,_=request(path,'POST',{**identity,'response':'yes'},'resolution=merge-duplicates')
     status,rows=request('/rest/v1/events?id=eq.'+events[0])
     expect(status==200 and rows[0]['completed_at'] is None,'změna účasti znovu otevře událost ke kontrole')

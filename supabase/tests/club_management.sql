@@ -36,6 +36,12 @@ update public.events set completed_at=now() where id='50000000-0000-4000-8000-00
 do $$begin
  if not exists(select 1 from public.events where completed_at is not null and completed_by=auth.uid()) then raise exception 'FAIL completion';end if;
 end $$;
+update public.events set actual_duration_minutes=75,perceived_effort=7,equipment=array['gumy','bosu'] where id='50000000-0000-4000-8000-000000000001';
+do $$begin
+ if exists(select 1 from public.events where completed_at is not null) then raise exception 'FAIL structured journal did not reopen review';end if;
+ if not exists(select 1 from public.events where actual_duration_minutes=75 and perceived_effort=7 and equipment=array['gumy','bosu']) then raise exception 'FAIL journal fields';end if;
+end $$;
+update public.events set completed_at=now() where id='50000000-0000-4000-8000-000000000001';
 update public.participation set response='maybe';
 do $$begin
  if exists(select 1 from public.events where completed_at is not null) then raise exception 'FAIL attendance edit did not reopen review';end if;

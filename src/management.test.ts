@@ -1,7 +1,7 @@
 import {describe,it,expect} from 'vitest';
 import {calendarCells,pendingReviews,reviewReady,reviewMembers} from './management';
 import type {EventRow,ClubData,MemberRow} from './clubData';
-const event:EventRow={id:'event',club_id:'club',template_id:null,name:'Fiktivní trénink',starts_at:'2026-10-12T16:00:00Z',place:'Park',type:'Běh',plan:'Plán',duration_minutes:60,event_kind:'training',status:'scheduled',actual_notes:'',completed_at:null,completed_by:null};
+const event:EventRow={id:'event',club_id:'club',template_id:null,name:'Fiktivní trénink',starts_at:'2026-10-12T16:00:00Z',place:'Park',type:'Běh',plan:'Plán',duration_minutes:60,event_kind:'training',status:'scheduled',actual_notes:'',completed_at:null,completed_by:null,actual_duration_minutes:null,perceived_effort:null,equipment:[]};
 const member:MemberRow={id:'member',club_id:'club',name:'Fiktivní člen',kind:'member',removed_at:null,purge_after:null};
 const data:ClubData={members:[member],events:[event],templates:[],participation:[]};
 const now=Date.parse('2026-10-13T12:00:00Z');

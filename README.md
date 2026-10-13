@@ -15,7 +15,7 @@ npm run build
 
 Vývojový server běží na portu 5173. Produkci nasazujte z `dist` na HTTPS. Ve Vercelu: Vite, kořen repozitáře, build `npm run build`, output `dist`, install `npm ci`. Nastavte `VITE_SUPABASE_URL` a `VITE_SUPABASE_ANON_KEY` na veřejný publishable/anon klíč pro příslušné prostředí. Po změně těchto hodnot je nutné nové sestavení (Redeploy). Nikdy nepoužívejte service_role, secret key nebo databázové heslo ve VITE proměnných. Testovací heslo a e-mail nepatří do Vercelu ani do repozitáře.
 
-Založení Supabase, první migrace a přiřazení vlastníka jsou popsané v [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Databáze vyžaduje migrace v pořadí: `202610120001_initial.sql`, `202610130002_club_management.sql`, `202610130003_journal_photos.sql`, `202610130004_race_results.sql`. Druhá přidává archivaci, dokončení událostí a retenční úklid; třetí strukturovaný deník a privátní fotografie událostí. Každou migraci aplikujte jen jednou; uživatel potvrdil aplikování všech čtyř a živé kontroly prošly.
+Založení Supabase, první migrace a přiřazení vlastníka jsou popsané v [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Databáze vyžaduje migrace v pořadí: `202610120001_initial.sql`, `202610130002_club_management.sql`, `202610130003_journal_photos.sql`, `202610130004_race_results.sql`, `202610130005_distinct_races.sql`. Druhá přidává archivaci, dokončení událostí a retenční úklid; třetí strukturovaný deník a privátní fotografie událostí. Každou migraci aplikujte jen jednou; uživatel potvrdil aplikování všech pěti a živé kontroly prošly.
 
 ## Demo a cloudový klub
 
@@ -30,7 +30,7 @@ Přehled, registr členů/hostů, hledání, šablony míst a workout plánů, t
 ### Etapa 2 — cloudová evidence
 
 - Správce/trenér přidává členy a hosty bez uživatelského účtu do vybraného klubu.
-- Ukládá šablony s místem, délkou a plánem; výběr šablony je součástí jediného formuláře Nový trénink.
+- Ukládá šablony s místem, délkou a plánem; výběr šablony je součástí formuláře Nová událost → Trénink.
 - Vytváří jednorázové nebo 4/8/12 týdenně opakované tréninky jedním atomickým databázovým insertem.
 - Čas tréninků používá Europe/Prague, série zachovává místní čas přes změnu letního času. Neexistující jarní čas je odmítnutý; dvojznačný podzimní čas zvolí standardní zimní výskyt.
 - Eviduje RSVP a samostatně potvrzuje docházku. Změna jedné hodnoty nepřepisuje druhou. Docházka je rozlišená na neověřeno/přítomen/nepřítomen a ukládá identitu potvrzujícího trenéra.
@@ -44,7 +44,7 @@ Cloudový přehled začíná prázdný. Demo není automaticky importované. Čt
 1. Výchozí stránka obnoví přihlášený klub. Odhlášení je pod uživatelským menu; staré demo odkazy vedou do stejné aplikace.
 2. Přehled obsahuje nadcházející události a seznam K dokončení; počet aktivních členů byl v další etapě odstraněný. Rychlý start a počty šablon byly odstraněné; Šablony jsou v levé navigaci (na mobilu pod tlačítkem navigace). Hlavní mobilní navigace má Přehled, Kalendář, Členové, Analýza.
 3. Měsíční kalendář má pondělí první, přechod mezi měsíci, odlišení tréninků/závodů a zrušených událostí. Klepnutí na datum předvyplní datum nové události. Událost lze vytvořit i bez šablony.
-4. Uplynulá událost se zobrazuje K dokončení až po svém konci (čas + délka). Dokončení vyžaduje uložený skutečný průběh a potvrzenou přítomnost nebo nepřítomnost všech uvedených členů. Kontrolu vynucuje také databázový trigger. Další změna účasti, průběhu, plánu či termínu záznam znovu otevře. Analýza započítává jen dokončené nezrušené události.
+4. Uplynulá událost se zobrazuje K dokončení až po svém konci (čas + délka). Dokončení tréninku vyžaduje uložený skutečný průběh a potvrzenou přítomnost nebo nepřítomnost všech uvedených členů. Závody mají od etapy 6 vlastní pravidla uvedená níže. Kontrolu vynucuje také databázový trigger. Další změna účasti, průběhu, plánu či termínu záznam znovu otevře. Analýza započítává jen dokončené nezrušené události.
 5. Odebrání člena vyžaduje potvrzení a přesune jej do archivu. Obnovení zachovává UUID a docházku; archivace účtu s vazbou user_id odebere roli member, obnovení ji vrátí. Staff role se tím nemění. Uchování je nejvýše 3 roky od odebrání; opakované odebrání bez obnovení deadline neprodlužuje. Po limitu jsou osobní údaje a navázaná účast nepřístupné přes RLS a obnova odmítnutá.
 6. Denní úklid maže členy a jejich navázanou docházku den před maximálním retenčním limitem. Migrace jej registruje jako pg_cron job `stg-member-retention`. Lokálně byla ověřena funkce, nikoliv běh plánovače Supabase. V SQL Editoru lze zkontrolovat `select jobname, schedule, active from cron.job where jobname = 'stg-member-retention';`. Pokud migrace oznámí nedostupný pg_cron, je před provozem nutné nastavit denní serverové volání `public.purge_expired_members()`; běžný klient jej volat nesmí. Retence zahrnuje data člena a klubovou účast, nikoliv globální účet Auth či již stažené exporty.
 7. Trénink/závod lze upravit včetně termínu, zrušit se zachováním historie, obnovit nebo trvale smazat s potvrzením (docházka se smaže kaskádou). Změna/smazání se týká jednoho termínu série. Šablonu lze upravit nebo smazat s potvrzením; existující události mají vlastní snapshot plánu a po smazání šablony zůstanou zachované.
@@ -72,7 +72,7 @@ Do dokončení testů dvou skutečných klubových účtů a Storage používejt
 
 ## Automatické kontroly
 
-`npm test` — 58 unit testů: opakování, platnost dat, časové pásmo a přechod DST, bezpečná veřejná konfigurace, ověřování identity, filtr club_id a stránkování, omezení rolí, oddělené změny RSVP/docházky, měsíční kalendář, podmínky dokončení, filtrování změn/mazání vybraným klubem, kombinované filtry a výpočty analýzy, bezpečné cesty a typy fotografií. `npm run build` — TypeScript a produkční sestavení.
+`npm test` — 67 unit testů: opakování, platnost dat, časové pásmo a přechod DST, bezpečná veřejná konfigurace, ověřování identity, filtr club_id a stránkování, omezení rolí, oddělené změny RSVP/docházky, měsíční kalendář, podmínky dokončení, filtrování změn/mazání vybraným klubem, kombinované filtry a výpočty analýzy, bezpečné cesty a typy fotografií. `npm run build` — TypeScript a produkční sestavení.
 
 `npm run test:cloud` — živé API kontroly s fiktivními fixtures: přihlášení, host, šablona, série událostí, RSVP/docházka, reload dat, anonymní přístup a RLS zamítnutí nepřiřazeného klubu, archivace a návrat člena, přesun/zrušení/obnovení a dokončení události, opětovné otevření po změně účasti a smazání používané šablony. Vyžaduje čtyři proměnné VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, STG_TEST_EMAIL, STG_TEST_PASSWORD v prostředí a testovací účet s rolí owner. Hodnoty neukládejte do souborů. Test maže pouze fixtures se svými generovanými UUID a odhlásí testovací relaci. Spouštějte jen proti vývojovému klubu.
 
@@ -102,3 +102,21 @@ Aplikujte jednou migraci `202610130004_race_results.sql`. Výsledky chrání RLS
 Ověření této etapy: 58 unit testů, produkční build a lokální PostgreSQL testy všech čtyř migrací. Testy pokrývají pořadí, čas, shodné výsledky, RLS, meziklubové vazby, nulový čas, DNF/DNS, změnu typu, zrušení a opětovné otevření události. Uživatel potvrdil aplikování čtvrté migrace. Živý mobilní test ověřil zápis času, persistenci po reloadu, změnu na DNF, odebrání výsledku, opětovné otevření dokončeného závodu a export času/poznámky vybraného člena. Anonymní API přístup byl zamítnutý.
 
 Všechny fiktivní testovací členy, události, šablony a fotografie živý test po dokončení uklidil. Vercel nasazení ověřte po dokončení deploymentu posledního commitu.
+
+
+## Etapa 6 — jednotné UI a samostatná logika závodů
+
+[Srovnání Spond, TeamSnap a Týmuj a produktový směr](docs/PRODUCT_DIRECTION.md) vychází z veřejných popisů funkcí. Převzali jsme vhodné principy: událost se soupiskou, přehled odpovědí a jednoduchý detail. Nejde o testování placených účtů ani kopii jejich grafiky.
+
+- Nová událost začíná volbou **Trénink / Závod**. Trénink používá šablonu, zaměření, plán a týdenní opakování. Závod používá disciplínu (OCR, silniční běh, trail…), délku trasy, registrační HTTPS odkaz, start, časové okno a organizační pokyny. Nemá tréninkovou šablonu, zaměření ani opakování.
+- Závod se vytváří s vybranými členy nebo hosty. Jedna transakční RPC uloží závod i soupisku, případná chyba vrátí celý zápis. Závod nemá automaticky docházku celého klubu. V detailu lze dalšího člena přidat nebo po potvrzení odebrat. S uloženým výsledkem jej nelze odebrat ze soupisky, dokud neodeberete výsledek.
+- Detail má záložky **Informace / Účast / Deník** pro trénink a **Informace / Účast / Výsledky** pro závod. Formulář i galerie používají stejný systém prvků. Poznámky závodu a fotografie jsou volitelné; délka skutečného tréninku, náročnost a pomůcky se u závodu nezadávají.
+- Závod lze dokončit po uplynutí časového okna, když má každý uvedený závodník ověřenou účast a výsledek. Dokončil/DNF vyžaduje přítomnost; DNS nepřítomnost. Nemusí mít tréninkový deník. Pravidla kontroluje také server, změna výsledku nebo soupisky znovu otevírá kontrolu.
+- Přehled má grafickou kartu dne, události s datem a souhrnem RSVP a konkrétní úkoly k dokončení. Kalendář filtruje tréninky/závody; výběr dne otevře jeho program a umožní přidat událost na vybrané datum. Formulář při změně šablony nebo druhu zachová název/místo (šablona je může nahradit) a zvolený datum/čas.
+- Analýza odděluje závody od zaměření tréninků. Minuty tréninku a pomůcky zahrnují jen tréninky. Starší závodní záznamy zůstávají v datech, ale nepředstírají tréninkové zaměření; nové údaje trasy a registrace exportuje schemaVersion 4.
+
+Migrace `202610130005_distinct_races.sql` musí být aplikovaná po předchozích čtyřech. Uživatel potvrdil její aplikování. Existující závody znovu otevře ke kontrole, odstraní vazbu na tréninkovou šablonu a ze stávajících výsledků doplní chybějící záznamy soupisky. Poznámky, docházku, výsledky a historické strukturované údaje nemaže.
+
+Ověřeno: 67 unit testů, produkční build, lokální PostgreSQL testy pěti migrací a všech pěti SQL sad, živé Supabase API kontroly a mobilní Chromium workflow. Mobilní test ověřil transakční závod s jediným vybraným hostem, absenci tréninkových polí, dokončení bez deníku, reload, export disciplíny/trasy/odkazu a výsledku, DNF/DNS a opětovné otevření. Vlastní fixtures byly odstraněné. Grafika byla samostatně ověřená s čistě fiktivními daty; kalendář nepřetéká při šířkách 360, 390, 768 a 1440 px.
+
+Omezení: RSVP stále zapisuje trenér. Pozvánky/notifikace, skutečné samoobslužné RSVP, podskupiny, oficiální výsledkové kategorie, hromadné změny série a zámek při souběžných změnách nejsou součástí této etapy. Časové okno je 5–480 minut; vícedenní závod zatím potřebuje rozšíření modelu termínů. Následující ucelená etapa je bezpečný členský postup pozvánka → přihlášení → Jdu/Nejdu/Možná.

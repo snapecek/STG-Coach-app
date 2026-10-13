@@ -1,6 +1,6 @@
 import {describe,it,expect,vi} from 'vitest';
 import type {SupabaseClient} from '@supabase/supabase-js';
-import {buildEventRows,pragueTimestamp,loadClubData,addMember,saveParticipation,archiveMember,deleteTemplate,deleteEvent,updateEvent,completeEvent,type TemplateRow} from './clubData';
+import {buildEventRows,pragueTimestamp,loadClubData,addMember,saveParticipation,archiveMember,deleteTemplate,deleteEvent,updateEvent,completeEvent,createClubRace,validateRaceDetails,type TemplateRow} from './clubData';
 const club={id:'20000000-0000-4000-8000-000000000001',name:'Fiktivní A',role:'coach' as const};
 const template:TemplateRow={id:'template-a',club_id:club.id,name:'Fiktivní běh',type:'Běh',place:'Testovací park',minutes:45,plan:'Fiktivní plán'};
 function mock(){const tables:string[]=[];const filters:unknown[][]=[];const writes:unknown[]=[];const q={select:vi.fn(()=>q),eq:vi.fn((...args:unknown[])=>{filters.push(args);return q}),order:vi.fn(()=>q),abortSignal:vi.fn(()=>q),range:vi.fn(()=>q),update:vi.fn((data:unknown)=>{writes.push(data);return q}),delete:vi.fn(()=>q),insert:vi.fn((data:unknown)=>{writes.push(data);return q}),upsert:vi.fn((data:unknown)=>{writes.push(data);return q}),single:vi.fn(async()=>({data:{id:'new'},error:null})),then:(fn:(v:unknown)=>unknown)=>Promise.resolve({data:[],error:null}).then(fn)};const client={storage:{from:()=>({list:async()=>({data:[],error:null})})},rpc:vi.fn(async()=>({data:{id:'member'},error:null})),auth:{getUser:vi.fn(async()=>({data:{user:{id:'trainer'}},error:null}))},from:vi.fn((table:string)=>{tables.push(table);return q})};return {client:client as unknown as SupabaseClient,tables,filters,writes,q,auth:client.auth,rpc:client.rpc};}
@@ -32,4 +32,11 @@ describe('Cloudový adaptér',()=>{
  it('změna události filtruje klub i ID',async()=>{const m=mock();await updateEvent(m.client,club,'event',{status:'cancelled'});expect(m.filters).toEqual([['club_id',club.id],['id','event']]);expect(m.writes[0]).toEqual({status:'cancelled'})});
  it('nepotvrdí dokončení, pokud jej server nepřijal',async()=>{const m=mock();await expect(completeEvent(m.client,club,'event')).rejects.toThrow('nebyla dokončena')});
 
+});
+
+describe('Bezpečné vytvoření závodu',()=>{
+ const input={id:'race',name:'Závod',place:'Park',type:'OCR',plan:'Pokyny',starts_at:'2026-10-13T08:00:00Z',duration_minutes:180,race_distance_km:8,race_registration_url:'https://example.invalid/race'};
+ it('závod a soupisku zapisuje v jedné transakční RPC',async()=>{const m=mock();await createClubRace(m.client,club,input,['member']);expect(m.rpc).toHaveBeenCalledWith('create_club_race',{target_club:club.id,race:input,entrants:['member']});expect(m.tables).toEqual([])});
+ it('odmítá prázdnou nebo duplicitní soupisku před zápisem',async()=>{const m=mock();await expect(createClubRace(m.client,club,input,[])).rejects.toThrow();await expect(createClubRace(m.client,club,input,['member','member'])).rejects.toThrow();expect(m.rpc).not.toHaveBeenCalled()});
+ it('odmítá nebezpečné odkazy a neplatné vzdálenosti',()=>{for(const url of ['javascript:alert(1)','http://example.invalid','https://user:password@example.invalid','https://example.invalid/a b'])expect(()=>validateRaceDetails({race_registration_url:url})).toThrow();for(const distance of [0,-1,Infinity,1001])expect(()=>validateRaceDetails({race_distance_km:distance})).toThrow()});
 });

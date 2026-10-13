@@ -16,3 +16,13 @@ describe('Kontrola po tréninku',()=>{
  it('člena odebraného před událostí bez historie nevyžaduje',()=>{const archived={...member,removed_at:'2026-10-10T12:00:00Z'};expect(reviewMembers({...data,members:[archived]},event)).toEqual([])});
  it('archivovaného účastníka s docházkou zachová',()=>{const archived={...member,removed_at:'2026-10-10T12:00:00Z'};expect(reviewMembers({...data,members:[archived],participation:[{club_id:'club',event_id:'event',member_id:'member',response:'yes',attended:true,confirmed_by:'trainer'}]},event)).toEqual([archived])});
 });
+
+describe('Samostatný postup závodu',()=>{
+ const race={...event,event_kind:'race' as const,actual_notes:''};
+ const p={club_id:'club',event_id:'event',member_id:'member',response:null,attended:true,confirmed_by:'coach'};
+ const result={club_id:'club',event_id:'event',member_id:'member',status:'finished' as const,elapsed_ms:300000,notes:''};
+ it('nezahrne automaticky celý klub do soupisky',()=>{expect(reviewMembers(data,race)).toEqual([]);expect(reviewMembers({...data,participation:[p]},race)).toEqual([member])});
+ it('vyžaduje výsledek, nikoliv tréninkový deník',()=>{const roster={...data,participation:[p]};expect(reviewReady(roster,race,now)).toBe(false);expect(reviewReady(roster,race,now,[result])).toBe(true)});
+ it('DNS musí mít nepřítomnost, ostatní výsledky přítomnost',()=>{const dns={...result,status:'dns' as const,elapsed_ms:null};expect(reviewReady({...data,participation:[p]},race,now,[dns])).toBe(false);expect(reviewReady({...data,participation:[{...p,attended:false}]},race,now,[dns])).toBe(true);expect(reviewReady({...data,participation:[{...p,attended:false}]},race,now,[result])).toBe(false)});
+ it('neuzavře závod před koncem nebo s neověřeným závodníkem',()=>{expect(reviewReady({...data,participation:[p]},race,Date.parse(event.starts_at),[result])).toBe(false);expect(reviewReady({...data,participation:[{...p,attended:null}]},race,now,[result])).toBe(false)});
+});

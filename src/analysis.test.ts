@@ -14,3 +14,8 @@ describe('Analýza',()=>{
  it('normalizuje a odstraní duplicitní pomůcky',()=>expect(equipmentTags(' Gumy, BOSU, gumy\nKettlebell ')).toEqual(['gumy','bosu','kettlebell']));
  it('odmítá nepřiměřený počet pomůcek',()=>expect(()=>equipmentTags(Array.from({length:31},(_,i)=>'tag'+i).join(','))).toThrow());
 });
+
+describe('Závody v analýze',()=>{
+ it('nepřevádí starší závodní údaje na zaměření a minuty tréninku',()=>{const race={...event,event_kind:'race' as const,type:'Síla',actual_duration_minutes:180};const summary=analysisSummary(data,[race]);expect(summary.minutes).toBe(0);expect(summary.recordedDurations).toBe(0);expect(summary.byType).toEqual([{type:'Závody',count:1}]);expect(summary.byEquipment).toEqual([])});
+ it('tréninkové filtry nezahrnou starší závod se stejnými hodnotami',()=>{const race={...event,id:'race',event_kind:'race' as const};const mixed={...data,events:[race]};expect(filterAnalysis(mixed,{...noFilters,type:'Běh'})).toEqual([]);expect(filterAnalysis(mixed,{...noFilters,equipment:'gumy'})).toEqual([])});
+});

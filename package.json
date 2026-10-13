@@ -12,7 +12,8 @@
     "test:member-ui": "node scripts/check-member-ui.cjs",
     "test:member-cloud": "python3 scripts/check-member-cloud.py",
     "test:database": "python3 scripts/check-database.py",
-    "test:capacity-cloud": "python3 scripts/check-capacity-cloud.py"
+    "test:capacity-cloud": "python3 scripts/check-capacity-cloud.py",
+    "test:groups-ui": "node scripts/check-groups-ui.cjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",

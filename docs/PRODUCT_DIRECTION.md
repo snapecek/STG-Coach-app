@@ -23,7 +23,7 @@ Samostatné formuláře a dokončení závodů, soupiska, výraznější přehle
 ## Následující ucelené etapy
 
 1. Dokončit provozní nastavení e-mailového odesílání pozvánek (RSVP a obnova hesla jsou implementované).
-2. Podskupiny a výběr účastníků tréninku podle skupiny; kapacita a transakční čekací listina jsou implementované v etapě 8.
+2. Skupiny a uložené soupisky byly implementované v etapě 9, kapacita a transakční čekací listina v etapě 8. Dále hromadné změny budoucích termínů s výslovným výběrem trenéra.
 3. Organizační úkoly a konverzace u události s oprávněními a notifikacemi.
 4. Týmy/minihry a oficiální výsledky/kategorie závodu.
 

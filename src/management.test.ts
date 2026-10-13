@@ -26,3 +26,11 @@ describe('Samostatný postup závodu',()=>{
  it('DNS musí mít nepřítomnost, ostatní výsledky přítomnost',()=>{const dns={...result,status:'dns' as const,elapsed_ms:null};expect(reviewReady({...data,participation:[p]},race,now,[dns])).toBe(false);expect(reviewReady({...data,participation:[{...p,attended:false}]},race,now,[dns])).toBe(true);expect(reviewReady({...data,participation:[{...p,attended:false}]},race,now,[result])).toBe(false)});
  it('neuzavře závod před koncem nebo s neověřeným závodníkem',()=>{expect(reviewReady({...data,participation:[p]},race,Date.parse(event.starts_at),[result])).toBe(false);expect(reviewReady({...data,participation:[{...p,attended:null}]},race,now,[result])).toBe(false)});
 });
+
+describe('Soupiska skupinového tréninku',()=>{
+ const grouped={...event,roster_only:true,group_name:'Fiktivní skupina',actual_notes:'Skutečný průběh'};
+ const other={...member,id:'other',name:'Fiktivní člen mimo skupinu'};
+ const p={club_id:'club',event_id:'event',member_id:'member',response:null,attended:false,confirmed_by:'coach'};
+ it('vyžaduje docházku jen uložené soupisky, nikoliv ostatních členů klubu',()=>{const selected={...data,members:[member,other],participation:[p]};expect(reviewMembers(selected,grouped)).toEqual([member]);expect(reviewReady(selected,grouped,now)).toBe(true);expect(reviewReady({...selected,participation:[p,{...p,member_id:'other',attended:null}]},grouped,now)).toBe(false)});
+ it('prázdnou soupisku nelze dokončit a archivovaného účastníka s historií zachová',()=>{expect(reviewReady(data,grouped,now)).toBe(false);expect(reviewMembers({...data,members:[{...member,removed_at:'2026-10-01'}],participation:[p]},grouped)).toHaveLength(1)});
+});

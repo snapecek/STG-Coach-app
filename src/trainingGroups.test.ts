@@ -1,0 +1,16 @@
+import {describe,it,expect,vi} from 'vitest';
+import type {SupabaseClient} from '@supabase/supabase-js';
+import {validateGroup,saveTrainingGroup,loadTrainingGroups,createGroupTrainings,activeGroupMembers,type TrainingGroup} from './trainingGroups';
+import type {MemberRow} from './clubData';
+const club={id:'club-a',name:'Fiktivní klub',role:'coach' as const};
+const group:TrainingGroup={id:'group-a',club_id:club.id,name:'Fiktivní skupina',description:'',archived_at:null,member_ids:['a','b']};
+const draft={name:' Fiktivní skupina ',description:' Popis ',member_ids:['a','b']};
+function mock(){const rpc=vi.fn(async()=>({data:[],error:null}));const from=vi.fn();const getUser=vi.fn(async()=>({data:{user:{id:'coach'}},error:null}));return {rpc,from,getUser,client:{rpc,from,auth:{getUser}} as unknown as SupabaseClient};}
+describe('Tréninkové skupiny',()=>{
+ it('přijme prázdnou skupinu a odmítne duplicitní nebo příliš dlouhé údaje',()=>{expect(()=>validateGroup({...draft,member_ids:[]})).not.toThrow();for(const invalid of [{...draft,name:' '},{...draft,description:'a'.repeat(1001)},{...draft,member_ids:['a','a']},{...draft,member_ids:Array.from({length:501},(_,i)=>String(i))}])expect(()=>validateGroup(invalid)).toThrow()});
+ it('ukládá skupinu i členy jednou klubovou RPC',async()=>{const m=mock();await saveTrainingGroup(m.client,club,group.id,draft);expect(m.rpc).toHaveBeenCalledWith('save_training_group',{target_club:club.id,target_group:group.id,label:'Fiktivní skupina',details:'Popis',entrants:['a','b']});expect(m.from).not.toHaveBeenCalled()});
+ it('člen nemůže číst registr skupin ani jej ukládat',async()=>{const m=mock();await expect(loadTrainingGroups(m.client,{...club,role:'member'})).rejects.toThrow();await expect(saveTrainingGroup(m.client,{...club,role:'member'},group.id,draft)).rejects.toThrow();expect(m.rpc).not.toHaveBeenCalled();expect(m.from).not.toHaveBeenCalled()});
+ it('neověřenému účtu neposkytne skupiny',async()=>{const m=mock();m.getUser.mockResolvedValue({data:{user:null},error:null} as never);await expect(loadTrainingGroups(m.client,club)).rejects.toThrow();expect(m.from).not.toHaveBeenCalled()});
+ it('celou sérii posílá v jedné RPC a soupisku odvozuje server ze skupiny',async()=>{const m=mock();await createGroupTrainings(m.client,club,group.id,{name:' Fiktivní běh ',place:'Park',type:'Běh',plan:'Plán',date:'2026-10-21',time:'18:00',count:2,template_id:'template',duration_minutes:60,capacity:4});expect(m.rpc).toHaveBeenCalledTimes(1);const args=m.rpc.mock.calls[0] as unknown as [string,{target_club:string;target_group:string;sessions:Record<string,unknown>[]}];expect(args[0]).toBe('create_group_trainings');expect(args[1].target_club).toBe(club.id);expect(args[1].target_group).toBe(group.id);expect(args[1].sessions.map(s=>s.starts_at)).toEqual(['2026-10-21T16:00:00.000Z','2026-10-28T17:00:00.000Z']);expect(args[1].sessions.every(s=>s.capacity===4&&!('entrants' in s))).toBe(true);expect(new Set(args[1].sessions.map(s=>s.id)).size).toBe(2)});
+ it('archivovaní členové zůstávají v historii, ale ne v novém výběru skupiny',()=>{const people=[{id:'a',removed_at:null},{id:'b',removed_at:'2026-10-01'},{id:'c',removed_at:null}] as MemberRow[];expect(activeGroupMembers(group,people).map(m=>m.id)).toEqual(['a']);expect(group.member_ids).toEqual(['a','b'])});
+});

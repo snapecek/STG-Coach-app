@@ -19,6 +19,11 @@ do $$begin
  begin perform public.create_group_trainings('20000000-0000-4000-8000-000000000001','40000000-0000-4000-8000-000000000001',jsonb_build_array(jsonb_build_object('id','50000000-0000-4000-8000-000000000099','name','Validní první','place','Park','type','Běh','starts_at',now()+interval '1 day','duration_minutes',60),jsonb_build_object('id','50000000-0000-4000-8000-000000000098','name','Neplatný druhý','place','Park','type','Běh','starts_at',now()+interval '8 days','duration_minutes',999)));raise exception 'FAIL invalid series';exception when check_violation then null;end;
  if exists(select 1 from public.events where id='50000000-0000-4000-8000-000000000099') then raise exception 'FAIL partial series created';end if;
 end $$;
+-- Explicit roster removal affects one term only and revokes its member access.
+delete from public.participation where event_id='50000000-0000-4000-8000-000000000002' and member_id='30000000-0000-4000-8000-000000000001';
+-- Empty groups can be saved but cannot create an event with no audience.
+select public.save_training_group('20000000-0000-4000-8000-000000000001','40000000-0000-4000-8000-000000000002','Prázdná skupina','',array[]::uuid[]);
+do $$begin begin perform public.create_group_trainings('20000000-0000-4000-8000-000000000001','40000000-0000-4000-8000-000000000002',jsonb_build_array(jsonb_build_object('name','Prázdný trénink')));raise exception 'FAIL empty roster event';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;end $$;
 -- Renaming/replacing members affects only future creation, not scheduled roster/history.
 select public.save_training_group('20000000-0000-4000-8000-000000000001','40000000-0000-4000-8000-000000000001','Fiktivní pokročilí','',array['30000000-0000-4000-8000-000000000003']::uuid[]);
 select * from public.create_group_trainings('20000000-0000-4000-8000-000000000001','40000000-0000-4000-8000-000000000001',jsonb_build_array(jsonb_build_object('id','50000000-0000-4000-8000-000000000003','name','Jiná soupiska','place','Park','type','Běh','starts_at',now()+interval '2 days','duration_minutes',60)));
@@ -34,7 +39,7 @@ end $$;
 select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002"}',true);
 do $$begin
  if exists(select 1 from public.training_groups) or exists(select 1 from public.training_group_members) then raise exception 'FAIL member sees registry';end if;
- if not exists(select 1 from public.events where id='50000000-0000-4000-8000-000000000001') or exists(select 1 from public.events where id='50000000-0000-4000-8000-000000000003') then raise exception 'FAIL member event privacy';end if;
+ if not exists(select 1 from public.events where id='50000000-0000-4000-8000-000000000001') or exists(select 1 from public.events where id in ('50000000-0000-4000-8000-000000000002','50000000-0000-4000-8000-000000000003')) then raise exception 'FAIL member event privacy';end if;
  begin perform public.respond_to_club_event('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000003','yes');raise exception 'FAIL member joins another roster';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
  begin perform public.save_training_group('20000000-0000-4000-8000-000000000001','40000000-0000-4000-8000-000000000001','Změna','',array[]::uuid[]);raise exception 'FAIL member manages group';exception when insufficient_privilege then null;end;
 end $$;

@@ -1,0 +1,31 @@
+begin;
+insert into auth.users(id) values ('10000000-0000-4000-8000-000000000001'),('10000000-0000-4000-8000-000000000002');
+insert into clubs(id,name) values ('20000000-0000-4000-8000-000000000001','Fiktivní série'),('20000000-0000-4000-8000-000000000002','Cizí klub');
+insert into club_roles values ('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001','coach'),('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000002','member');
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
+select * from public.create_training_series('20000000-0000-4000-8000-000000000001',jsonb_build_array(jsonb_build_object('id','50000000-0000-4000-8000-000000000001','name','Série','place','Park','type','Běh','starts_at',now()-interval '1 day','duration_minutes',60),jsonb_build_object('id','50000000-0000-4000-8000-000000000002','name','Série','place','Park','type','Běh','starts_at',now()+interval '1 day','duration_minutes',60),jsonb_build_object('id','50000000-0000-4000-8000-000000000003','name','Série','place','Park','type','Běh','starts_at',now()+interval '8 days','duration_minutes',60)));
+select set_config('stg.series',(select series_id::text from events limit 1),true);
+select set_config('stg.preview',(select jsonb_agg(jsonb_build_object('id',id,'expected_starts_at',starts_at,'expected_status',status))::text from events where starts_at>now()),true);
+do $$begin
+ if (select count(distinct series_id) from events)<>1 then raise exception 'FAIL series linkage';end if;
+ begin update events set series_id=null;raise exception 'FAIL series identity mutation';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
+end $$;
+select * from public.change_training_series('20000000-0000-4000-8000-000000000001',current_setting('stg.series')::uuid,'cancel',current_setting('stg.preview')::jsonb);
+do $$begin if (select count(*) from events where status='cancelled')<>2 or not exists(select 1 from events where id='50000000-0000-4000-8000-000000000001' and status='scheduled') then raise exception 'FAIL cancelled past event';end if;
+ begin perform public.change_training_series('20000000-0000-4000-8000-000000000001',current_setting('stg.series')::uuid,'cancel',current_setting('stg.preview')::jsonb);raise exception 'FAIL stale preview accepted';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
+end $$;
+select set_config('stg.restore',(select jsonb_agg(jsonb_build_object('id',id,'expected_starts_at',starts_at,'expected_status',status))::text from events where starts_at>now()),true);
+select * from public.change_training_series('20000000-0000-4000-8000-000000000001',current_setting('stg.series')::uuid,'restore',current_setting('stg.restore')::jsonb);
+-- An invalid later row must roll back the earlier change too.
+select set_config('stg.bad_move',(select jsonb_agg(jsonb_build_object('id',id,'expected_starts_at',starts_at,'expected_status',status,'starts_at',case when id='50000000-0000-4000-8000-000000000002' then starts_at+interval '1 hour' else now()-interval '1 hour' end) order by id)::text from events where starts_at>now()),true);
+do $$begin begin perform public.change_training_series('20000000-0000-4000-8000-000000000001',current_setting('stg.series')::uuid,'reschedule',current_setting('stg.bad_move')::jsonb);raise exception 'FAIL bad time accepted';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
+ if (select starts_at from events where id='50000000-0000-4000-8000-000000000002')<>((current_setting('stg.preview')::jsonb->0->>'expected_starts_at')::timestamptz) then raise exception 'FAIL partial update committed';end if;
+end $$;
+select set_config('stg.move',(select jsonb_agg(jsonb_build_object('id',id,'expected_starts_at',starts_at,'expected_status',status,'starts_at',starts_at+interval '1 hour'))::text from events where starts_at>now()),true);
+select * from public.change_training_series('20000000-0000-4000-8000-000000000001',current_setting('stg.series')::uuid,'reschedule',current_setting('stg.move')::jsonb);
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002"}',true);
+do $$begin begin perform public.change_training_series('20000000-0000-4000-8000-000000000001',current_setting('stg.series')::uuid,'cancel',current_setting('stg.move')::jsonb);raise exception 'FAIL member changed series';exception when insufficient_privilege then null;end;end $$;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
+do $$begin begin perform public.change_training_series('20000000-0000-4000-8000-000000000002',current_setting('stg.series')::uuid,'cancel',current_setting('stg.move')::jsonb);raise exception 'FAIL other club';exception when insufficient_privilege then null;end;end $$;
+rollback;

@@ -54,3 +54,7 @@ Ověřte nesprávné heslo, účet bez klubu, účet se dvěma kluby a odhláše
 ## Další etapa
 
 Cloudový adaptér a testy zápisů jsou implementované. Editace, rušení/mazání událostí a šablon, kalendář, archivace členů a dokončení tréninků jsou implementované. Další krok: ověřit dva skutečné účty s různými kluby a Storage, ověřit aktivní cron job stg-member-retention a doplnit auditní historii. Teprve po jejich průchodu lze plánovat použití skutečných členských údajů. Reset hesla, pozvánky, MFA a samoobslužné RSVP člena zůstávají dalšími úkoly.
+
+## Členské účty
+
+Navazuje migrace `202610130006_member_access.sql` a nasazení serverové funkce dle [MEMBER_ACCESS_SETUP.md](MEMBER_ACCESS_SETUP.md). Již aplikované migrace neopakujte. Vlastní RSVP a osobní čtení chrání databázové RPC. Pozvánky a obnova hesla vyžadují správné Auth URL a doručování pošty.

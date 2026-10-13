@@ -15,7 +15,7 @@ npm run build
 
 Vývojový server běží na portu 5173. Produkci nasazujte z `dist` na HTTPS. Ve Vercelu: Vite, kořen repozitáře, build `npm run build`, output `dist`, install `npm ci`. Nastavte `VITE_SUPABASE_URL` a `VITE_SUPABASE_ANON_KEY` na veřejný publishable/anon klíč pro příslušné prostředí. Po změně těchto hodnot je nutné nové sestavení (Redeploy). Nikdy nepoužívejte service_role, secret key nebo databázové heslo ve VITE proměnných. Testovací heslo a e-mail nepatří do Vercelu ani do repozitáře.
 
-Založení Supabase, první migrace a přiřazení vlastníka jsou popsané v [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Databáze vyžaduje migrace v pořadí: `202610120001_initial.sql`, `202610130002_club_management.sql`, `202610130003_journal_photos.sql`, `202610130004_race_results.sql`, `202610130005_distinct_races.sql`. Druhá přidává archivaci, dokončení událostí a retenční úklid; třetí strukturovaný deník a privátní fotografie událostí. Každou migraci aplikujte jen jednou; uživatel potvrdil aplikování všech pěti a živé kontroly prošly.
+Založení Supabase, první migrace a přiřazení vlastníka jsou popsané v [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Databáze vyžaduje migrace v pořadí: `202610120001_initial.sql`, `202610130002_club_management.sql`, `202610130003_journal_photos.sql`, `202610130004_race_results.sql`, `202610130005_distinct_races.sql`, `202610130006_member_access.sql`. Druhá přidává archivaci, dokončení událostí a retenční úklid; třetí strukturovaný deník a privátní fotografie událostí. Každou migraci aplikujte jen jednou; uživatel potvrdil aplikování všech šesti a živé kontroly prošly.
 
 ## Demo a cloudový klub
 
@@ -72,7 +72,7 @@ Do dokončení testů dvou skutečných klubových účtů a Storage používejt
 
 ## Automatické kontroly
 
-`npm test` — 67 unit testů: opakování, platnost dat, časové pásmo a přechod DST, bezpečná veřejná konfigurace, ověřování identity, filtr club_id a stránkování, omezení rolí, oddělené změny RSVP/docházky, měsíční kalendář, podmínky dokončení, filtrování změn/mazání vybraným klubem, kombinované filtry a výpočty analýzy, bezpečné cesty a typy fotografií. `npm run build` — TypeScript a produkční sestavení.
+`npm test` — 81 unit testů: opakování, platnost dat, časové pásmo a přechod DST, bezpečná veřejná konfigurace, ověřování identity, filtr club_id a stránkování, omezení rolí, oddělené změny RSVP/docházky, měsíční kalendář, podmínky dokončení, filtrování změn/mazání vybraným klubem, kombinované filtry a výpočty analýzy, bezpečné cesty a typy fotografií. `npm run build` — TypeScript a produkční sestavení.
 
 `npm run test:cloud` — živé API kontroly s fiktivními fixtures: přihlášení, host, šablona, série událostí, RSVP/docházka, reload dat, anonymní přístup a RLS zamítnutí nepřiřazeného klubu, archivace a návrat člena, přesun/zrušení/obnovení a dokončení události, opětovné otevření po změně účasti a smazání používané šablony. Vyžaduje čtyři proměnné VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, STG_TEST_EMAIL, STG_TEST_PASSWORD v prostředí a testovací účet s rolí owner. Hodnoty neukládejte do souborů. Test maže pouze fixtures se svými generovanými UUID a odhlásí testovací relaci. Spouštějte jen proti vývojovému klubu.
 
@@ -120,3 +120,22 @@ Migrace `202610130005_distinct_races.sql` musí být aplikovaná po předchozíc
 Ověřeno: 67 unit testů, produkční build, lokální PostgreSQL testy pěti migrací a všech pěti SQL sad, živé Supabase API kontroly a mobilní Chromium workflow. Mobilní test ověřil transakční závod s jediným vybraným hostem, absenci tréninkových polí, dokončení bez deníku, reload, export disciplíny/trasy/odkazu a výsledku, DNF/DNS a opětovné otevření. Vlastní fixtures byly odstraněné. Grafika byla samostatně ověřená s čistě fiktivními daty; kalendář nepřetéká při šířkách 360, 390, 768 a 1440 px.
 
 Omezení: RSVP stále zapisuje trenér. Pozvánky/notifikace, skutečné samoobslužné RSVP, podskupiny, oficiální výsledkové kategorie, hromadné změny série a zámek při souběžných změnách nejsou součástí této etapy. Časové okno je 5–480 minut; vícedenní závod zatím potřebuje rozšíření modelu termínů. Následující ucelená etapa je bezpečný členský postup pozvánka → přihlášení → Jdu/Nejdu/Možná.
+
+
+## Etapa 7 — členský účet, pozvánky a vlastní RSVP
+
+Trenér v registru přes **Pozvat účet** zadá e-mail člena nebo hosta. Pozvánka propojí potvrzený účet se stejným členským ID a historií. Platí 7 dní, je jednorázová a nová pozvánka ruší předchozí. Lze ji odvolat. Účet s jiným e-mailem, neověřený účet, expirovaná/odvolaná pozvánka nebo archivovaný člen se nepřipojí. Další záznam téhož účtu v klubu nelze bez rozhodnutí trenéra sloučit.
+
+Nový Auth účet nastaví heslo; existující účet dostane přihlašovací odkaz. Přijetí klubové pozvánky je samostatný krok po ověření účtu. Auth tokeny a klubový token aplikace odstraní z URL ještě před načítáním klubových dat. Relace i rozpracované přijetí jsou v sessionStorage; nastavení hesla vydrží obnovení stránky. Obsah stránky používá no-referrer. Z uživatelského menu lze změnit heslo; přihlášení obsahuje obnovu hesla s obecnou odpovědí bez potvrzování existence e-mailu.
+
+Účet s rolí **member** má vlastní přehled a kalendář: tréninky klubu a pouze závody, na které jej zařadil trenér. Odpovídá **Jdu / Nejdu / Možná** jedním klepnutím. Po startu nebo zrušení události se odpovědi uzavřou. Databáze při zápisu odvodí jeho member_id z ověřeného Auth účtu; nepřijímá member_id ani attended od klienta. Potvrzenou docházku může člen číst jen vlastní a mění ji dál trenér. Ostatní členové, pozvánky, fotografie, výsledky a celý registr zůstávají staff only. Owner/coach si při přijetí pozvánky zachovají vyšší roli; jejich účet se automaticky nezmění na členský pohled.
+
+**Nasazení:** šestá migrace byla aplikovaná a živé RPC testy prošly. Pro odesílání e-mailů je navíc potřeba Edge Function **invite-member**, Auth redirect URL a SMTP podle [docs/MEMBER_ACCESS_SETUP.md](docs/MEMBER_ACCESS_SETUP.md). Při poslední kontrole endpoint funkce vracel 404; nasazení a skutečné doručení zatím nebylo potvrzené. Příjemce nových Auth pozvánek otestujte vlastním zvoleným e-mailem až po nastavení. Service role klíč patří jen do serverové funkce; veřejné registrace zůstávají vypnuté.
+
+**Ověření:** 81 unit testů a produkční build; Deno 2.5.0 `check` pro nasazovanou funkci; lokální PostgreSQL všech šesti migrací a šesti SQL sad; živý členský RPC test s jedním existujícím ověřeným owner účtem (bez e-mailů a bez změny hesla), který ověřil stabilní identitu, jednorázovost, zachování role a potvrzené docházky, závodní soupisku a uzavření RSVP. Fixtures byly odstraněné. Dosavadní živý mobilní trenérský workflow prošel. Členský mobilní workflow má samostatné testy s fiktivním Auth/API, včetně přijetí pozvánky, hesla, refresh, zamítnutí a odvolání; nejde o potvrzení skutečného e-mailového doručení nebo test dvou reálných účtů.
+
+- `npm run test:member-ui`: vyžaduje běžící Vite a Chromium; používá pouze fiktivní síťové odpovědi, nic neposílá do skutečné databáze nebo e-mailu.
+- `npm run test:member-cloud`: opt-in stejné čtyři testovací proměnné jako test:cloud. Neposílá e-maily a nemění Auth heslo; vytváří a uklízí jen vlastní fiktivní DB fixtures. Existující členský záznam testovacího účtu nikdy nepřepíše. Nespouštějte zápisové integrační testy současně se stejným účtem.
+- Edge check: `DENO_DIR=/workspace/stg-validation/deno DENO_CERT=/etc/ssl/certs/ca-certificates.crt npm exec --cache /workspace/.npm-cache --yes --package deno@2.5.0 -- deno check supabase/functions/invite-member/index.ts`. Zachovejte běžné ověřování TLS; v prostředí s jinými CA použijte jeho důvěryhodný systémový bundle.
+
+Další ucelená etapa: podskupiny, kapacita a čekací listina; až po ověření poštovního provozu připomínky s přehledem doručení. Skutečné doručení/reset a izolace dvou reálných členských účtů zůstávají provozními kontrolami této etapy.

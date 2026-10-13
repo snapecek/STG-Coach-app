@@ -1,6 +1,6 @@
 # Databázové kontroly
 
-`tenant_access.sql` se spouští až po všech pěti migracích v prázdném vývojovém Supabase projektu; při chybě proveďte ROLLBACK. Vkládá pouze fiktivní data a na konci je odstraní rollbackem.
+`tenant_access.sql` se spouští až po všech šesti migracích v prázdném vývojovém Supabase projektu; při chybě proveďte ROLLBACK. Vkládá pouze fiktivní data a na konci je odstraní rollbackem.
 
 Kontroly: trenér vidí jen svůj klub, šablony, události a účast; nelze připojit šablonu nebo člena z jiného klubu; trenér nemůže přidělovat role; člen vidí události, ale ne registr ani účast a nemůže potvrzovat docházku; anonym nemůže číst registr.
 
@@ -18,11 +18,13 @@ docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/202610130003_journal_photos.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/202610130004_race_results.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/202610130005_distinct_races.sql
+docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/202610130006_member_access.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/tenant_access.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/club_management.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/journal_photos.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/race_results.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/distinct_races.sql
+docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/member_access.sql
 docker rm -f stg-rls-validation
 ```
 
@@ -35,3 +37,5 @@ Skutečné API testy: `python3 scripts/check-cloud.py` s konfigurací veřejnéh
 Výsledky závodů: po třetí migraci aplikujte `202610130004_race_results.sql` a spusťte `race_results.sql` stejným příkazem psql. Ověřuje staff/member/anon/cizí účet, vazby, platnost času, zrušení, změnu typu a otevření dokončení.
 
 `distinct_races.sql` ověřuje transakční vybranou soupisku (ne celý klub), zamítnutí cizího člena/role, dokončení bez tréninkového deníku a soulad dokončil/DNF/DNS s potvrzenou účastí.
+
+`member_access.sql` testuje potvrzený a cizí e-mail, jednorázovost/expiraci/odvolání pozvánky, odmítnutí duplicitního člena, archivovaného člena, osobní profil a RSVP bez možnosti přepsat docházku. `local-bootstrap.sql` doplňuje pgcrypto a minimální email_confirmed_at pouze pro lokální substituci Auth. Živý opt-in test: `npm run test:member-cloud`; nikdy neposílá e-maily nebo nemění heslo.

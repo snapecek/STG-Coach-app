@@ -1,3 +1,5 @@
+project_id = "stg-coach"
+
 [functions.invite-member]
 # Handler verifies the bearer through Auth.getUser and checks the club role.
 # This also supports projects with the newer asymmetric JWT signing keys.

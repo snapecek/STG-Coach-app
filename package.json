@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:cloud": "python3 scripts/check-cloud.py",
-    "test:ui": "node scripts/check-ui.cjs"
+    "test:ui": "node scripts/check-ui.cjs",
+    "test:member-ui": "node scripts/check-member-ui.cjs",
+    "test:member-cloud": "python3 scripts/check-member-cloud.py"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",

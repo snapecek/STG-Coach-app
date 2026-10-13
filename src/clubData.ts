@@ -2,7 +2,7 @@ import {removeAllEventPhotos} from './photos';
 import type {SupabaseClient} from '@supabase/supabase-js';
 import {dates} from './domain';
 import type {ClubAccess} from './supabase';
-export type MemberRow={id:string;club_id:string;name:string;kind:'member'|'guest';removed_at:string|null;purge_after:string|null};
+export type MemberRow={id:string;club_id:string;name:string;kind:'member'|'guest';removed_at:string|null;purge_after:string|null;user_id?:string|null};
 export type TemplateRow={id:string;club_id:string;name:string;type:string;place:string;minutes:number;plan:string};
 export type EventRow={id:string;club_id:string;template_id:string|null;name:string;starts_at:string;place:string;type:string;plan:string;duration_minutes:number;event_kind:'training'|'race';status:'scheduled'|'cancelled';actual_notes:string;completed_at:string|null;completed_by:string|null;actual_duration_minutes:number|null;perceived_effort:number|null;equipment:string[];race_distance_km?:number|null;race_registration_url?:string};
 export type ParticipationRow={club_id:string;event_id:string;member_id:string;response:'yes'|'no'|'maybe'|null;attended:boolean|null;confirmed_by:string|null};
@@ -39,7 +39,7 @@ export async function loadClubData(client:SupabaseClient,club:ClubAccess,signal?
   }
  }
  const [members,templates,events,participation]=await Promise.all([
-  canManage(club)?readAll<MemberRow>('members','id,club_id,name,kind,removed_at,purge_after'):Promise.resolve([]),
+  canManage(club)?readAll<MemberRow>('members','id,club_id,name,kind,removed_at,purge_after,user_id'):Promise.resolve([]),
   readAll<TemplateRow>('templates','id,club_id,name,type,place,minutes,plan'),
   readAll<EventRow>('events','id,club_id,template_id,name,starts_at,place,type,plan,duration_minutes,event_kind,status,actual_notes,completed_at,completed_by,actual_duration_minutes,perceived_effort,equipment,race_distance_km,race_registration_url'),
   canManage(club)?readAll<ParticipationRow>('participation','club_id,event_id,member_id,response,attended,confirmed_by'):Promise.resolve([])
@@ -48,7 +48,7 @@ export async function loadClubData(client:SupabaseClient,club:ClubAccess,signal?
 }
 export async function addMember(client:SupabaseClient,club:ClubAccess,name:string,kind:MemberRow['kind']){
  staff(club);if(!['member','guest'].includes(kind))throw new Error('Neplatný typ člena.');await verify(client);
- return checked<MemberRow>(await client.from('members').insert({id:crypto.randomUUID(),club_id:club.id,name:text(name,'Jméno',80),kind}).select('id,club_id,name,kind,removed_at,purge_after').single(),'Člena se nepodařilo uložit.');
+ return checked<MemberRow>(await client.from('members').insert({id:crypto.randomUUID(),club_id:club.id,name:text(name,'Jméno',80),kind}).select('id,club_id,name,kind,removed_at,purge_after,user_id').single(),'Člena se nepodařilo uložit.');
 }
 export async function addTemplate(client:SupabaseClient,club:ClubAccess,input:Pick<TemplateRow,'name'|'type'|'place'|'minutes'|'plan'>){
  staff(club);if(!Number.isInteger(input.minutes)||input.minutes<5||input.minutes>480)throw new Error('Délka musí být 5 až 480 minut.');if(input.plan.length>5000)throw new Error('Plán je příliš dlouhý.');await verify(client);

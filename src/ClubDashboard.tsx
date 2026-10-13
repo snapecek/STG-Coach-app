@@ -66,12 +66,12 @@ export function ClubDashboard({client,club}:{client:SupabaseClient;club:ClubAcce
  const updateParticipation=(event:string,member:string,patch:Parameters<typeof saveParticipation>[4])=>void write(async()=>{await saveParticipation(client,club,event,member,patch);await refreshReservations();},'Účast uložena.');
  const applySeries=(action:SeriesAction,changes:SeriesChange[])=>write(async()=>{if(!current?.series_id)throw new Error('Série není dostupná.');await changeTrainingSeries(client,club,current.series_id,action,changes);await refreshReservations();},'Série byla změněna.',true);
  const saveEventDraft=(draft:EventDraft)=>void write(async()=>{
-  const {date,time,count,entrants,group_id,...fields}=draft;
+  const {date,time,count,selectedDates,entrants,group_id,...fields}=draft;
   if(modal==='edit-event'&&current){setEvent(await updateEvent(client,club,current.id,{name:fields.name,place:fields.place,type:fields.type,plan:fields.plan,duration_minutes:fields.duration_minutes,event_kind:fields.event_kind,template_id:fields.template_id,race_distance_km:fields.race_distance_km,race_registration_url:fields.race_registration_url,...(current.capacity!==undefined||fields.capacity!=null?{capacity:fields.capacity}:{}),starts_at:pragueTimestamp(date,time)}));await refreshReservations();return;}
   if(fields.event_kind==='race'){
    const row=await createClubRace(client,club,{id:crypto.randomUUID(),name:fields.name,place:fields.place,type:fields.type,plan:fields.plan,duration_minutes:fields.duration_minutes,starts_at:pragueTimestamp(date,time),race_distance_km:fields.race_distance_km,race_registration_url:fields.race_registration_url},entrants);
    setData(s=>({...s,events:[...s.events,row].sort((a,b)=>a.starts_at.localeCompare(b.starts_at)),participation:[...s.participation,...entrants.map(member_id=>({club_id:club.id,event_id:row.id,member_id,response:null,attended:null,confirmed_by:null}))]}));
-  }else if(group_id){await createGroupTrainings(client,club,group_id,{...fields,date,time,count});await refreshReservations();}else{const rows=await createClubEvents(client,club,{...fields,date,time,count});setData(s=>({...s,events:[...s.events,...rows].sort((a,b)=>a.starts_at.localeCompare(b.starts_at))}));}
+  }else if(group_id){await createGroupTrainings(client,club,group_id,{...fields,date,time,count,selectedDates});await refreshReservations();}else{const rows=await createClubEvents(client,club,{...fields,date,time,count,selectedDates});setData(s=>({...s,events:[...s.events,...rows].sort((a,b)=>a.starts_at.localeCompare(b.starts_at))}));}
  },modal==='edit-event'?'Událost byla změněna.':'Události byly uloženy.',true);
  const submit=(event:React.FormEvent<HTMLFormElement>)=>{
   event.preventDefault();const f=new FormData(event.currentTarget);

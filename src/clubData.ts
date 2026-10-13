@@ -1,6 +1,6 @@
 import {removeAllEventPhotos} from './photos';
 import type {SupabaseClient} from '@supabase/supabase-js';
-import {dates} from './domain';
+import {dates,trainingDates} from './domain';
 import type {ClubAccess} from './supabase';
 export type MemberRow={id:string;club_id:string;name:string;kind:'member'|'guest';removed_at:string|null;purge_after:string|null;user_id?:string|null};
 export type TemplateRow={id:string;club_id:string;name:string;type:string;place:string;minutes:number;plan:string};
@@ -103,9 +103,9 @@ export async function completeEvent(client:SupabaseClient,club:ClubAccess,id:str
 export async function deleteEvent(client:SupabaseClient,club:ClubAccess,id:string){
  staff(club);await verify(client);await removeAllEventPhotos(client,club.id,id);return checked<{id:string}>(await client.from('events').delete().eq('club_id',club.id).eq('id',id).select('id').single(),'Událost se nepodařilo smazat.');
 }
-export async function createClubEvents(client:SupabaseClient,club:ClubAccess,input:{template_id:string|null;name:string;place:string;type:string;plan:string;duration_minutes:number;event_kind:'training'|'race';date:string;time:string;count:number;capacity?:number|null}){
+export async function createClubEvents(client:SupabaseClient,club:ClubAccess,input:{template_id:string|null;name:string;place:string;type:string;plan:string;duration_minutes:number;event_kind:'training'|'race';date:string;time:string;count:number;selectedDates?:string[];capacity?:number|null}){
  staff(club);validateCapacity(input.capacity);if(!Number.isInteger(input.duration_minutes)||input.duration_minutes<5||input.duration_minutes>480||input.plan.length>5000)throw new Error('Zkontrolujte délku a plán.');
- const rows=dates(input.date,input.count).map(date=>({id:crypto.randomUUID(),club_id:club.id,template_id:input.template_id,name:text(input.name,'Název',80),place:text(input.place,'Místo'),type:text(input.type,'Typ',40),plan:input.plan.trim(),duration_minutes:input.duration_minutes,event_kind:input.event_kind,...(input.capacity!=null?{capacity:input.capacity}:{}),starts_at:pragueTimestamp(date,input.time)}));await verify(client);
+ const rows=trainingDates(input.date,input.count,input.selectedDates).map(date=>({id:crypto.randomUUID(),club_id:club.id,template_id:input.template_id,name:text(input.name,'Název',80),place:text(input.place,'Místo'),type:text(input.type,'Typ',40),plan:input.plan.trim(),duration_minutes:input.duration_minutes,event_kind:input.event_kind,...(input.capacity!=null?{capacity:input.capacity}:{}),starts_at:pragueTimestamp(date,input.time)}));await verify(client);
  if(input.event_kind!=='training')throw new Error('Závod vytvořte samostatně se soupiskou.');
  return checked<EventRow[]>(await client.rpc('create_training_series',{target_club:club.id,sessions:rows}),'Tréninky se nepodařilo uložit. Ověřte migraci 011 a údaje série.');
 }

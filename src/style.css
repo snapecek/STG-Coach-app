@@ -32,3 +32,7 @@
 .review-list .task-context{line-height:1.5;overflow-wrap:anywhere}.task-context>span{color:#c7d1dc}.task-overview>button>div{min-width:0;flex:1}.task-overview>button>svg{flex-shrink:0}
 
 .series-preview{margin:20px 0;border:1px solid var(--border);border-radius:12px;padding:16px;max-height:340px;overflow:auto}.series-preview h3{font-size:14px;margin-bottom:12px}.series-preview>div{padding:10px 0;border-top:1px solid var(--border)}.series-preview b{font-size:13px;overflow-wrap:anywhere}.series-preview small{display:block;color:var(--muted);margin-top:5px;font-size:12px}.series-preview .series-target{color:var(--teal)}.series-target svg{vertical-align:middle}.series-confirm{display:flex;align-items:center;gap:10px;margin:18px 0}.series-confirm input{width:18px;height:18px;accent-color:var(--orange);flex-shrink:0}
+
+.training-schedule{border-top:1px solid var(--border);padding-top:16px;margin-top:16px}.schedule-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin:12px 0}.schedule-calendar small{text-align:center;color:#95a3b2}.schedule-calendar button{padding:10px 0;min-width:0;border:1px solid #34404d;background:#18212b;border-radius:9px}.schedule-calendar button[aria-pressed=true]{background:#1e665a;border-color:#56cbb2;color:#fff}.schedule-summary{padding:12px;background:#17232a;border-radius:12px;margin-top:12px}.schedule-summary>div{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.schedule-summary span{font-size:12px;padding:5px 8px;border-radius:6px;background:#25343e}
+
+.form-grid label[hidden]{display:none}

@@ -72,7 +72,7 @@ Do dokončení testů dvou skutečných klubových účtů a Storage používejt
 
 ## Automatické kontroly
 
-`npm test` — 103 unit testů: opakování, platnost dat, časové pásmo a přechod DST, bezpečná veřejná konfigurace, ověřování identity, filtr club_id a stránkování, omezení rolí, oddělené změny RSVP/docházky, měsíční kalendář, podmínky dokončení, filtrování změn/mazání vybraným klubem, kombinované filtry a výpočty analýzy, bezpečné cesty a typy fotografií. `npm run build` — TypeScript a produkční sestavení.
+`npm test` — 108 unit testů: opakování, platnost dat, časové pásmo a přechod DST, bezpečná veřejná konfigurace, ověřování identity, filtr club_id a stránkování, omezení rolí, oddělené změny RSVP/docházky, měsíční kalendář, podmínky dokončení, filtrování změn/mazání vybraným klubem, kombinované filtry a výpočty analýzy, bezpečné cesty a typy fotografií. `npm run build` — TypeScript a produkční sestavení.
 
 `npm run test:cloud` — živé API kontroly s fiktivními fixtures: přihlášení, host, šablona, série událostí, RSVP/docházka, reload dat, anonymní přístup a RLS zamítnutí nepřiřazeného klubu, archivace a návrat člena, přesun/zrušení/obnovení a dokončení události, opětovné otevření po změně účasti a smazání používané šablony. Vyžaduje čtyři proměnné VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, STG_TEST_EMAIL, STG_TEST_PASSWORD v prostředí a testovací účet s rolí owner. Hodnoty neukládejte do souborů. Test maže pouze fixtures se svými generovanými UUID a odhlásí testovací relaci. Spouštějte jen proti vývojovému klubu.
 
@@ -201,3 +201,10 @@ Server mění pouze budoucí, nedokončené termíny příslušného stavu a klu
 Migraci `202610130011_training_series.sql` uživatel potvrdil jako aplikovanou; neopakovat. [Postup a omezení](docs/TRAINING_SERIES_SETUP.md). Starší termíny se automaticky nepropojují podle názvu a nadále se upravují jednotlivě. Termíny organizačních úkolů se neposouvají a změny neposílají automatická upozornění. Export schemaVersion 4 obsahuje volitelný `series_id`.
 
 Ověření: 103 unit testů, produkční build, jedenáct migrací a deset lokálních SQL sad včetně konkurenčních rezervací. SQL ověřuje ochranu historie, izolaci klubů/rolí, zastaralý náhled a transakční návrat při chybě. Mobilní test s fiktivním API ověřuje skupinovou sérii a zrušení potvrzení po změně náhledu. Živý mobilní test proti Supabase ověřuje přesun, zrušení a obnovení čtyř fiktivních termínů; fixtures byly odstraněné. První běh skončil timeoutem při vytvoření závodu; opakovaný úplný běh prošel včetně závodů, deníku, soukromých fotografií a úklidu. Další etapa může navázat přehledem změn a oznámeními, včetně samostatného ověření doručování.
+
+
+### Výběr opakování tréninku
+
+Formulář Nová událost → Trénink nabízí Jednorázově, Týdně (volitelný počet 1–12 týdnů od prvního data) a Vybrat termíny v měsíci. Ruční režim zobrazí měsíční kalendář od pondělí; klepnutím vyberte 1–12 libovolných dnů. Změna měsíce vyčistí výběr. Přehled před uložením ukazuje skutečné termíny a čas v Praze; všechny termíny používají stejný čas a údaje tréninku. Ruční výběr funguje pro celý klub i skupinu, ukládá se jednou transakční RPC a více termínů tvoří spravovatelnou sérii. Závody zůstávají samostatné. Nevyžaduje další migraci nad aplikovanou 011.
+
+Ověření: 108 unit testů, produkční build a mobilní prohlížečové kontroly s fiktivním API, včetně přesných nepravidelných dat skupinové série a její následné správy. Regrese pokrývá prázdný výběr, duplicity, jiný měsíc, neexistující datum a převod přes změnu času. V této úpravě nebyly spouštěny další zápisy do živého Supabase ani měněno schéma. Omezení: nejvýše 12 termínů v jedné sérii, společný čas; jednotlivé časy lze následně upravit v detailu termínu. Další možné rozšíření: vlastní čas pro každý ručně vybraný den.

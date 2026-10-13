@@ -43,3 +43,7 @@ Další krok: založit vývojový Supabase projekt podle návodu, aplikovat migr
 ### Ověření připojení 13. 10. 2026
 
 Projektové proměnné jsou přítomné; HTTPS URL a typ veřejného klíče byly zkontrolované bez výpisu hodnot. Supabase Auth settings odpovědělo HTTP 200 a disable_signup=true. Anonymní GET na clubs a members skončil HTTP 401 / 42501; žádné záznamy nebyly zpřístupněny. To ověřuje zákaz anonymního čtení, nikoliv izolaci přihlášených klubů ani oprávnění fotografií. Přes podporovanou HTTPS proxy připojení funguje; přímý Node fetch v tomto prostředí proxy automaticky nepoužil. 14 unit testů a build prošly, vývojový server byl spuštěn s konfigurací. Přihlášení konkrétního testovacího účtu a jeho klub dosud nebyly ověřeny.
+
+### Živé ověření Auth a klubového přístupu
+
+Přihlášení nakonfigurovaným testovacím účtem přes Auth API prošlo (HTTP 200). Následné ověření identity přes `/auth/v1/user` potvrdilo stejného uživatele a dotaz na jeho klubové role vrátil jeden klub s rolí owner. Testovací relace byla odhlášena. Přihlašovací údaje ani tokeny nejsou součástí repozitáře. Tato kontrola není test UI ani důkaz izolace dvou přihlášených klubů. Nahrání kódu do GitHubu stále čeká na aplikování síťové konfigurace povolující github.com; nynější runtime povoluje pouze Supabase.

@@ -1,0 +1,3 @@
+import {describe,it,expect} from 'vitest';
+import {dates,createEvents,templates,seed} from './domain';
+describe('Události',()=>{it('opakuje po týdnu přes konec měsíce',()=>expect(dates('2026-10-28',3)).toEqual(['2026-10-28','2026-11-04','2026-11-11']));it('odmítne neexistující datum',()=>expect(()=>dates('2026-02-31',2)).toThrow());it('odmítne příliš dlouhé opakování',()=>expect(()=>dates('2026-10-12',13)).toThrow());it('vytváří nezávislé záznamy docházky',()=>{const e=createEvents(templates[0],'2026-10-12','18:00',2);e[0].attendance.a=true;expect(e[1].attendance).toEqual({});expect(e[0].id).not.toBe(e[1].id)});it('demo obsahuje hosta bez účtu',()=>expect(seed().members.some(m=>m.kind==='guest')).toBe(true));});

@@ -15,7 +15,7 @@ npm run build
 
 Vývojový server běží na portu 5173. Produkci nasazujte z `dist` na HTTPS. Ve Vercelu: Vite, kořen repozitáře, build `npm run build`, output `dist`, install `npm ci`. Nastavte `VITE_SUPABASE_URL` a `VITE_SUPABASE_ANON_KEY` na veřejný publishable/anon klíč pro příslušné prostředí. Po změně těchto hodnot je nutné nové sestavení (Redeploy). Nikdy nepoužívejte service_role, secret key nebo databázové heslo ve VITE proměnných. Testovací heslo a e-mail nepatří do Vercelu ani do repozitáře.
 
-Založení Supabase, první migrace a přiřazení vlastníka jsou popsané v [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Databáze vyžaduje migrace v pořadí: `202610120001_initial.sql`, `202610130002_club_management.sql`, `202610130003_journal_photos.sql`, `202610130004_race_results.sql`, `202610130005_distinct_races.sql`, `202610130006_member_access.sql`, `202610130007_training_capacity.sql`, `202610130008_freeze_past_reservations.sql`, `202610130009_training_groups.sql`, `202610130010_event_tasks.sql`. Druhá přidává archivaci, dokončení událostí a retenční úklid; třetí strukturovaný deník a privátní fotografie událostí. Každou migraci aplikujte jen jednou; uživatel potvrdil aplikování všech deseti. Již aplikované soubory neopakujte.
+Založení Supabase, první migrace a přiřazení vlastníka jsou popsané v [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Databáze vyžaduje migrace v pořadí: `202610120001_initial.sql`, `202610130002_club_management.sql`, `202610130003_journal_photos.sql`, `202610130004_race_results.sql`, `202610130005_distinct_races.sql`, `202610130006_member_access.sql`, `202610130007_training_capacity.sql`, `202610130008_freeze_past_reservations.sql`, `202610130009_training_groups.sql`, `202610130010_event_tasks.sql`, `202610130011_training_series.sql`. Druhá přidává archivaci, dokončení událostí a retenční úklid; třetí strukturovaný deník a privátní fotografie událostí. Každou migraci aplikujte jen jednou; uživatel potvrdil aplikování všech jedenácti. Již aplikované soubory neopakujte.
 
 ## Demo a cloudový klub
 
@@ -72,7 +72,7 @@ Do dokončení testů dvou skutečných klubových účtů a Storage používejt
 
 ## Automatické kontroly
 
-`npm test` — 98 unit testů: opakování, platnost dat, časové pásmo a přechod DST, bezpečná veřejná konfigurace, ověřování identity, filtr club_id a stránkování, omezení rolí, oddělené změny RSVP/docházky, měsíční kalendář, podmínky dokončení, filtrování změn/mazání vybraným klubem, kombinované filtry a výpočty analýzy, bezpečné cesty a typy fotografií. `npm run build` — TypeScript a produkční sestavení.
+`npm test` — 103 unit testů: opakování, platnost dat, časové pásmo a přechod DST, bezpečná veřejná konfigurace, ověřování identity, filtr club_id a stránkování, omezení rolí, oddělené změny RSVP/docházky, měsíční kalendář, podmínky dokončení, filtrování změn/mazání vybraným klubem, kombinované filtry a výpočty analýzy, bezpečné cesty a typy fotografií. `npm run build` — TypeScript a produkční sestavení.
 
 `npm run test:cloud` — živé API kontroly s fiktivními fixtures: přihlášení, host, šablona, série událostí, RSVP/docházka, reload dat, anonymní přístup a RLS zamítnutí nepřiřazeného klubu, archivace a návrat člena, přesun/zrušení/obnovení a dokončení události, opětovné otevření po změně účasti a smazání používané šablony. Vyžaduje čtyři proměnné VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, STG_TEST_EMAIL, STG_TEST_PASSWORD v prostředí a testovací účet s rolí owner. Hodnoty neukládejte do souborů. Test maže pouze fixtures se svými generovanými UUID a odhlásí testovací relaci. Spouštějte jen proti vývojovému klubu.
 
@@ -190,3 +190,14 @@ Trenérský přehled má otevřené organizační úkoly nezrušených událost�
 **Omezení a další kroky:** synchronizace úkolů mezi zařízeními je ruční přes Obnovit data, automatické e-mail/push notifikace a audit změn nejsou implementované. Člen musí mít propojený ověřený účet; pozvánky nadále vyžadují samostatné nasazení senderu/SMTP. Nejde o potvrzení dvou skutečných Auth identit ani doručování pošty. Další ucelená etapa může navázat upozorněními a přehledem jejich doručení, případně organizací týmů a výsledků.
 
 Přehled organizačních úkolů u každé položky výslovně uvádí událost včetně jejího termínu, odpovědnou osobu a případný termín úkolu. Nepřiřazený úkol je označený Bez přiřazení; archivovaná osoba zůstává rozpoznatelná a chybějící osobu nenahrazujeme jiným členem.
+
+
+## Etapa 11 — správa opakovaných tréninků
+
+Nové opakované tréninky mají společný identifikátor série, také při vytvoření pro skupinu. Celá série vzniká v jedné transakci. V detailu tréninku → Informace → Spravovat sérii lze posunout datum a čas, zrušit nebo obnovit budoucí termíny. Náhled ukazuje dotčené termíny a původní/nové časy v Praze; uložení vyžaduje potvrzení, které další změna náhledu zruší. Přesun zachová rozestupy jednotlivých termínů i místní čas přes změnu letního času.
+
+Server mění pouze budoucí, nedokončené termíny příslušného stavu a klubu. Proběhlé tréninky, soupisky, RSVP, docházka, deník, fotografie a úkoly zůstávají zachované. Pokud se náhled změnil nebo termín mezitím začal, celá operace se odmítne bez částečného zápisu. Přístup mají pouze trenéři a správci vlastního klubu; závody tuto logiku nepoužívají.
+
+Migraci `202610130011_training_series.sql` uživatel potvrdil jako aplikovanou; neopakovat. [Postup a omezení](docs/TRAINING_SERIES_SETUP.md). Starší termíny se automaticky nepropojují podle názvu a nadále se upravují jednotlivě. Termíny organizačních úkolů se neposouvají a změny neposílají automatická upozornění. Export schemaVersion 4 obsahuje volitelný `series_id`.
+
+Ověření: 103 unit testů, produkční build, jedenáct migrací a deset lokálních SQL sad včetně konkurenčních rezervací. SQL ověřuje ochranu historie, izolaci klubů/rolí, zastaralý náhled a transakční návrat při chybě. Mobilní test s fiktivním API ověřuje skupinovou sérii a zrušení potvrzení po změně náhledu. Živý mobilní test proti Supabase ověřuje přesun, zrušení a obnovení čtyř fiktivních termínů; fixtures byly odstraněné. První běh skončil timeoutem při vytvoření závodu; opakovaný úplný běh prošel včetně závodů, deníku, soukromých fotografií a úklidu. Další etapa může navázat přehledem změn a oznámeními, včetně samostatného ověření doručování.

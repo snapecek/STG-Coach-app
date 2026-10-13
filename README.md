@@ -208,3 +208,12 @@ Ověření: 103 unit testů, produkční build, jedenáct migrací a deset loká
 Formulář Nová událost → Trénink nabízí Jednorázově, Týdně (volitelný počet 1–12 týdnů od prvního data) a Vybrat termíny v měsíci. Ruční režim zobrazí měsíční kalendář od pondělí; klepnutím vyberte 1–12 libovolných dnů. Změna měsíce vyčistí výběr. Přehled před uložením ukazuje skutečné termíny a čas v Praze; všechny termíny používají stejný čas a údaje tréninku. Ruční výběr funguje pro celý klub i skupinu, ukládá se jednou transakční RPC a více termínů tvoří spravovatelnou sérii. Závody zůstávají samostatné. Nevyžaduje další migraci nad aplikovanou 011.
 
 Ověření: 108 unit testů, produkční build a mobilní prohlížečové kontroly s fiktivním API, včetně přesných nepravidelných dat skupinové série a její následné správy. Regrese pokrývá prázdný výběr, duplicity, jiný měsíc, neexistující datum a převod přes změnu času. V této úpravě nebyly spouštěny další zápisy do živého Supabase ani měněno schéma. Omezení: nejvýše 12 termínů v jedné sérii, společný čas; jednotlivé časy lze následně upravit v detailu termínu. Další možné rozšíření: vlastní čas pro každý ručně vybraný den.
+
+
+### Kopírování událostí bez šablony
+
+Trenér/správce v detailu → Informace → Zkopírovat otevře nový předvyplněný formulář. Kopie přebírá název, místo, zaměření/disciplinu, plán/pokyny, délku, pražský čas, kapacitu a případné údaje závodu. Datum začíná dnešním dnem a lze je změnit; opakování začíná jednorázově a lze zvolit týdny nebo ruční měsíční termíny. Kopie není závislá na existenci šablony a vzniká standardní transakční RPC s novým ID a případně novou sérií. Originál se nemění. Docházka, RSVP, deník, fotografie, výsledky, úkoly a stav dokončení se nepřenášejí.
+
+U skupinového tréninku je předvolená dosud aktivní zdrojová skupina; účastníci vycházejí z jejího aktuálního seznamu, nikoliv z historických ručních úprav soupisky. Pokud skupina není dostupná, formulář vybírá celý klub a upozorní na kontrolu účastníků. Kopie závodu předvolí původní dosud aktivní účastníky; seznam lze změnit a bez účastníka nelze závod vytvořit. Nevyžaduje novou migraci.
+
+Ověření: 108 unit testů, produkční build a mobilní test s fiktivním API pro předvyplnění, úpravu názvu/data, nové ID, samostatný termín a čistou docházku při zachování originálu. V této úpravě se nezapisovalo do živé databáze.

@@ -1,0 +1,29 @@
+import {describe,it,expect,vi} from 'vitest';
+import type {SupabaseClient} from '@supabase/supabase-js';
+import {buildEventRows,pragueTimestamp,loadClubData,addMember,saveParticipation,type TemplateRow} from './clubData';
+const club={id:'club-a',name:'Fiktivní A',role:'coach' as const};
+const template:TemplateRow={id:'template-a',club_id:club.id,name:'Fiktivní běh',type:'Běh',place:'Testovací park',minutes:45,plan:'Fiktivní plán'};
+function mock(){const tables:string[]=[];const filters:unknown[][]=[];const writes:unknown[]=[];const q={select:vi.fn(()=>q),eq:vi.fn((...args:unknown[])=>{filters.push(args);return q}),order:vi.fn(()=>q),abortSignal:vi.fn(()=>q),range:vi.fn(()=>q),insert:vi.fn((data:unknown)=>{writes.push(data);return q}),upsert:vi.fn((data:unknown)=>{writes.push(data);return q}),single:vi.fn(async()=>({data:{id:'new'},error:null})),then:(fn:(v:unknown)=>unknown)=>Promise.resolve({data:[],error:null}).then(fn)};const client={auth:{getUser:vi.fn(async()=>({data:{user:{id:'trainer'}},error:null}))},from:vi.fn((table:string)=>{tables.push(table);return q})};return {client:client as unknown as SupabaseClient,tables,filters,writes,q,auth:client.auth};}
+describe('Čas a opakování',()=>{
+ it('převede letní a zimní pražský čas',()=>{expect(pragueTimestamp('2026-07-01','18:00')).toBe('2026-07-01T16:00:00.000Z');expect(pragueTimestamp('2026-12-01','18:00')).toBe('2026-12-01T17:00:00.000Z')});
+ it('zachová 18:00 přes změnu času',()=>expect(buildEventRows(club.id,template,'2026-10-21','18:00',2).map(e=>e.starts_at)).toEqual(['2026-10-21T16:00:00.000Z','2026-10-28T17:00:00.000Z']));
+ it('odmítá neexistující jarní čas',()=>expect(()=>pragueTimestamp('2026-03-29','02:30')).toThrow());
+ it('odmítá cizí šablonu',()=>expect(()=>buildEventRows('club-b',template,'2026-10-13','18:00',1)).toThrow());
+});
+describe('Cloudový adaptér',()=>{
+ it('každé čtení filtruje club_id',async()=>{const m=mock();await loadClubData(m.client,club);expect(m.tables).toEqual(['members','templates','events','participation']);expect(m.filters).toEqual(Array(4).fill(['club_id',club.id]))});
+ it('načte další stránku registru místo tichého oříznutí',async()=>{
+  const ranges:unknown[][]=[];
+  const client={auth:{getUser:async()=>({data:{user:{id:'trainer'}},error:null})},from:(table:string)=>{
+   let offset=0;const q={select:()=>q,eq:()=>q,order:()=>q,range:(start:number,end:number)=>{offset=start;if(table==='members')ranges.push([start,end]);return q},then:(fn:(v:unknown)=>unknown)=>Promise.resolve({data:table==='members'&&offset===0?Array.from({length:500},(_,i)=>({id:String(i),club_id:club.id,name:'Fiktivní člen',kind:'member'})):[],error:null}).then(fn)};return q;
+  }} as unknown as SupabaseClient;
+  const data=await loadClubData(client,club);expect(data.members).toHaveLength(500);expect(ranges).toEqual([[0,499],[500,999]]);
+ });
+ it('členovi vůbec nenačítá registr ani účast',async()=>{const m=mock();await loadClubData(m.client,{...club,role:'member'});expect(m.tables).toEqual(['templates','events'])});
+ it('člen nesmí zapisovat ani při chybě UI',async()=>{const m=mock();await expect(addMember(m.client,{...club,role:'member'},'Fiktivní člen','member')).rejects.toThrow();expect(m.tables).toEqual([])});
+ it('neověřený účet nečte tabulky',async()=>{const m=mock();m.auth.getUser.mockResolvedValue({data:{user:null as never},error:null});await expect(loadClubData(m.client,club)).rejects.toThrow();expect(m.tables).toEqual([])});
+ it('nového člena sváže s klubem',async()=>{const m=mock();await addMember(m.client,club,' Fiktivní host ','guest');expect(m.writes[0]).toMatchObject({club_id:club.id,name:'Fiktivní host',kind:'guest'})});
+ it('RSVP nepřepisuje docházku',async()=>{const m=mock();await saveParticipation(m.client,club,'event','member',{response:'yes'});expect(m.writes[0]).toEqual({club_id:club.id,event_id:'event',member_id:'member',response:'yes'})});
+ it('docházku potvrdí ověřený trenér bez přepsání RSVP',async()=>{const m=mock();await saveParticipation(m.client,club,'event','member',{attended:true});expect(m.writes[0]).toEqual({club_id:club.id,event_id:'event',member_id:'member',attended:true,confirmed_by:'trainer'})});
+ it('chyba databáze není nahrazená demo daty',async()=>{const m=mock();m.q.single.mockResolvedValue({data:null as never,error:new Error('Denied') as never});await expect(addMember(m.client,club,'Fiktivní člen','member')).rejects.toThrow('nepodařilo')});
+});

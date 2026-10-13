@@ -1,6 +1,6 @@
 # Založení Supabase pro STG Coach
 
-Tato etapa ověřuje přihlášení a členství v klubu. Cloudové ukládání členů a tréninků zatím není zapojené. Používejte pouze fiktivní data, dokud neprojdou integrační testy RLS a celého uživatelského workflow.
+Tato etapa ověřuje přihlášení a členství v klubu. Cloudová evidence je zapojená: členové, šablony, události a účast se ukládají do vybraného klubu. Používejte pouze fiktivní data, dokud neprojdou integrační testy RLS a celého uživatelského workflow.
 
 ## 1. Založte projekt
 
@@ -47,10 +47,10 @@ Lokálně můžete použít `.env.local` podle `.env.example`; tento soubor Git 
 
 ## 5. Ověřte přihlášení
 
-V aplikaci zvolte **Přihlásit se**. Přihlaste testovací účet. Aplikace ověří identitu přes Auth, načte pouze členství daného účtu a nabídne přiřazené kluby. Vybraný klub zatím obsahuje pouze ověření přístupu, nikoli registr či tréninky.
+V aplikaci zvolte **Přihlásit se**. Přihlaste testovací účet. Aplikace ověří identitu přes Auth, načte pouze členství daného účtu a nabídne přiřazené kluby. Vybraný klub otevře vlastní přehled a registr. Prázdný klub nemá žádná automaticky importovaná demo data.
 
 Ověřte nesprávné heslo, účet bez klubu, účet se dvěma kluby a odhlášení. Po odhlášení nesmí zůstávat seznam klubů. Cloudový prostor při chybě nikdy nepřejde na demo data. Demo se do databáze neimportuje.
 
 ## Další etapa
 
-Po ověření konfigurace: zapojení cloudového datového adaptéru, ukládání šablon/událostí/účasti, testy zápisů a oddělení klubů přes skutečné API. Teprve po jejich průchodu lze plánovat použití skutečných členských údajů. Fotografie, reset hesla, pozvánky, MFA a samoobslužné RSVP člena zůstávají dalšími úkoly.
+Cloudový adaptér a testy zápisů jsou implementované. Další krok: ověřit dva skutečné účty s různými kluby a Storage; poté editace, rušení a historie změn. Teprve po jejich průchodu lze plánovat použití skutečných členských údajů. Fotografie, reset hesla, pozvánky, MFA a samoobslužné RSVP člena zůstávají dalšími úkoly.

@@ -1,49 +1,66 @@
 # STG Coach
 
-Mobilní první etapa správy sportovního klubu. React, TypeScript, Vite, Tailwind CSS; české tmavé rozhraní. Veškerá předvyplněná data jsou fiktivní.
+Mobilní aplikace pro malé sportovní kluby: React, TypeScript, Vite, Tailwind CSS a Supabase. České tmavé rozhraní s oranžovými akcenty. OCR Timer není součástí projektu.
 
-## Spuštění
+## Spuštění a nasazení
 
-Node.js 22+ (ověřeno na 24), `npm ci`, `npm run dev`. `npm test` ověří doménovou logiku a `npm run build` TypeScript i produkční sestavení. Produkci nasaďte z adresáře `dist` na HTTPS statický hosting s fallbackem na index.html. Manifest umožňuje instalaci; service worker poskytuje pouze fallback úvodní stránky, plný offline režim není dokončen.
+Node.js 22+ (ověřeno na 24), Python 3 pro integrační kontroly.
 
-## Etapa 1 — funkční demo
+```sh
+npm ci
+npm run dev
+npm test
+npm run build
+```
 
-Přehled klubu, seznam a hledání členů, přidání členů a hostů bez účtu, vytváření šablon míst a plánů, tréninky ze šablon, týdenní opakování (4/8/12), Jdu/Nejdu/Možná, potvrzení skutečné účasti trenérem, souhrn docházky a JSON export se schemaVersion. Stav se ukládá do localStorage `stg-fictional-demo-v1`. Smazáním této položky se obnoví demo. Nevkládejte skutečné osobní údaje. Šablony ani členové zatím nemají editaci a mazání. Rychlý start předvybere zvolenou šablonu.
+Vývojový server běží na portu 5173. Produkci nasazujte z `dist` na HTTPS. Ve Vercelu: Vite, kořen repozitáře, build `npm run build`, output `dist`, install `npm ci`. Nastavte `VITE_SUPABASE_URL` a `VITE_SUPABASE_ANON_KEY` na veřejný publishable/anon klíč pro příslušné prostředí. Po změně těchto hodnot je nutné nové sestavení (Redeploy). Nikdy nepoužívejte service_role, secret key nebo databázové heslo ve VITE proměnných. Testovací heslo a e-mail nepatří do Vercelu ani do repozitáře.
 
-## Supabase a bezpečné nasazení
+Založení Supabase, první migrace a přiřazení vlastníka jsou popsané v [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Pro tuto etapu není nutná nová databázová migrace, pokud již byla aplikována `202610120001_initial.sql`. Migraci ručně neopakujte.
 
-Aplikace zatím používá výhradně lokální demo. Oddělený cloudový prostor (`?workspace=cloud`) obsahuje přihlášení e-mailem a heslem, odhlášení a načtení klubů přihlášeného účtu. Evidence členů a tréninků zatím běží pouze v demu; nejde o dokončené produkční workflow. Pro skutečná data nejprve integračně ověřte přihlášení a RLS, dokončete pozvánky, serverové založení klubu a datový adaptér. Klient nikdy nesmí dostat service_role klíč.
+## Demo a cloudový klub
 
-1. Založte Supabase projekt. Pomocí Supabase CLI jej propojte (`supabase link --project-ref …`) a aplikujte migraci `supabase db push`.
-2. Nastavte Auth redirect URL na vlastní HTTPS doménu, ověřování e-mailu a vhodná pravidla pro registrace.
-3. Zkopírujte .env.example do .env.local a vyplňte veřejné projektové hodnoty. Tajné klíče patří jen na server.
-4. První klub a roli owner vytvořte důvěryhodnou serverovou administrací; záměrně není dostupná veřejná politika pro založení klubu nebo přidělení vlastní role.
-5. Před použitím skutečných dat otestujte dva kluby, anonymního klienta, člena i trenéra. Ověřte, že klub A nečte ani nemění klub B, člen nečte registr, nemění docházku a anonymní klient nečte žádná členská data ani fotografie.
+Výchozí stránka `/` je fiktivní demo. Ukládá stav do localStorage `stg-fictional-demo-v1`, nic neposílá do databáze. Smazáním položky obnovíte demo. Do dema nevkládejte skutečné osobní údaje.
 
-Migrace obsahuje oddělené kluby, role, členy/hosty, šablony, události a účast. Složené cizí klíče brání propojení různých klubů. Všechny tabulky mají RLS. Registr a účast jsou v etapě 1 dostupné pouze trenérům/správcům. Fotografie mají privátní bucket, přístup jen pracovníkům příslušného klubu; UI pro fotografie není implementováno. Samoobslužné RSVP člena vyžaduje další bezpečně oddělenou politiku nebo RPC, aby člen nemohl potvrdit vlastní skutečnou docházku.
+Tlačítko **Přihlásit se** otevře `/?workspace=cloud`. Přihlášení e-mailem a heslem používá Supabase Auth. Klub je dostupný pouze po ověření identity a načtení přiřazených rolí. Cloudový režim používá data vybraného klubu, nikdy nesahá po demo datech při chybě. Relace je v sessionStorage; klubová data jsou pouze v paměti stránky. Odhlášení a přepnutí klubu odstraní příslušný klubový prostor. Obnovení tokenu neruší výběr klubu.
 
-## Ověření a další etapy
+### Etapa 1 — dokončené demo
 
-Automatické testy: týdenní opakování přes konec měsíce, omezení počtu opakování, oddělený stav docházky a host bez účtu. Build kontroluje typy. Databázová migrace dosud nebyla spuštěna proti živému Supabase; RLS integrační testy a testy UI zůstávají další povinnou etapou před produkcí.
+Přehled, registr členů/hostů, hledání, šablony míst a workout plánů, tréninky ze šablon, týdenní opakování, RSVP Jdu/Nejdu/Možná, skutečná docházka, základní souhrn a strukturovaný JSON export, PWA manifest a omezený navigační fallback service workeru.
 
-Další kroky: bezpečná autentizace a cloudový adaptér, testy tenant izolace, editace a rušení událostí, lokalizační slovníky pro angličtinu, tréninkový deník a soukromé fotografie, statistiky podle období, závody a týmy. OCR Timer není součástí projektu.
+### Etapa 2 — cloudová evidence
 
-### Výsledek ověření této etapy
+- Správce/trenér přidává členy a hosty bez uživatelského účtu do vybraného klubu.
+- Ukládá šablony s místem, délkou a plánem; rychlý start předvybere šablonu.
+- Vytváří jednorázové nebo 4/8/12 týdenně opakované tréninky jedním atomickým databázovým insertem.
+- Čas tréninků používá Europe/Prague, série zachovává místní čas přes změnu letního času. Neexistující jarní čas je odmítnutý; dvojznačný podzimní čas zvolí standardní zimní výskyt.
+- Eviduje RSVP a samostatně potvrzuje docházku. Změna jedné hodnoty nepřepisuje druhou. Docházka je rozlišená na neověřeno/přítomen/nepřítomen a ukládá identitu potvrzujícího trenéra.
+- Vidí souhrn potvrzené účasti a může exportovat strukturovaný JSON vlastního klubu (`schemaVersion: 1`, UTC časové údaje, časové pásmo).
+- Člen s rolí member vidí jen klubové události a šablony; registr a docházku nečte ani nemění. RSVP v této etapě zapisuje trenér, nejde o samoobslužné přihlašování členů.
 
-`npm ci` z lockfilu prošlo; 5 doménových testů a produkční sestavení prošly. Vývojový server odpověděl úspěšně na požadavek stránky i PWA manifestu. Vizuální a interakční test v Chromium nebyl proveden: stažení z cdn.playwright.dev vrátilo 403 Domain forbidden. To není ověření UI. Supabase migrace a Auth dosud nebyly integračně ověřeny.
+Cloudový přehled začíná prázdný. Demo není automaticky importované. Čtení je stránkované, aby větší registr či historie docházky nebyly tiše oříznuté limitem API. Zápisy blokují opakované klepnutí při ukládání; při chybě se nepotvrzuje úspěch. Obnovování dat je ruční. Úpravy a mazání záznamů, realtime synchronizace a historie změn zatím nejsou v UI.
 
-## Etapa 2a — přihlášení a přístup ke klubu
+## Oprávnění a bezpečnost
 
-Postup založení projektu je v [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Cloudový prostor nikdy nepoužívá demo jako fallback a nečte členské údaje ani fotografie. Auth ověřuje identitu přes getUser před načtením klubů; session je uložená v sessionStorage, ne společně s demo daty. Chyby přihlášení nezobrazují podrobnosti o existenci účtu. Konfigurace odmítá tajné serverové klíče a HTTP URL; tajný klíč nikdy nesmí být ani vstupem sestavení Vite.
+Tabulky clubs, club_roles, members, templates, events a participation mají RLS. Složené cizí klíče zakazují propojit člena či šablonu z jiného klubu. Anonymní role nemá přístup k registru ani dalším klubovým tabulkám. Změny členů/šablon/událostí/účasti povolují pouze owner/coach, role přiděluje pouze owner. Klub a první roli vytváří důvěryhodná administrace; veřejné zakládání klubů a registrace jsou vypnuté.
 
-Ověřeno: 14 automatických testů a produkční build. Nové testy kontrolují odmítnutí nebezpečné konfigurace, čtení až po ověření identity, filtr účtu a odmítnutí fallbacku při chybě databáze. Jsou to unit testy, nikoli důkaz funkční Auth nebo RLS vůči Supabase. `supabase/tests/tenant_access.sql` připravuje integrační kontroly anonymního přístupu, izolace klubů a oprávnění člena/trenéra; zatím nebyl spuštěn, projekt není nakonfigurovaný. Testy pro fotografie a zápisy událostí/docházky ještě zbývají. Živé přihlášení ani vizuální test UI nejsou ověřené.
+Bucket club-photos je privátní; jeho přístup omezuje klubová politika. Fotografie zatím nemají UI ani ověřené kompletní Storage workflow. Service worker necachuje API data ani tokeny, neposkytuje cloudová data offline. PWA instalace je připravená manifestem, plný offline režim zůstává další etapou.
 
-Další krok: založit vývojový Supabase projekt podle návodu, aplikovat migraci, spustit SQL testy a doplnit veřejnou konfiguraci. Pak zapojit cloudový adaptér a ověřit celé workflow s fiktivními daty.
+Do dokončení testů dvou skutečných klubových účtů a Storage používejte výhradně fiktivní údaje. Frontendové filtrování a skrytá tlačítka nejsou náhradou RLS. Export obsahuje údaje členů a patří jen do důvěryhodného úložiště.
 
-### Ověření připojení 13. 10. 2026
+## Automatické kontroly
 
-Projektové proměnné jsou přítomné; HTTPS URL a typ veřejného klíče byly zkontrolované bez výpisu hodnot. Supabase Auth settings odpovědělo HTTP 200 a disable_signup=true. Anonymní GET na clubs a members skončil HTTP 401 / 42501; žádné záznamy nebyly zpřístupněny. To ověřuje zákaz anonymního čtení, nikoliv izolaci přihlášených klubů ani oprávnění fotografií. Přes podporovanou HTTPS proxy připojení funguje; přímý Node fetch v tomto prostředí proxy automaticky nepoužil. 14 unit testů a build prošly, vývojový server byl spuštěn s konfigurací. Přihlášení konkrétního testovacího účtu a jeho klub dosud nebyly ověřeny.
+`npm test` — 27 unit testů: opakování, platnost dat, časové pásmo a přechod DST, bezpečná veřejná konfigurace, ověřování identity, filtr club_id a stránkování, omezení rolí a oddělené změny RSVP/docházky. `npm run build` — TypeScript a produkční sestavení.
 
-### Živé ověření Auth a klubového přístupu
+`npm run test:cloud` — živé API kontroly s fiktivními fixtures: přihlášení, host, šablona, série událostí, RSVP/docházka, reload dat, anonymní přístup a RLS zamítnutí nepřiřazeného klubu. Vyžaduje čtyři proměnné VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, STG_TEST_EMAIL, STG_TEST_PASSWORD v prostředí a testovací účet s rolí owner. Hodnoty neukládejte do souborů. Test maže pouze fixtures se svými generovanými UUID a odhlásí testovací relaci. Spouštějte jen proti vývojovému klubu.
 
-Přihlášení nakonfigurovaným testovacím účtem přes Auth API prošlo (HTTP 200). Následné ověření identity přes `/auth/v1/user` potvrdilo stejného uživatele a dotaz na jeho klubové role vrátil jeden klub s rolí owner. Testovací relace byla odhlášena. Přihlašovací údaje ani tokeny nejsou součástí repozitáře. Tato kontrola není test UI ani důkaz izolace dvou přihlášených klubů. Po aktualizaci síťové konfigurace funguje čtení GitHub repozitáře; místní a vzdálená historie byly sloučeny bez přepisování vzdálených commitů.
+`npm run test:ui` — Chromium smoke test na šířce 390px proti spuštěnému Vite na portu 5173. Vyžaduje stejné testovací proměnné, Python 3 a nainstalované Chromium (`npx playwright install chromium`). V managed prostředí používejte writable cache, např. `PLAYWRIGHT_BROWSERS_PATH=/workspace/stg-validation/browsers`. Testovací relay na 127.0.0.1:8770 používá podporovanou HTTPS proxy a běžné TLS ověřování. Nekonfigurujte vlastní certifikační bypass. Test prochází skutečné UI a Supabase API, kontroluje persistenci po reloadu, mobilní šířku, JS chyby a odhlášení. Vlastní fixtures následně odstraní. Nespouštějte oba zápisové integrační testy zároveň se stejným účtem.
+
+[Databázové testy](supabase/tests/README.md) ověřují izolaci existujících dvou klubů, ochranu vazeb a role member/coach. Lokálně prošly na PostgreSQL 17 s minimální testovací náhradou schémat Auth/Storage. Tento výsledek nenahrazuje živé Supabase testy dvou skutečných účtů ani Storage.
+
+### Výsledek této etapy
+
+Prošly unit testy a produkční build, živé API kontroly a mobilní Chromium workflow: host přetrval po reloadu, šablona vytvořila čtyři termíny, RSVP i skutečná docházka zůstaly samostatně uložené a odhlášení odstranilo klubový prostor. Testovací záznamy byly odstraněné. Databázové RLS kontroly dvou klubů prošly lokálně. Vercel nasazení tohoto nového commitu ověřte až po dokončení jeho deploymentu.
+
+## Další kroky a omezení
+
+Živé ověření izolace dvou účtů/klubů a Storage; pozvánky, reset hesla a MFA; bezpečné samoobslužné RSVP člena; editace, rušení a historie změn; deník a soukromé fotografie; statistiky podle období a pomůcek; závody, týmy a playlisty; anglické lokalizační slovníky. Český jazyk je výchozí, anglické UI zatím není hotové. Při souběžné změně stejného pole platí poslední úspěšný zápis; optimalistické zamykání není implementované.

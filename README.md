@@ -170,3 +170,7 @@ Karty trenéra odlišují počet potvrzených míst a čekajících, detail ukaz
 **Úklid integračního testu:** vlastní vygenerované členy, šablony a události smaže; členství skupiny zmizí kaskádou. Prázdná fiktivní metadata skupiny zůstávají v archivu, protože role staff nemá DELETE na training_groups. Test jejich archivaci a prázdné členství výslovně kontroluje. Neodstraňuje žádná cizí data. Zápisové cloud/UI testy spouštějte postupně se stejným účtem, při běžícím Vite na portu 5173 a se stejnými čtyřmi proměnnými prostředí jako ostatní testy; skript neposílá e-maily ani nemění hesla.
 
 **Omezení a další kroky:** přesuny osob a změny skupiny nejsou zpětně aplikované do naplánovaných soupisek. Členské přihlášení se obnovuje po 30 sekundách na viditelné stránce; nové události/nově přiřazenou soupisku načtěte pomocí Obnovit data. Automatická oznámení, audit změn a hromadné změny série zatím nejsou implementované. Další ucelená etapa: organizační úkoly u události a návazná upozornění. E-mailové pozvánky stále vyžadují samostatné provozní nastavení dle MEMBER_ACCESS_SETUP.md.
+
+### Zobrazení hesla
+
+Přihlášení, nové heslo i potvrzení hesla mají vlastní přepínač s ikonou oka. Výchozí stav je skrytý; přepnutí zachovává hodnotu a neodesílá formulář. Ovládání podporuje klávesnici a přístupný název/stav. Ověřeno prohlížečovým testem s fiktivním Auth/API, bez změn skutečných hesel či e-mailů.

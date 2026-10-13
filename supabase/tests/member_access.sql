@@ -1,0 +1,41 @@
+begin;
+insert into auth.users(id,email,email_confirmed_at) values ('10000000-0000-4000-8000-000000000001','coach@example.invalid',now()),('10000000-0000-4000-8000-000000000002','member@example.invalid',now()),('10000000-0000-4000-8000-000000000003','wrong@example.invalid',now());
+insert into public.clubs(id,name) values ('20000000-0000-4000-8000-000000000001','Fiktivní tým'),('20000000-0000-4000-8000-000000000002','Cizí tým');
+insert into public.club_roles values ('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001','coach');
+insert into public.members(id,club_id,name,kind) values ('30000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','Fiktivní člen','guest'),('30000000-0000-4000-8000-000000000002','20000000-0000-4000-8000-000000000001','Jiný člen','member');
+insert into public.events(id,club_id,name,starts_at,place,type,event_kind) values ('50000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','Trénink',now()+interval '2 days','Park','Kondice','training'),('50000000-0000-4000-8000-000000000002','20000000-0000-4000-8000-000000000001','Závod',now()+interval '3 days','Les','OCR','race');
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
+select set_config('stg.test_invite',(public.issue_club_invitation('20000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000001',' MEMBER@example.invalid ')->>'token'),true);
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000003"}',true);
+do $$begin
+ begin perform public.accept_club_invitation(current_setting('stg.test_invite'));raise exception 'FAIL wrong email accepts';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
+ if exists(select 1 from public.club_invitations) then raise exception 'FAIL outsider sees invitations';end if;
+end $$;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002"}',true);
+select public.accept_club_invitation(current_setting('stg.test_invite'));
+do $$begin
+ if (select count(*) from public.my_club_member('20000000-0000-4000-8000-000000000001'))<>1 then raise exception 'FAIL own profile';end if;
+ if exists(select 1 from public.members) or exists(select 1 from public.participation) or exists(select 1 from public.club_invitations) then raise exception 'FAIL member sees staff tables';end if;
+ begin perform public.accept_club_invitation(current_setting('stg.test_invite'));raise exception 'FAIL reused invite';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
+ begin perform public.issue_club_invitation('20000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000002','x@example.invalid');raise exception 'FAIL member invites';exception when insufficient_privilege then null;end;
+ begin perform public.respond_to_club_event('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002','yes');raise exception 'FAIL uninvited race';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
+end $$;
+select public.respond_to_club_event('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001','yes');
+reset role;
+update public.participation set attended=true,confirmed_by='10000000-0000-4000-8000-000000000001';
+set local role authenticated;
+select public.respond_to_club_event('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001','maybe');
+do $$declare p public.participation;begin
+ select * into p from public.my_club_participation('20000000-0000-4000-8000-000000000001');if p.response<>'maybe' or p.attended is distinct from true or p.confirmed_by<>'10000000-0000-4000-8000-000000000001' then raise exception 'FAIL RSVP overwrote attendance';end if;
+ begin update public.participation set attended=false;exception when insufficient_privilege then null;end;
+ select * into p from public.my_club_participation('20000000-0000-4000-8000-000000000001');if p.attended is distinct from true then raise exception 'FAIL member attendance edit';end if;
+ if exists(select 1 from public.my_club_member('20000000-0000-4000-8000-000000000002')) then raise exception 'FAIL foreign profile';end if;
+end $$;
+reset role;
+update public.events set starts_at=now()-interval '1 day' where event_kind='training';
+set local role authenticated;
+do $$begin begin perform public.respond_to_club_event('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001','no');raise exception 'FAIL past RSVP';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;end $$;
+set local role anon;
+do $$begin begin perform public.my_club_member('20000000-0000-4000-8000-000000000001');raise exception 'FAIL anon RPC';exception when insufficient_privilege then null;end;end $$;
+rollback;

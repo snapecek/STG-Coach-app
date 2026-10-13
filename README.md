@@ -15,7 +15,7 @@ npm run build
 
 Vývojový server běží na portu 5173. Produkci nasazujte z `dist` na HTTPS. Ve Vercelu: Vite, kořen repozitáře, build `npm run build`, output `dist`, install `npm ci`. Nastavte `VITE_SUPABASE_URL` a `VITE_SUPABASE_ANON_KEY` na veřejný publishable/anon klíč pro příslušné prostředí. Po změně těchto hodnot je nutné nové sestavení (Redeploy). Nikdy nepoužívejte service_role, secret key nebo databázové heslo ve VITE proměnných. Testovací heslo a e-mail nepatří do Vercelu ani do repozitáře.
 
-Založení Supabase, první migrace a přiřazení vlastníka jsou popsané v [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Databáze vyžaduje migrace v pořadí: `202610120001_initial.sql`, `202610130002_club_management.sql`, `202610130003_journal_photos.sql`, `202610130004_race_results.sql`, `202610130005_distinct_races.sql`, `202610130006_member_access.sql`, `202610130007_training_capacity.sql`, `202610130008_freeze_past_reservations.sql`, `202610130009_training_groups.sql`. Druhá přidává archivaci, dokončení událostí a retenční úklid; třetí strukturovaný deník a privátní fotografie událostí. Každou migraci aplikujte jen jednou; uživatel potvrdil aplikování všech devíti. Již aplikované soubory neopakujte.
+Založení Supabase, první migrace a přiřazení vlastníka jsou popsané v [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Databáze vyžaduje migrace v pořadí: `202610120001_initial.sql`, `202610130002_club_management.sql`, `202610130003_journal_photos.sql`, `202610130004_race_results.sql`, `202610130005_distinct_races.sql`, `202610130006_member_access.sql`, `202610130007_training_capacity.sql`, `202610130008_freeze_past_reservations.sql`, `202610130009_training_groups.sql`, `202610130010_event_tasks.sql`. Druhá přidává archivaci, dokončení událostí a retenční úklid; třetí strukturovaný deník a privátní fotografie událostí. Každou migraci aplikujte jen jednou; uživatel potvrdil aplikování všech deseti. Již aplikované soubory neopakujte.
 
 ## Demo a cloudový klub
 
@@ -72,7 +72,7 @@ Do dokončení testů dvou skutečných klubových účtů a Storage používejt
 
 ## Automatické kontroly
 
-`npm test` — 92 unit testů: opakování, platnost dat, časové pásmo a přechod DST, bezpečná veřejná konfigurace, ověřování identity, filtr club_id a stránkování, omezení rolí, oddělené změny RSVP/docházky, měsíční kalendář, podmínky dokončení, filtrování změn/mazání vybraným klubem, kombinované filtry a výpočty analýzy, bezpečné cesty a typy fotografií. `npm run build` — TypeScript a produkční sestavení.
+`npm test` — 98 unit testů: opakování, platnost dat, časové pásmo a přechod DST, bezpečná veřejná konfigurace, ověřování identity, filtr club_id a stránkování, omezení rolí, oddělené změny RSVP/docházky, měsíční kalendář, podmínky dokončení, filtrování změn/mazání vybraným klubem, kombinované filtry a výpočty analýzy, bezpečné cesty a typy fotografií. `npm run build` — TypeScript a produkční sestavení.
 
 `npm run test:cloud` — živé API kontroly s fiktivními fixtures: přihlášení, host, šablona, série událostí, RSVP/docházka, reload dat, anonymní přístup a RLS zamítnutí nepřiřazeného klubu, archivace a návrat člena, přesun/zrušení/obnovení a dokončení události, opětovné otevření po změně účasti a smazání používané šablony. Vyžaduje čtyři proměnné VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, STG_TEST_EMAIL, STG_TEST_PASSWORD v prostředí a testovací účet s rolí owner. Hodnoty neukládejte do souborů. Test maže pouze fixtures se svými generovanými UUID a odhlásí testovací relaci. Spouštějte jen proti vývojovému klubu.
 
@@ -174,3 +174,17 @@ Karty trenéra odlišují počet potvrzených míst a čekajících, detail ukaz
 ### Zobrazení hesla
 
 Přihlášení, nové heslo i potvrzení hesla mají vlastní přepínač s ikonou oka. Výchozí stav je skrytý; přepnutí zachovává hodnotu a neodesílá formulář. Ovládání podporuje klávesnici a přístupný název/stav. Ověřeno prohlížečovým testem s fiktivním Auth/API, bez změn skutečných hesel či e-mailů.
+
+## Etapa 10 — organizační úkoly
+
+Detail tréninku i závodu má záložku **Úkoly**. Trenér přidá název, odpovědnou osobu (nebo bez přiřazení) a volitelný termín v Europe/Prague; údaje může upravit, stav označit jako hotový/znovu otevřený a úkol smazat s potvrzením. U vybrané soupisky se nově přiřazuje jen jejím aktivním účastníkům. Host bez účtu může být odpovědnou osobou, jeho stav zaznamená trenér. Limit je 100 úkolů na událost, vynucený pod zámkem události i pro současné zápisy. U zrušené události jsou změny uzavřené; při obnovení se úkoly zpřístupní.
+
+Trenérský přehled má otevřené organizační úkoly nezrušených událostí, řazené podle termínu, nejvýše osm s odkazem do detailu. Z úkolu otevře rovnou záložku Úkoly. Člen má přehled vlastních úkolů a jejich stav v detailu události. Členská RPC vrací jen vlastní názvy/termíny/stavy a odvozuje oprávnění z ověřeného účtu a přístupu k události; nelze změnit přiřazení, text, termín nebo cizí úkol. Registr úkolů přímo zůstává staff-only. Stav dokončení a potvrzující účet stanoví server.
+
+Úkoly neblokují deník, nevstupují do skutečné docházky ani znovu neotevírají dokončený trénink. Úprava údajů zachovává stav úkolu, otevření je výslovná akce. Smazání události smaže úkoly kaskádou. Při retenčním smazání člena se přiřazení odstraní; tento úklid funguje také u zrušených událostí. Export schemaVersion 4 doplňuje `eventTasks` pouze vybraných událostí a při filtru člena jen jeho přiřazené úkoly.
+
+**Databáze:** migrace `202610130010_event_tasks.sql` aplikovaná uživatelem; neopakovat. [Postup](docs/EVENT_TASKS_SETUP.md).
+
+**Ověření:** 98 unit testů a produkční build; všech deset migrací a devět lokálních SQL sad plus konkurenční rezervace. SQL úkolů ověřuje vlastní/cizí/anon oprávnění, znovuotevření, vybranou soupisku, limit, archivovaného člena a retenční odstranění přiřazení u zrušené události. Prohlížečový test s fiktivním Auth/API ověřil vytvoření/přiřazení/dokončení/smazání trenérem a vlastní úkol člena po reloadu; neposílá e-maily nebo hesla do skutečné Auth. Živé opt-in testy `test:ui` a `test:member-cloud` prošly: vlastní fiktivní úkoly, zachování dokončeného deníku, vlastní RPC čtení/dokončení, přetrvání stavu a kaskádový úklid. Jejich události, členové, šablony a fotografie byly odstraněné. Testy zápisu spouštějte postupně. Docker runner čeká na finální TCP server po inicializaci databáze, nikoliv na dočasný bootstrap socket.
+
+**Omezení a další kroky:** synchronizace úkolů mezi zařízeními je ruční přes Obnovit data, automatické e-mail/push notifikace a audit změn nejsou implementované. Člen musí mít propojený ověřený účet; pozvánky nadále vyžadují samostatné nasazení senderu/SMTP. Nejde o potvrzení dvou skutečných Auth identit ani doručování pošty. Další ucelená etapa může navázat upozorněními a přehledem jejich doručení, případně organizací týmů a výsledků.

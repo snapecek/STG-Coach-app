@@ -1,0 +1,13 @@
+import {describe,it,expect,vi} from 'vitest';
+import type {SupabaseClient} from '@supabase/supabase-js';
+import {loadEventTasks,saveEventTask,pendingEventTasks,type EventTask} from './eventTasks';
+const club={id:'club',name:'Fiktivní klub',role:'coach' as const};
+function mock(){const filters:unknown[][]=[];const q={select:vi.fn(()=>q),eq:vi.fn((...a:unknown[])=>{filters.push(a);return q}),order:vi.fn(()=>q),range:vi.fn(()=>q),update:vi.fn(()=>q),insert:vi.fn(()=>q),single:vi.fn(async()=>({data:{id:'task'},error:null})),then:(fn:(x:unknown)=>unknown)=>Promise.resolve({data:[],error:null}).then(fn)};const client={auth:{getUser:vi.fn(async()=>({data:{user:{id:'coach'}},error:null}))},from:vi.fn(()=>q),rpc:vi.fn(()=>q)};return {client:client as unknown as SupabaseClient,raw:client,q,filters};}
+describe('Organizační úkoly',()=>{
+ it('staff čte pouze vybraný klub',async()=>{const m=mock();await loadEventTasks(m.client,club);expect(m.raw.from).toHaveBeenCalledWith('event_tasks');expect(m.filters).toEqual([['club_id',club.id]])});
+ it('člen čte pouze zabezpečenou vlastní RPC',async()=>{const m=mock();await loadEventTasks(m.client,{...club,role:'member'});expect(m.raw.from).not.toHaveBeenCalled();expect(m.raw.rpc).toHaveBeenCalledWith('my_event_tasks',{target_club:club.id})});
+ it('člen nemůže vytvořit ani změnit údaje úkolu',async()=>{const m=mock();await expect(saveEventTask(m.client,{...club,role:'member'},'event',{title:'Výbava',assignee_id:null,due_at:null})).rejects.toThrow();expect(m.raw.from).not.toHaveBeenCalled()});
+ it('úprava filtruje klub, událost i UUID úkolu',async()=>{const m=mock();await saveEventTask(m.client,club,'event',{id:'task',title:' Výbava ',assignee_id:null,due_at:null});expect(m.filters).toEqual([['id','task'],['event_id','event'],['club_id','club']]);expect(m.q.update).toHaveBeenCalledWith({title:'Výbava',assignee_id:null,due_at:null})});
+ it('odmítá prázdný název a neplatný termín před zápisem',async()=>{const m=mock();for(const input of [{title:' ',assignee_id:null,due_at:null},{title:'Výbava',assignee_id:null,due_at:'bad'}])await expect(saveEventTask(m.client,club,'event',input)).rejects.toThrow();expect(m.raw.from).not.toHaveBeenCalled()});
+ it('přehled vynechá hotové i úkoly zrušených/smazaných událostí a řadí podle termínu',()=>{const rows=[{id:'late',event_id:'event',title:'Doprava',completed_at:null,due_at:'2026-10-15'},{id:'early',event_id:'event',title:'Výbava',completed_at:null,due_at:'2026-10-14'},{id:'done',event_id:'event',title:'Hotovo',completed_at:'2026-10-13',due_at:null},{id:'cancelled',event_id:'cancelled',title:'Zrušeno',completed_at:null,due_at:null}] as EventTask[];expect(pendingEventTasks(rows,new Set(['event'])).map(t=>t.id)).toEqual(['early','late'])});
+});

@@ -46,4 +46,4 @@ Projektové proměnné jsou přítomné; HTTPS URL a typ veřejného klíče byl
 
 ### Živé ověření Auth a klubového přístupu
 
-Přihlášení nakonfigurovaným testovacím účtem přes Auth API prošlo (HTTP 200). Následné ověření identity přes `/auth/v1/user` potvrdilo stejného uživatele a dotaz na jeho klubové role vrátil jeden klub s rolí owner. Testovací relace byla odhlášena. Přihlašovací údaje ani tokeny nejsou součástí repozitáře. Tato kontrola není test UI ani důkaz izolace dvou přihlášených klubů. Nahrání kódu do GitHubu stále čeká na aplikování síťové konfigurace povolující github.com; nynější runtime povoluje pouze Supabase.
+Přihlášení nakonfigurovaným testovacím účtem přes Auth API prošlo (HTTP 200). Následné ověření identity přes `/auth/v1/user` potvrdilo stejného uživatele a dotaz na jeho klubové role vrátil jeden klub s rolí owner. Testovací relace byla odhlášena. Přihlašovací údaje ani tokeny nejsou součástí repozitáře. Tato kontrola není test UI ani důkaz izolace dvou přihlášených klubů. Po aktualizaci síťové konfigurace funguje čtení GitHub repozitáře; místní a vzdálená historie byly sloučeny bez přepisování vzdálených commitů.

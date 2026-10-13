@@ -1,8 +1,13 @@
-import React,{lazy,Suspense} from 'react';
+import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {CloudWorkspace} from './CloudWorkspace';
 import './style.css';
-const DemoApp=lazy(()=>import('./DemoApp'));
-const demo=new URLSearchParams(window.location.search).get('workspace')==='demo';
-createRoot(document.getElementById('root')!).render(<React.StrictMode>{demo?<Suspense fallback={<p role="status">Načítám demo…</p>}><DemoApp/></Suspense>:<CloudWorkspace/>}</React.StrictMode>);
+// Bookmarks to the original trainer prototype now open the single club app.
+// Keep local demo data untouched; never import it into a real club automatically.
+const url=new URL(window.location.href);
+if(url.searchParams.get('workspace')==='demo'){
+ url.searchParams.delete('workspace');
+ window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+}
+createRoot(document.getElementById('root')!).render(<React.StrictMode><CloudWorkspace/></React.StrictMode>);
 if(import.meta.env.PROD&&'serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js');

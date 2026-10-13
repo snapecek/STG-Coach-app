@@ -1,12 +1,12 @@
 import {useEffect,useRef,useState} from 'react';
 import type {Session,SupabaseClient} from '@supabase/supabase-js';
-import {Activity,LogOut,ShieldCheck,ArrowLeft,RefreshCw,UserRound} from 'lucide-react';
+import {Activity,LogOut,ShieldCheck,RefreshCw,UserRound} from 'lucide-react';
 import {configuredClient,loadClubAccess,type ClubAccess} from './supabase';
 import {ClubDashboard} from './ClubDashboard';
 
 export function CloudWorkspace(){
  const [setup]=useState(()=>{try{return {client:configuredClient(),error:''}}catch(error){return {client:undefined,error:error instanceof Error?error.message:'Konfigurace není dostupná.'}}});
- return <div className="auth-screen cloud-screen"><div className="auth-card cloud-card"><a className="brand" href="/"><span className="brand-icon"><Activity/></span>STG<span className="brand-light">Coach</span></a><div className="eyebrow">KLUBOVÝ PROSTOR</div>{setup.client?<AuthWorkspace client={setup.client}/>:<><h1>Připoj svůj klub</h1><p role="status">{setup.error}</p><p>Demo je k dispozici i bez připojení. Skutečné členské údaje zatím nejsou v aplikaci povolené.</p></>}<a className="text-button auth-back" href="/?workspace=demo"><ArrowLeft size={16}/> Otevřít fiktivní demo</a></div></div>;
+ return <div className="auth-screen cloud-screen"><div className="auth-card cloud-card"><a className="brand" href="/"><span className="brand-icon"><Activity/></span>STG<span className="brand-light">Coach</span></a><div className="eyebrow">KLUBOVÝ PROSTOR</div>{setup.client?<AuthWorkspace client={setup.client}/>:<><h1>Připoj svůj klub</h1><p role="status">{setup.error}</p><p>Připojení klubu vyžaduje nastavení Supabase. Členské údaje se bez něj nenačítají.</p></>}</div></div>;
 }
 function AuthWorkspace({client}:{client:SupabaseClient}){
  const [session,setSession]=useState<Session|null>(null),[initializing,setInitializing]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[clubs,setClubs]=useState<ClubAccess[]>([]),[loadingClubs,setLoadingClubs]=useState(false),[retry,setRetry]=useState(0),[activeClub,setActiveClub]=useState('');

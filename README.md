@@ -19,7 +19,7 @@ Založení Supabase, první migrace a přiřazení vlastníka jsou popsané v [d
 
 ## Demo a cloudový klub
 
-Výchozí stránka `/` otevírá přihlášení nebo již přihlášený klub. Fiktivní demo je dostupné výhradně na `/?workspace=demo`. Ukládá stav do localStorage `stg-fictional-demo-v1`, nic neposílá do databáze. Smazáním položky obnovíte demo. Do dema nevkládejte skutečné osobní údaje.
+Výchozí stránka `/` otevírá přihlášení nebo již přihlášený klub. Původní trenérský prototyp na `/?workspace=demo` byl vyřazen; tato adresa nyní otevře stejnou aktuální aplikaci a odstraní zastaralý parametr z adresy. Dřívější lokální demo data zůstávají v prohlížeči, ale nejsou načítaná ani automaticky importovaná do databáze.
 
 Dřívější adresa `/?workspace=cloud` zůstává podporovaná. Přihlášení e-mailem a heslem používá Supabase Auth. Klub je dostupný pouze po ověření identity a načtení přiřazených rolí. Cloudový režim používá data vybraného klubu, nikdy nesahá po demo datech při chybě. Relace je v sessionStorage; klubová data jsou pouze v paměti stránky. Odhlášení a přepnutí klubu odstraní příslušný klubový prostor. Obnovení tokenu neruší výběr klubu.
 
@@ -41,7 +41,7 @@ Cloudový přehled začíná prázdný. Demo není automaticky importované. Čt
 
 ### Etapa 3 — dokončení správy před dalšími moduly
 
-1. Výchozí stránka obnoví přihlášený klub. Odhlášení je pod uživatelským menu; demo má vlastní výslovnou adresu.
+1. Výchozí stránka obnoví přihlášený klub. Odhlášení je pod uživatelským menu; staré demo odkazy vedou do stejné aplikace.
 2. Přehled obsahuje jen aktivní členy, nadcházející události a seznam K dokončení. Rychlý start a počty šablon byly odstraněné; Šablony jsou v levé navigaci (na mobilu pod tlačítkem navigace). Hlavní mobilní navigace má Přehled, Kalendář, Členové, Analýza.
 3. Měsíční kalendář má pondělí první, přechod mezi měsíci, odlišení tréninků/závodů a zrušených událostí. Klepnutí na datum předvyplní datum nové události. Událost lze vytvořit i bez šablony.
 4. Uplynulá událost se zobrazuje K dokončení až po svém konci (čas + délka). Dokončení vyžaduje uložený skutečný průběh a potvrzenou přítomnost nebo nepřítomnost všech uvedených členů. Kontrolu vynucuje také databázový trigger. Další změna účasti, průběhu, plánu či termínu záznam znovu otevře. Analýza započítává jen dokončené nezrušené události.
@@ -76,3 +76,7 @@ Prošly unit testy a produkční build, živé API kontroly a mobilní Chromium 
 ## Další kroky a omezení
 
 Živé ověření izolace dvou účtů/klubů a Storage; pozvánky, reset hesla a MFA; bezpečné samoobslužné RSVP člena; hromadné změny celé série, editace jména člena a auditní historie; deník a soukromé fotografie; statistiky podle období a pomůcek; závody, týmy a playlisty; anglické lokalizační slovníky. Český jazyk je výchozí, anglické UI zatím není hotové. Při souběžné změně stejného pole platí poslední úspěšný zápis; optimalistické zamykání není implementované.
+
+### Oprava staré trenérské adresy
+
+`/?workspace=demo` již neotevírá původní rozhraní s Rychlým startem a starými statistikami. Kořenová stránka i tato stará záložka zobrazují stejný klubový dashboard podle skutečné role owner/coach/member. Zpětný odkaz do prototypu byl odstraněný. Přihlášení a RLS zůstávají povinné; stará URL nevytváří trenérská oprávnění. Provozujte pouze fiktivní data až do dokončení zbývajících bezpečnostních kontrol.

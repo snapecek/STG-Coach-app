@@ -11,7 +11,7 @@ Tato etapa ověřuje přihlášení a členství v klubu. Cloudová evidence je 
 
 ## 2. Připravte databázi
 
-V novém prázdném projektu otevřete **SQL Editor** a spusťte obsah `supabase/migrations/202610120001_initial.sql` jednou. Případně použijte Supabase CLI a `supabase db push` podle README. Nespouštějte migraci opakovaně ručně: vytváří tabulky a politiky, není idempotentní. Pokud migrace selže, neposílejte další dotazy naslepo; sdělte chybu bez tajných hodnot.
+V novém prázdném projektu otevřete **SQL Editor** a spusťte obsah `supabase/migrations/202610120001_initial.sql` jednou a potom `supabase/migrations/202610130002_club_management.sql` jednou. Pokud první migrace již existuje, spouštějte pouze novou druhou. Případně použijte Supabase CLI a `supabase db push` podle README. Nespouštějte migraci opakovaně ručně: vytváří tabulky a politiky, není idempotentní. Pokud migrace selže, neposílejte další dotazy naslepo; sdělte chybu bez tajných hodnot.
 
 Potom můžete ve stejném prázdném vývojovém projektu spustit `supabase/tests/tenant_access.sql`. Test dočasně vytvoří fiktivní uživatele a kluby, ověří role a vše vrátí pomocí ROLLBACK. Výsledek bez chyby znamená průchod uvedených databázových kontrol, nikoliv ověření UI ani fotografií.
 
@@ -47,10 +47,10 @@ Lokálně můžete použít `.env.local` podle `.env.example`; tento soubor Git 
 
 ## 5. Ověřte přihlášení
 
-V aplikaci zvolte **Přihlásit se**. Přihlaste testovací účet. Aplikace ověří identitu přes Auth, načte pouze členství daného účtu a nabídne přiřazené kluby. Vybraný klub otevře vlastní přehled a registr. Prázdný klub nemá žádná automaticky importovaná demo data.
+Na kořenové stránce aplikace se zobrazí přihlášení, nebo již přihlášený klub. Přihlaste testovací účet. Aplikace ověří identitu přes Auth, načte pouze členství daného účtu a nabídne přiřazené kluby. Vybraný klub otevře vlastní přehled a registr. Prázdný klub nemá žádná automaticky importovaná demo data.
 
 Ověřte nesprávné heslo, účet bez klubu, účet se dvěma kluby a odhlášení. Po odhlášení nesmí zůstávat seznam klubů. Cloudový prostor při chybě nikdy nepřejde na demo data. Demo se do databáze neimportuje.
 
 ## Další etapa
 
-Cloudový adaptér a testy zápisů jsou implementované. Další krok: ověřit dva skutečné účty s různými kluby a Storage; poté editace, rušení a historie změn. Teprve po jejich průchodu lze plánovat použití skutečných členských údajů. Fotografie, reset hesla, pozvánky, MFA a samoobslužné RSVP člena zůstávají dalšími úkoly.
+Cloudový adaptér a testy zápisů jsou implementované. Editace, rušení/mazání událostí a šablon, kalendář, archivace členů a dokončení tréninků jsou implementované. Další krok: ověřit dva skutečné účty s různými kluby a Storage, ověřit aktivní cron job stg-member-retention a doplnit auditní historii. Teprve po jejich průchodu lze plánovat použití skutečných členských údajů. Fotografie, reset hesla, pozvánky, MFA a samoobslužné RSVP člena zůstávají dalšími úkoly.

@@ -15,7 +15,7 @@ npm run build
 
 Vývojový server běží na portu 5173. Produkci nasazujte z `dist` na HTTPS. Ve Vercelu: Vite, kořen repozitáře, build `npm run build`, output `dist`, install `npm ci`. Nastavte `VITE_SUPABASE_URL` a `VITE_SUPABASE_ANON_KEY` na veřejný publishable/anon klíč pro příslušné prostředí. Po změně těchto hodnot je nutné nové sestavení (Redeploy). Nikdy nepoužívejte service_role, secret key nebo databázové heslo ve VITE proměnných. Testovací heslo a e-mail nepatří do Vercelu ani do repozitáře.
 
-Založení Supabase, první migrace a přiřazení vlastníka jsou popsané v [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Databáze vyžaduje migrace v pořadí: `202610120001_initial.sql`, `202610130002_club_management.sql`, `202610130003_journal_photos.sql`, `202610130004_race_results.sql`. Druhá přidává archivaci, dokončení událostí a retenční úklid; třetí strukturovaný deník a privátní fotografie událostí. Každou migraci aplikujte jen jednou; uživatel potvrdil aplikování druhé i třetí a živé API kontroly prošly.
+Založení Supabase, první migrace a přiřazení vlastníka jsou popsané v [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md). Databáze vyžaduje migrace v pořadí: `202610120001_initial.sql`, `202610130002_club_management.sql`, `202610130003_journal_photos.sql`, `202610130004_race_results.sql`. Druhá přidává archivaci, dokončení událostí a retenční úklid; třetí strukturovaný deník a privátní fotografie událostí. Každou migraci aplikujte jen jednou; uživatel potvrdil aplikování všech čtyř a živé kontroly prošly.
 
 ## Demo a cloudový klub
 
@@ -99,6 +99,6 @@ V detailu závodu trenér nebo správce zapisuje čas HH:MM:SS.mmm, DNF (nedokon
 
 Aplikujte jednou migraci `202610130004_race_results.sql`. Výsledky chrání RLS pro staff vlastního klubu, složené vazby odmítají členy z cizího klubu. Výsledky zanikají s událostí nebo při retenčním smazání člena. Export schemaVersion 4 přidává `raceResults` (status, elapsed_ms, notes a identifikátory); týká se jen filtrovaných dokončených událostí. Filtr člena stále vybírá skutečně navštívené události, proto DNS u nepřítomného není v jeho osobním exportu.
 
-Ověření této etapy: 58 unit testů, produkční build a lokální PostgreSQL testy všech čtyř migrací. Testy pokrývají pořadí, čas, shodné výsledky, RLS, meziklubové vazby, nulový čas, DNF/DNS, změnu typu, zrušení a opětovné otevření události. Živé ověření nových výsledků je závislé na aplikování čtvrté migrace; lokální test není potvrzením nasazení na Supabase.
+Ověření této etapy: 58 unit testů, produkční build a lokální PostgreSQL testy všech čtyř migrací. Testy pokrývají pořadí, čas, shodné výsledky, RLS, meziklubové vazby, nulový čas, DNF/DNS, změnu typu, zrušení a opětovné otevření události. Uživatel potvrdil aplikování čtvrté migrace. Živý mobilní test ověřil zápis času, persistenci po reloadu, změnu na DNF, odebrání výsledku, opětovné otevření dokončeného závodu a export času/poznámky vybraného člena. Anonymní API přístup byl zamítnutý.
 
-Živý mobilní test této etapy prošel dosavadním workflow až po vytvoření závodu. Zápis výsledku zatím nedokončil: hosted Supabase vrátil PGRST205 (tabulka race_results chybí). Testovací členové, události, šablony i fotografie byly uklizené. Po aplikování čtvrté migrace je nutné zopakovat `npm run test:ui`.
+Všechny fiktivní testovací členy, události, šablony a fotografie živý test po dokončení uklidil. Vercel nasazení ověřte po dokončení deploymentu posledního commitu.

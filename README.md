@@ -72,7 +72,7 @@ Do dokončení testů dvou skutečných klubových účtů a Storage používejt
 
 ## Automatické kontroly
 
-`npm test` — 81 unit testů: opakování, platnost dat, časové pásmo a přechod DST, bezpečná veřejná konfigurace, ověřování identity, filtr club_id a stránkování, omezení rolí, oddělené změny RSVP/docházky, měsíční kalendář, podmínky dokončení, filtrování změn/mazání vybraným klubem, kombinované filtry a výpočty analýzy, bezpečné cesty a typy fotografií. `npm run build` — TypeScript a produkční sestavení.
+`npm test` — 84 unit testů: opakování, platnost dat, časové pásmo a přechod DST, bezpečná veřejná konfigurace, ověřování identity, filtr club_id a stránkování, omezení rolí, oddělené změny RSVP/docházky, měsíční kalendář, podmínky dokončení, filtrování změn/mazání vybraným klubem, kombinované filtry a výpočty analýzy, bezpečné cesty a typy fotografií. `npm run build` — TypeScript a produkční sestavení.
 
 `npm run test:cloud` — živé API kontroly s fiktivními fixtures: přihlášení, host, šablona, série událostí, RSVP/docházka, reload dat, anonymní přístup a RLS zamítnutí nepřiřazeného klubu, archivace a návrat člena, přesun/zrušení/obnovení a dokončení události, opětovné otevření po změně účasti a smazání používané šablony. Vyžaduje čtyři proměnné VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, STG_TEST_EMAIL, STG_TEST_PASSWORD v prostředí a testovací účet s rolí owner. Hodnoty neukládejte do souborů. Test maže pouze fixtures se svými generovanými UUID a odhlásí testovací relaci. Spouštějte jen proti vývojovému klubu.
 
@@ -139,3 +139,15 @@ Nový Auth účet nastaví heslo; existující účet dostane přihlašovací od
 - Edge check: `DENO_DIR=/workspace/stg-validation/deno DENO_CERT=/etc/ssl/certs/ca-certificates.crt npm exec --cache /workspace/.npm-cache --yes --package deno@2.5.0 -- deno check supabase/functions/invite-member/index.ts`. Zachovejte běžné ověřování TLS; v prostředí s jinými CA použijte jeho důvěryhodný systémový bundle.
 
 Další ucelená etapa: podskupiny, kapacita a čekací listina; až po ověření poštovního provozu připomínky s přehledem doručení. Skutečné doručení/reset a izolace dvou reálných členských účtů zůstávají provozními kontrolami této etapy.
+
+## Etapa 8 — kapacita tréninků a čekací listina
+
+Trenér při vytvoření nebo úpravě tréninku zadá počet míst (1–500), nebo ponechá kapacitu bez omezení. Opakované termíny mají každý vlastní kapacitu a pořadí. Nad limit „Jdu“ znamená čekací listinu, nikoliv potvrzené místo. Odhlášení, odstranění přihlášení a archivace člena uvolní místo prvnímu čekajícímu; návrat do přihlášení patří na konec pořadí. Opakované Jdu ani změna skutečné docházky pořadí nemění. Přesun ani RSVP nepotvrzují skutečnou přítomnost.
+
+Karty trenéra odlišují počet potvrzených míst a čekajících, detail ukazuje stav u člena. Členské rozhraní zřetelně ukazuje čekací listinu nebo potvrzené místo a obnovuje pouze vlastní přihlášení každých 30 sekund na viditelné stránce; celé události se obnoví tlačítkem Obnovit data. Zvýšení kapacity povýší čekající, snížení pod potvrzená místa databáze odmítne. Po zahájení je kapacita uzavřená. Rezervace proběhlých událostí se nepřepočítávají při retenčním mazání historických členů.
+
+**Databáze:** jednou aplikujte migraci `202610130007_training_capacity.sql` a následně `202610130008_freeze_past_reservations.sql`. Druhá doplňuje ochranu historických rezervací a dokončených deníků při retenčním mazání. Již aplikované migrace neopakujte. [Postup](docs/TRAINING_CAPACITY_SETUP.md). Interní přepočítávací funkce nemají veřejné RPC oprávnění, limity platí také při zápisu trenérem a současných požadavcích. Přístup člena nadále vrací jen jeho vlastní údaje; anon nic nemění.
+
+**Ověření:** 84 unit testů, TypeScript/build, všech osm migrací a sedm SQL sad na PostgreSQL 17; test dvou konkurenčních transakcí na poslední místo. `npm run test:database` vytvoří izolovaný dočasný Docker kontejner a odstraní jej, nepoužívá produkční údaje. `npm run test:capacity-cloud` ověřuje Supabase rezervace na vlastních fiktivních fixtures, dvě souběžná přihlášení, povýšení, změny limitu, archivaci a nezměněnou docházku; vyžaduje stejné testovací proměnné jako ostatní opt-in cloud testy a fixtures odstraní. Mobilní test s fiktivním API kontroluje členský i trenérský stav čekání, formulář kapacity a přetrvání po reloadu. Dosavadní živý trenérský workflow včetně fotografií, deníku, závodů a exportu prošel.
+
+**Omezení a další kroky:** kapacita platí pro tréninky, závod má samostatnou soupisku a registraci u pořadatele. Přesuny neposílají e-mail/push; nastavení e-mailových pozvánek z etapy 7 je stále samostatným krokem. Podskupiny a výběr skupiny pro trénink jsou další vývojová etapa. V této etapě nevzniká skupinová soupiska: trénink má dosavadní klubovou docházku. Export zachovává schemaVersion 4 a doplňuje volitelnou kapacitu/rezervační stav; skutečná docházka zůstává rozhodující pro analýzu.

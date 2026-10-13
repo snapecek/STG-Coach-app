@@ -23,16 +23,29 @@ update public.participation set response='yes',seat_status='confirmed',reservati
 do $$begin if not exists(select 1 from public.participation where member_id='30000000-0000-4000-8000-000000000003' and seat_status='waiting' and reservation_order>0) then raise exception 'FAIL queue jump';end if;end $$;
 -- Leaving and rejoining goes to the end.
 update public.participation set response='yes' where member_id='30000000-0000-4000-8000-000000000001';
-update public.events set capacity=2;
+update public.events set capacity=2 where id='50000000-0000-4000-8000-000000000001';
 do $$begin if not exists(select 1 from public.participation where member_id='30000000-0000-4000-8000-000000000003' and seat_status='confirmed') then raise exception 'FAIL increased capacity';end if;
- begin update public.events set capacity=1;raise exception 'FAIL reduced confirmed capacity';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
+ begin update public.events set capacity=1 where id='50000000-0000-4000-8000-000000000001';raise exception 'FAIL reduced confirmed capacity';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
 end $$;
+-- A retention cascade must not reallocate historical seats or reopen completion.
+insert into public.events(id,club_id,name,starts_at,place,type,capacity) values ('50000000-0000-4000-8000-000000000002','20000000-0000-4000-8000-000000000001','Historický trénink',now()+interval '1 day','Park','Běh',1);
+insert into public.participation(club_id,event_id,member_id,response,attended,confirmed_by) select '20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002',id,'yes',true,'10000000-0000-4000-8000-000000000001' from public.members order by id;
+update public.events set starts_at=now()-interval '1 day',actual_notes='Fiktivní průběh' where id='50000000-0000-4000-8000-000000000002';
+update public.events set completed_at=now() where id='50000000-0000-4000-8000-000000000002';
+savepoint historical_retention;
+reset role;
+delete from public.members where id='30000000-0000-4000-8000-000000000001';
+do $$begin
+ if not exists(select 1 from public.events where id='50000000-0000-4000-8000-000000000002' and completed_at is not null) then raise exception 'FAIL retention reopened completion';end if;
+ if exists(select 1 from public.participation where event_id='50000000-0000-4000-8000-000000000002' and seat_status='confirmed') then raise exception 'FAIL historical waiting member promoted';end if;
+end $$;
+rollback to historical_retention;
 -- Archive releases its future seat, but never overwrites actual attendance.
 select public.archive_club_member('20000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000002');
 do $$begin if not exists(select 1 from public.participation where member_id='30000000-0000-4000-8000-000000000001' and seat_status='confirmed') then raise exception 'FAIL archive promotion';end if;
  if not exists(select 1 from public.participation where member_id='30000000-0000-4000-8000-000000000002' and response='no' and attended=true) then raise exception 'FAIL archived attendance';end if;
 end $$;
-update public.events set capacity=null;
+update public.events set capacity=null where id='50000000-0000-4000-8000-000000000001';
 update public.participation set response='maybe' where member_id='30000000-0000-4000-8000-000000000001';
 do $$begin if exists(select 1 from public.participation where response<>'yes' and seat_status is not null) then raise exception 'FAIL non-yes reservation';end if;end $$;
 update public.events set starts_at=now()-interval '1 day';

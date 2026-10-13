@@ -1,6 +1,6 @@
 # Kapacita tréninků a čekací listina
 
-V Supabase → SQL Editor spusťte jednou celý obsah [202610130007_training_capacity.sql](../supabase/migrations/202610130007_training_capacity.sql). Předchozí migrace neopakujte. Soubor je SQL; nevkládejte jeho název ani příkazy terminálu.
+V Supabase → SQL Editor spusťte jednou celý obsah [202610130007_training_capacity.sql](../supabase/migrations/202610130007_training_capacity.sql). Poté jednou spusťte také [202610130008_freeze_past_reservations.sql](../supabase/migrations/202610130008_freeze_past_reservations.sql): chrání dokončené historické deníky před přepočtem rezervací při retenčním mazání. Pokud jste 007 už provedli, spusťte pouze 008. Předchozí migrace neopakujte. Soubor je SQL; nevkládejte jeho název ani příkazy terminálu.
 
 - Prázdná kapacita znamená bez omezení, jinak 1–500 míst.
 - „Jdu“ je zájem o účast. Při plné kapacitě získá člen stav „Čekací listina“.

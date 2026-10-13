@@ -19,12 +19,15 @@ docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/202610130004_race_results.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/202610130005_distinct_races.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/202610130006_member_access.sql
+docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/202610130007_training_capacity.sql
+docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/202610130008_freeze_past_reservations.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/tenant_access.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/club_management.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/journal_photos.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/race_results.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/distinct_races.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/member_access.sql
+docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/training_capacity.sql
 docker rm -f stg-rls-validation
 ```
 
@@ -39,3 +42,5 @@ Výsledky závodů: po třetí migraci aplikujte `202610130004_race_results.sql`
 `distinct_races.sql` ověřuje transakční vybranou soupisku (ne celý klub), zamítnutí cizího člena/role, dokončení bez tréninkového deníku a soulad dokončil/DNF/DNS s potvrzenou účastí.
 
 `member_access.sql` testuje potvrzený a cizí e-mail, jednorázovost/expiraci/odvolání pozvánky, odmítnutí duplicitního člena, archivovaného člena, osobní profil a RSVP bez možnosti přepsat docházku. `local-bootstrap.sql` doplňuje pgcrypto a minimální email_confirmed_at pouze pro lokální substituci Auth. Živý opt-in test: `npm run test:member-cloud`; nikdy neposílá e-maily nebo nemění heslo.
+
+`npm run test:database` automatizuje celý lokální postup v dočasném kontejneru včetně dvou souběžných transakcí. `training_capacity.sql` ověřuje limity, FIFO, ochranu proti falšování místa/pořadí, povýšení, nezměněnou docházku, archivaci a zachování dokončení při retenčním mazání historické rezervace. Živý opt-in test: `npm run test:capacity-cloud`.

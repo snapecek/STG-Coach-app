@@ -11,7 +11,7 @@ Tato etapa ověřuje přihlášení a členství v klubu. Cloudová evidence je 
 
 ## 2. Připravte databázi
 
-V novém prázdném projektu otevřete **SQL Editor** a spusťte obsah `supabase/migrations/202610120001_initial.sql` jednou a potom `supabase/migrations/202610130002_club_management.sql` jednou. Potom aplikujte `supabase/migrations/202610130003_journal_photos.sql` pro strukturovaný deník a soukromé fotografie. Spouštějte pouze migrace, které ještě nebyly aplikované. Případně použijte Supabase CLI a `supabase db push` podle README. Nespouštějte migraci opakovaně ručně: vytváří tabulky a politiky, není idempotentní. Pokud migrace selže, neposílejte další dotazy naslepo; sdělte chybu bez tajných hodnot.
+V novém prázdném projektu otevřete **SQL Editor** a spusťte obsah `supabase/migrations/202610120001_initial.sql` jednou a potom `supabase/migrations/202610130002_club_management.sql` jednou. Potom aplikujte `supabase/migrations/202610130003_journal_photos.sql` pro strukturovaný deník a soukromé fotografie a poté `supabase/migrations/202610130004_race_results.sql` pro soukromé výsledky závodů. Spouštějte pouze migrace, které ještě nebyly aplikované. Případně použijte Supabase CLI a `supabase db push` podle README. Nespouštějte migraci opakovaně ručně: vytváří tabulky a politiky, není idempotentní. Pokud migrace selže, neposílejte další dotazy naslepo; sdělte chybu bez tajných hodnot.
 
 Potom můžete ve stejném prázdném vývojovém projektu spustit `supabase/tests/tenant_access.sql`. Test dočasně vytvoří fiktivní uživatele a kluby, ověří role a vše vrátí pomocí ROLLBACK. Výsledek bez chyby znamená průchod uvedených databázových kontrol, nikoliv ověření UI ani fotografií.
 

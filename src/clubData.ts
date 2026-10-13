@@ -85,7 +85,7 @@ export async function updateEvent(client:SupabaseClient,club:ClubAccess,id:strin
  if(patch.equipment!==undefined&&(patch.equipment.length>30||patch.equipment.some(tag=>!tag.trim()||tag.length>40)))throw new Error('Zadejte nejvýše 30 pomůcek, každou do 40 znaků.');
  if(patch.name!==undefined)patch={...patch,name:text(patch.name,'Název',80)};
  if(patch.actual_notes!==undefined&&patch.actual_notes.length>5000)throw new Error('Skutečný průběh je příliš dlouhý.');
- await verify(client);return checked<EventRow>(await client.from('events').update(patch).eq('club_id',club.id).eq('id',id).select(eventColumns).single(),'Událost se nepodařilo změnit.');
+ await verify(client);const result=await client.from('events').update(patch).eq('club_id',club.id).eq('id',id).select(eventColumns).single();if(result.error?.message.includes('Remove race results'))throw new Error('Před změnou závodu na trénink odeberte jeho výsledky.');return checked<EventRow>(result,'Událost se nepodařilo změnit.');
 }
 export async function completeEvent(client:SupabaseClient,club:ClubAccess,id:string){
  staff(club);await verify(client);const row=checked<EventRow>(await client.from('events').update({completed_at:new Date().toISOString()}).eq('club_id',club.id).eq('id',id).select(eventColumns).single(),'Událost nelze dokončit. Doplňte průběh a docházku po skončení.');

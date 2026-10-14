@@ -1,0 +1,16 @@
+import {it,expect} from 'vitest';
+import {parseIntervals,intervalTime,validatePerformance,performanceSummary,type TrainingPerformance} from './trainingPerformances';
+import {shareFormats} from './journalShare';
+import type {ClubData,EventRow} from './clubData';
+const row=(event_id='now',patch:Partial<TrainingPerformance>={}):TrainingPerformance=>({club_id:'c',event_id,member_id:'m',distance_m:800,planned_repetitions:2,interval_ms:[192000,194000],notes:'',...patch});
+const event=(id:string,starts_at:string,patch:Partial<EventRow>={}):EventRow=>({id,starts_at,event_kind:'training',status:'scheduled',type:'Běh',completed_at:'2026-10-13T12:00:00Z',...patch} as EventRow);
+const fixture=():ClubData=>({events:[event('now','2026-10-13T10:00:00Z'),event('old','2026-10-06T10:00:00Z')],members:[],templates:[],participation:['now','old'].map(event_id=>({event_id,club_id:'c',member_id:'m',response:null,attended:true,confirmed_by:'u'}))});
+it('čte minuty, hodiny a desetinné sekundy a oddělí řádky',()=>expect(parseIntervals('3:12; 3:14,5\n1:02:03.025')).toEqual([192000,194500,3723025]));
+it('odmítá neplatný, nulový a příliš dlouhý čas',()=>{for(const input of ['0:00','3:99','abc','25:00:00'])expect(()=>parseIntervals(input)).toThrow();expect(parseIntervals('')).toEqual([])});
+it('formátuje bez ztráty tisícin a přetečení hodin',()=>{expect(intervalTime(192025)).toBe('3:12.025');expect(intervalTime(3723025)).toBe('1:02:03.025')});
+it('kontroluje plán, vzdálenost, počet dokončených úseků a nulové časy',()=>{validatePerformance(row());for(const patch of [{planned_repetitions:1},{distance_m:0},{interval_ms:[0]},{interval_ms:[NaN]},{planned_repetitions:101}])expect(()=>validatePerformance(row('now',patch))).toThrow()});
+it('počítá splnění jen ze zadaných měření a porovnává předchozí dokončený trénink',()=>{const d=fixture(),s=performanceSummary(d,d.events[0],[row(),row('old',{interval_ms:[198000,200000]})]);expect(s.completion).toBe(100);expect(s.fastest[0].ms).toBe(192000);expect(s.improvements[0].ms).toBe(6000)});
+it('nesrovnává jinou délku, počet opakování, disciplínu nebo nedokončený trénink',()=>{for(const patch of [{distance_m:400},{planned_repetitions:3},{interval_ms:[220000]}]){const d=fixture();expect(performanceSummary(d,d.events[0],[row(),row('old',patch)]).improvements).toHaveLength(0)}for(const patch of [{type:'Plavání'},{completed_at:null},{status:'cancelled' as const}]){const d=fixture();d.events[1]={...d.events[1],...patch};expect(performanceSummary(d,d.events[0],[row(),row('old',{interval_ms:[200000,210000]})]).improvements).toHaveLength(0)}});
+it('chybějící výkony neodhaduje a nepřítomného ani omluveného nezapočítává',()=>{const d=fixture();expect(performanceSummary(d,d.events[0],[]).completion).toBeNull();d.participation[0].attended=false;expect(performanceSummary(d,d.events[0],[row()]).rows).toHaveLength(0)});
+it('odliší nulové splnění od nevyplněného a uchová rozdílné délky úseků',()=>{const d=fixture();const s=performanceSummary(d,d.events[0],[row('now',{interval_ms:[]})]);expect(s.completion).toBe(0);expect(s.fastest).toHaveLength(0);expect(s.distances).toEqual([800])});
+it('nabízí skutečné rozměry exportovaných grafických formátů',()=>expect(Object.values(shareFormats).map(f=>[f.width,f.height])).toEqual([[1080,1080],[1080,1350],[1080,1920]]));

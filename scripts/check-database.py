@@ -17,7 +17,7 @@ try:
   try:docker('exec',name,'pg_isready','-h','127.0.0.1','-U','postgres',capture_output=True);break
   except subprocess.CalledProcessError:sleep(1)
  else:raise RuntimeError('PostgreSQL did not start')
- tests=['tenant_access','club_management','journal_photos','race_results','distinct_races','member_access','training_capacity','training_groups','event_tasks','training_series','weekly_goals','journal_distance','attendance_matrix','training_performances','race_teams']
+ tests=['tenant_access','club_management','journal_photos','race_results','distinct_races','member_access','training_capacity','training_groups','event_tasks','training_series','weekly_goals','journal_distance','attendance_matrix','training_performances','race_teams','training_games']
  files=[root/'supabase/tests/local-bootstrap.sql',*sorted((root/'supabase/migrations').glob('*.sql')),*[root/f'supabase/tests/{test}.sql' for test in tests]]
  for file in files:
   try:sql(file.read_text())

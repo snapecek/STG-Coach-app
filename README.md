@@ -320,3 +320,9 @@ Dokončení závodu vyžaduje dosavadní individuální výsledky a, jsou-li tý
 Pravidla a omezení: [Závodní týmy](docs/RACE_TEAMS_SETUP.md). Ověřeno 149 unit testů, produkční build, všech 16 migrací / 15 SQL sad a souběžné rezervace. Fiktivní prohlížečový workflow pokrývá vytvoření dvou týmů, ruční časy a pořadí, výhradní členství, změnu soupisky, bezpečné smazání, reload a rozložení 320/1440 px. E-mailová připomenutí a automatické sociální publikování zůstávají odložené.
 
 Živý cílený test `npm run test:race-teams-ui` prošel proti Supabase po aplikování 016: dvoučlenný tým s vlastním časem 00:40:00.000 oproti individuálním 00:32:15.500 / 00:33:00.000, dokončení a reload, schemaVersion 6 s vybraným členem bez osobní vazby spoluhráče (`roster_size: 2`), změna soupisky s vymazáním týmového výsledku a nové dokončení, potvrzené smazání se zachováním individuálních výsledků. Vlastní fiktivní událost a oba členové byly smazané; ověřené jsou i prázdné týmové vazby po úklidu. Kompletní fiktivní UI scénář, SQL a unit testy prošly.
+
+### Etapa 18 — minihry a výzvy
+
+Trénink má samostatný panel **Minihry** dostupný také z detailu deníku. Podporuje čas, opakování, vzdálenost a body, vlastní soupisku, pořadí se shodami, DNF/DNS a ověření skutečné docházky. Nulový a chybějící výsledek jsou odlišné. Úpravy používají kontrolu revize, smazání potvrzení a zachovává docházku. Analytický export verze 7 přidává `trainingGames` s filtrováním osobních údajů.
+
+Vyžaduje migraci **017**. Podrobný postup, oprávnění a omezení: [Minihry](docs/TRAINING_GAMES_SETUP.md). Minihry jsou volitelné; týmové minihry a automatické sdílení jsou další možné etapy.

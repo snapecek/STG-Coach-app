@@ -5,7 +5,7 @@ import type {ClubAccess} from './supabase';
 export type MemberRow={id:string;club_id:string;name:string;kind:'member'|'guest';removed_at:string|null;purge_after:string|null;user_id?:string|null};
 export type TemplateRow={id:string;club_id:string;name:string;type:string;place:string;minutes:number;plan:string};
 export type EventRow={id:string;club_id:string;template_id:string|null;name:string;starts_at:string;place:string;type:string;plan:string;duration_minutes:number;event_kind:'training'|'race';status:'scheduled'|'cancelled';actual_notes:string;completed_at:string|null;completed_by:string|null;actual_duration_minutes:number|null;perceived_effort:number|null;equipment:string[];race_distance_km?:number|null;race_registration_url?:string;capacity?:number|null;source_group_id?:string|null;group_name?:string;roster_only?:boolean;series_id?:string|null;actual_distance_km?:number|null};
-export type ParticipationRow={club_id:string;event_id:string;member_id:string;response:'yes'|'no'|'maybe'|null;attendance_excused?:boolean;attended:boolean|null;confirmed_by:string|null;seat_status?:'confirmed'|'waiting'|null;reservation_order?:number|null};
+export type ParticipationRow={club_id:string;event_id:string;member_id:string;response:'yes'|'no'|'maybe'|'companion'|null;attendance_excused?:boolean;attended:boolean|null;confirmed_by:string|null;seat_status?:'confirmed'|'waiting'|null;reservation_order?:number|null};
 export type ClubData={members:MemberRow[];templates:TemplateRow[];events:EventRow[];participation:ParticipationRow[]};
 export const emptyClubData=():ClubData=>({members:[],templates:[],events:[],participation:[]});
 export const canManage=(club:ClubAccess)=>club.role==='owner'||club.role==='coach';
@@ -69,7 +69,7 @@ export async function addEvents(client:SupabaseClient,club:ClubAccess,template:T
 }
 export async function saveParticipation(client:SupabaseClient,club:ClubAccess,eventId:string,memberId:string,patch:{response:ParticipationRow['response']}|{attended:boolean|null;attendance_excused?:boolean}){
  staff(club);const userId=await verify(client);
- if('response' in patch&&patch.response!==null&&!['yes','no','maybe'].includes(patch.response))throw new Error('Neplatná odpověď.');
+ if('response' in patch&&patch.response!==null&&!['yes','no','maybe','companion'].includes(patch.response))throw new Error('Neplatná odpověď.');
  const row:Partial<ParticipationRow>={club_id:club.id,event_id:eventId,member_id:memberId,...patch,...('attended' in patch?{confirmed_by:userId}:{})};
  // Send only the changed fields: RSVP must not overwrite actual attendance (or vice versa).
  checked<ParticipationRow>(await client.from('participation').upsert(row,{onConflict:'event_id,member_id'}).select('*').single(),'Účast se nepodařilo uložit.');

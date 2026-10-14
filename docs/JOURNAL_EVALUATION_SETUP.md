@@ -2,6 +2,8 @@
 
 ## Databáze
 
+Migrace 015 je uživatelem potvrzená jako úspěšně provedená. Následující postup je pro nové instalace; na stávající databázi ji neopakujte.
+
 V Supabase → SQL Editor spusťte jednou celý obsah `supabase/migrations/202610140015_training_performances.sql`. Starší migrace neopakujte. Název souboru ani příkaz terminálu nejsou SQL. Migrace musí navazovat na 001–014.
 
 Tabulka `training_performances` ukládá nejvýše jedno měření člena na trénink: délku úseku v metrech, plán 1–100 opakování, pole skutečných časů v milisekundách a poznámku. V rámci jednoho tréninku lze měřit různé délky u různých členů. Více různých sad jednoho člena v jednom tréninku zatím podporováno není.

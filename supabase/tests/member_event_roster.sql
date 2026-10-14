@@ -1,0 +1,42 @@
+begin;
+insert into auth.users(id,email,email_confirmed_at) values ('10000000-0000-4000-8000-000000000001','coach@example.invalid',now()),('10000000-0000-4000-8000-000000000002','member@example.invalid',now()),('10000000-0000-4000-8000-000000000003','wrong@example.invalid',now());
+insert into public.clubs(id,name) values ('20000000-0000-4000-8000-000000000001','Fiktivní tým'),('20000000-0000-4000-8000-000000000002','Cizí tým');
+insert into public.club_roles values ('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001','coach');
+insert into public.members(id,club_id,name,kind) values ('30000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','Fiktivní člen','guest'),('30000000-0000-4000-8000-000000000002','20000000-0000-4000-8000-000000000001','Jiný člen','member');
+insert into public.events(id,club_id,name,starts_at,place,type,event_kind) values ('50000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','Trénink',now()+interval '2 days','Park','Kondice','training'),('50000000-0000-4000-8000-000000000002','20000000-0000-4000-8000-000000000001','Závod',now()+interval '3 days','Les','OCR','race');
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
+select set_config('stg.test_invite',(public.issue_club_invitation('20000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000001',' MEMBER@example.invalid ')->>'token'),true);
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000003"}',true);
+do $$begin
+ begin perform public.accept_club_invitation(current_setting('stg.test_invite'));raise exception 'FAIL wrong email accepts';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
+ if exists(select 1 from public.club_invitations) then raise exception 'FAIL outsider sees invitations';end if;
+end $$;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002"}',true);
+select public.accept_club_invitation(current_setting('stg.test_invite'));
+do $$declare r jsonb;begin
+ if (select count(*) from member_event_roster('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001'))<>2 then raise exception 'FAIL whole club roster';end if;
+ select to_jsonb(x) into r from member_event_roster('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001') x where is_self;
+ if r is null or r ? 'attended' or r ? 'email' or r ? 'user_id' then raise exception 'FAIL minimal own roster';end if;
+ begin perform member_event_roster('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002');raise exception 'FAIL uninvited race';exception when insufficient_privilege then null;end;
+ begin perform member_event_roster('20000000-0000-4000-8000-000000000002','50000000-0000-4000-8000-000000000001');raise exception 'FAIL foreign club';exception when insufficient_privilege then null;end;
+ if exists(select 1 from members) or exists(select 1 from participation) then raise exception 'FAIL staff access expanded';end if;
+end $$;
+reset role;
+update events set roster_only=true,group_name='Fiktivní soupiska' where false;
+insert into events(id,club_id,name,starts_at,place,type,event_kind,roster_only,group_name) values ('50000000-0000-4000-8000-000000000003','20000000-0000-4000-8000-000000000001','Skupina',now()+interval '3 days','Park','Běh','training',true,'Fiktivní skupina');
+insert into participation(club_id,event_id,member_id,response) values ('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000003','30000000-0000-4000-8000-000000000002','maybe');
+set local role authenticated;
+do $$begin
+ begin perform member_event_roster('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000003');raise exception 'FAIL uninvited group';exception when insufficient_privilege then null;end;
+end $$;
+reset role;
+insert into participation(club_id,event_id,member_id,response) values ('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000003','30000000-0000-4000-8000-000000000001','yes');
+set local role authenticated;
+do $$begin if (select count(*) from member_event_roster('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000003'))<>2 then raise exception 'FAIL selected roster';end if;end $$;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000003"}',true);
+do $$begin begin perform member_event_roster('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001');raise exception 'FAIL outsider';exception when insufficient_privilege then null;end;end $$;
+reset role;
+set local role anon;
+do $$begin begin perform member_event_roster('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001');raise exception 'FAIL anon';exception when insufficient_privilege then null;end;end $$;
+rollback;

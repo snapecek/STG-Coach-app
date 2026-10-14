@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {calendarCells,pendingReviews,reviewReady,reviewMembers} from './management';
+import {calendarCells,pendingReviews,reviewReady,reviewMembers,trainingCompletionIssues} from './management';
 import type {EventRow,ClubData,MemberRow} from './clubData';
 const event:EventRow={id:'event',club_id:'club',template_id:null,name:'Fiktivní trénink',starts_at:'2026-10-12T16:00:00Z',place:'Park',type:'Běh',plan:'Plán',duration_minutes:60,event_kind:'training',status:'scheduled',actual_notes:'',completed_at:null,completed_by:null,actual_duration_minutes:null,perceived_effort:null,equipment:[]};
 const member:MemberRow={id:'member',club_id:'club',name:'Fiktivní člen',kind:'member',removed_at:null,purge_after:null};
@@ -51,4 +51,13 @@ it('requires actual attendance but no racing result for a companion',()=>{
  const roster={...data,participation} as ClubData;
  expect(reviewReady(roster,race,now,[])).toBe(true);
  expect(reviewReady({...roster,participation:[{...roster.participation[0],attended:null}]},race,now,[])).toBe(false);
+});
+
+it('explains missing journal notes and only actually unverified attendance',()=>{
+ const rows=[{event_id:event.id,member_id:member.id,response:'yes',attended:null}];
+ expect(trainingCompletionIssues({...data,participation:rows} as ClubData,event,now).map(i=>i.kind)).toEqual(['notes','attendance']);
+ const ready={...event,actual_notes:'Skutečný průběh'};
+ expect(trainingCompletionIssues({...data,participation:[{...rows[0],attended:false}]} as ClubData,ready,now)).toEqual([]);
+ expect(trainingCompletionIssues(data,ready,Date.parse(event.starts_at)).map(i=>i.kind)).toContain('time');
+ expect(trainingCompletionIssues(data,{...ready,status:'cancelled'},now)).toEqual([{kind:'cancelled'}]);
 });

@@ -4,3 +4,7 @@ project_id = "stg-coach"
 # Handler verifies the bearer through Auth.getUser and checks the club role.
 # This also supports projects with the newer asymmetric JWT signing keys.
 verify_jwt = false
+
+[functions.remind-event]
+# Handler verifies Auth.getUser and staff role before resolving any recipients.
+verify_jwt = false

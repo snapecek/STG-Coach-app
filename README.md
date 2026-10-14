@@ -326,3 +326,13 @@ Pravidla a omezení: [Závodní týmy](docs/RACE_TEAMS_SETUP.md). Ověřeno 149 
 Trénink má samostatný panel **Minihry** dostupný také z detailu deníku. Podporuje čas, opakování, vzdálenost a body, vlastní soupisku, pořadí se shodami, DNF/DNS a ověření skutečné docházky. Nulový a chybějící výsledek jsou odlišné. Úpravy používají kontrolu revize, smazání potvrzení a zachovává docházku. Analytický export verze 7 přidává `trainingGames` s filtrováním osobních údajů.
 
 Vyžaduje migraci **017**. Podrobný postup, oprávnění a omezení: [Minihry](docs/TRAINING_GAMES_SETUP.md). Minihry jsou volitelné; týmové minihry a automatické sdílení jsou další možné etapy.
+
+### Etapa 19 — členské prostředí pro betaverzi
+
+Člen má čtyři záložky **Přehled, Kalendář, Docházka, Deník**. Přehled nabízí nejbližší událost, přímou odpověď, skutečný týdenní plán, vlastní úkoly a osm týdnů ověřené docházky. Zvonek otevírá seznam vlastních úkolů a nevyřízených odpovědí; neposílá e-maily ani systémové push notifikace.
+
+Docházka zobrazuje detail zvolené události, čas, místo, plán, vlastní rezervaci a minimální soupisku (jméno, odpověď, čekací listina). Čekající se nepočítají mezi potvrzené. Deník ukazuje jen vlastní historii a trenérem potvrzenou docházku. Členské rozhraní nemá trenérské úpravy.
+
+**Nasazení:** jednou spusťte celý obsah `supabase/migrations/202610140018_member_event_roster.sql`. Bez migrace funguje vlastní odpověď, ale seznam účastníků zobrazí vysvětlení. Funkce ověřuje aktivní propojený účet, klub a pozvání u závodů/skupin; nevrací kontakty, skutečnou docházku jiných osob ani údaje o účtech. RLS členských tabulek se nerozšiřuje.
+
+Ověření: `npm test`, `npm run build`, `npm run test:database`, `npm run test:member-ui`. Prohlížeč používá fiktivní data a kontroluje odpověď po reloadu, čekací listinu, čtyři záložky a šířky 320/390/1440 px. Další krok bety: pilotní průchod pozvánkou a první skutečný trénink; odesílání e-mailů zůstává samostatným odloženým nastavením.

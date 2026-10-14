@@ -344,3 +344,9 @@ Migrace `202610140019_race_companion.sql` přidává odpověď **Doprovod** pouz
 Odebraného člena vracejte přes **Členové → Archiv → Obnovit**. Zůstane stejné ID a historie. Nové přidání stejné osoby vytváří jinou identitu; formulář proto při shodném archivovaném jménu doporučí obnovení. Historické záznamy se automaticky neslučují podle jména. U běžného tréninku se archivovaný člen odebraný před termínem bez skutečné docházky nezobrazuje jen kvůli starému RSVP; historická skutečná účast a výslovné skupinové soupisky zůstávají zachované. Stejné pravidlo v migraci 019 upravuje dokončení tréninku na serveru.
 
 Regrese: `npm test`, `npm run build`, `npm run test:database` (včetně `race_companion.sql`) a `npm run test:member-ui` (fiktivní API; změna odpovědi, reload, šířky 320/390/1440px, archivovaný člen a ochrana před novou duplicitou).
+
+## Šablony tréninků, závodů, pomůcek a miniher
+
+Správa **Šablony** má čtyři samostatné části. Závodní šablony předvyplňují disciplínu, vzdálenost a další výchozí údaje; uložené pomůcky se vybírají v deníku klepnutím; minihry mají vlastní pravidla, hodnocení a režim jednotlivců nebo týmů. Vyhodnocení tréninku v deníku nyní zobrazuje i minihry, jejich účastníky, výsledky a pořadí a umožňuje dodatečně přidat neplánovanou hru. Tým má společný výsledek a účastník může být v jednom týmu dané hry. Použité šablony jsou kopie, jejich pozdější úpravy historii nemění.
+
+Vyžaduje migraci **020** po 019. Podrobnosti, pravidla týmového hodnocení a ověření: [docs/PRESET_LIBRARY_SETUP.md](docs/PRESET_LIBRARY_SETUP.md).

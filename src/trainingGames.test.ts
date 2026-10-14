@@ -10,3 +10,13 @@ it('rozlišuje nezapsáno, nulu, DNF a DNS podle skutečné docházky',()=>{cons
 it('hlídá celočíselné typy, rozsahy, přesnost i záporné body',()=>{expect(validGameScore('points',-5)).toBe(true);expect(validGameScore('repetitions',-1)).toBe(false);expect(validGameScore('repetitions',1.5)).toBe(false);expect(validGameScore('distance',1.001)).toBe(true);expect(validGameScore('distance',1.0001)).toBe(false);expect(validGameScore('time',172800001)).toBe(false);expect(validGameScore('points',Infinity)).toBe(false);expect(validGameScore('points',NaN)).toBe(false)});
 it('formátuje jednotky bez ztráty nulové hodnoty',()=>{expect(gameScoreLabel('time',12345)).toBe('00:00:12.345');expect(gameScoreLabel('points',0)).toBe('0 bodů');expect(gameScoreLabel('distance',1.234)).toBe('1,234 m')});
 it('vyžaduje název, známý typ a unikátní účastníky do limitu',()=>{validateGame({name:'Fiktivní výzva',scoring:'points',notes:'',member_ids:['a','b']});for(const ids of [[],['a','a'],Array.from({length:101},(_,i)=>String(i))])expect(()=>validateGame({name:'Výzva',scoring:'time',notes:'',member_ids:ids})).toThrow()});
+
+it('team ranking requires every team member and shared zero scores are valid',async()=>{
+ const {rankGameTeams}=await import('./trainingGames');const g=game();g.mode='teams';g.entries[0].score=10;
+ g.teams=[{id:'one',name:'První',member_ids:['a','b'],status:'scored',score:10},{id:'two',name:'Druhý',member_ids:['c'],status:'scored',score:10}];
+ expect(rankGameTeams(g,attendance).map(t=>t.rank)).toEqual([1,1]);
+ expect(rankGameTeams(g,attendance.map(p=>p.member_id==='b'?{...p,attended:false}:p)).find(t=>t.id==='one')?.rank).toBeNull();
+ g.entries[0].score=0;g.entries[1].score=0;g.teams[0].score=0;
+ expect(rankGameTeams(g,attendance).find(t=>t.id==='one')?.rank).toBe(2);
+});
+it('does not allow a player in two teams',async()=>{const {validateTeamGame}=await import('./trainingGames');expect(()=>validateTeamGame({name:'Štafeta',scoring:'points',notes:'',teams:[{id:'1',name:'A',member_ids:['a'],status:null,score:null},{id:'2',name:'B',member_ids:['a'],status:null,score:null}]})).toThrow();});

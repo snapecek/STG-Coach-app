@@ -9,7 +9,7 @@ export function filterAnalysis(data:ClubData,filters:AnalysisFilters):EventRow[]
 }
 export function analysisSummary(data:ClubData,events:EventRow[],memberId=''){
  const ids=new Set(events.map(e=>e.id));const attendance=data.participation.filter(p=>ids.has(p.event_id)&&(!memberId||p.member_id===memberId));
- const confirmed=attendance.filter(p=>p.attended!==null);const present=confirmed.filter(p=>p.attended===true).length;
+ const confirmed=attendance.filter(p=>p.attended!==null&&!p.attendance_excused);const present=confirmed.filter(p=>p.attended===true).length;
  const byType=[...new Set(events.map(e=>e.event_kind==='race'?'Závody':e.type))].sort().map(type=>({type,count:events.filter(e=>(e.event_kind==='race'?'Závody':e.type)===type).length}));
  const byEquipment=[...new Set(events.filter(e=>e.event_kind==='training').flatMap(e=>e.equipment))].sort().map(name=>({name,count:events.filter(e=>e.equipment.includes(name)).length}));
  const training=events.filter(e=>e.event_kind==='training');

@@ -34,3 +34,21 @@ describe('Soupiska skupinového tréninku',()=>{
  it('vyžaduje docházku jen uložené soupisky, nikoliv ostatních členů klubu',()=>{const selected={...data,members:[member,other],participation:[p]};expect(reviewMembers(selected,grouped)).toEqual([member]);expect(reviewReady(selected,grouped,now)).toBe(true);expect(reviewReady({...selected,participation:[p,{...p,member_id:'other',attended:null}]},grouped,now)).toBe(false)});
  it('prázdnou soupisku nelze dokončit a archivovaného účastníka s historií zachová',()=>{expect(reviewReady(data,grouped,now)).toBe(false);expect(reviewMembers({...data,members:[{...member,removed_at:'2026-10-01'}],participation:[p]},grouped)).toHaveLength(1)});
 });
+
+it('excludes archived members with only old RSVP after removal, keeps confirmed history',()=>{
+ const archived={id:'old',name:'Stejné jméno',removed_at:'2026-10-12T12:00:00Z'};
+ const active={id:'new',name:'Stejné jméno',removed_at:null};
+ const event={id:'future',starts_at:'2026-10-14T12:00:00Z',event_kind:'training'} as EventRow;
+ const data={members:[archived,active],participation:[{event_id:'future',member_id:'old',response:'no',attended:null}]} as unknown as ClubData;
+ expect(reviewMembers(data,event).map(m=>m.id)).toEqual(['new']);
+ data.participation[0].attended=true;
+ expect(reviewMembers(data,event).map(m=>m.id)).toEqual(['old','new']);
+});
+
+it('requires actual attendance but no racing result for a companion',()=>{
+ const race={...event,event_kind:'race' as const};
+ const participation=[{event_id:event.id,member_id:member.id,response:'companion' as const,attended:true}];
+ const roster={...data,participation} as ClubData;
+ expect(reviewReady(roster,race,now,[])).toBe(true);
+ expect(reviewReady({...roster,participation:[{...roster.participation[0],attended:null}]},race,now,[])).toBe(false);
+});

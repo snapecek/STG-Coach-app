@@ -336,3 +336,11 @@ Docházka zobrazuje detail zvolené události, čas, místo, plán, vlastní rez
 **Nasazení:** jednou spusťte celý obsah `supabase/migrations/202610140018_member_event_roster.sql`. Bez migrace funguje vlastní odpověď, ale seznam účastníků zobrazí vysvětlení. Funkce ověřuje aktivní propojený účet, klub a pozvání u závodů/skupin; nevrací kontakty, skutečnou docházku jiných osob ani údaje o účtech. RLS členských tabulek se nerozšiřuje.
 
 Ověření: `npm test`, `npm run build`, `npm run test:database`, `npm run test:member-ui`. Prohlížeč používá fiktivní data a kontroluje odpověď po reloadu, čekací listinu, čtyři záložky a šířky 320/390/1440 px. Další krok bety: pilotní průchod pozvánkou a první skutečný trénink; odesílání e-mailů zůstává samostatným odloženým nastavením.
+
+## Doprovod závodu a obnovení člena
+
+Migrace `202610140019_race_companion.sql` přidává odpověď **Doprovod** pouze pro závody. Členská tlačítka závodu používají **Zúčastním se**, **Možná**, **Nezúčastním se** a **Doprovod**. Doprovod má samostatně potvrzenou skutečnou přítomnost, ale nepovinný závodní výsledek: nelze mu ukládat výsledek ani jej zařadit do závodního týmu. Před přepnutím závodníka na doprovod je třeba odstranit jeho výsledek a zařazení do týmu. Pro dokončení závodu stačí u doprovodu ověřená přítomnost nebo nepřítomnost. Migraci 019 aplikujte po 018 před používáním nové odpovědi; frontend sám databázovou migraci nespouští.
+
+Odebraného člena vracejte přes **Členové → Archiv → Obnovit**. Zůstane stejné ID a historie. Nové přidání stejné osoby vytváří jinou identitu; formulář proto při shodném archivovaném jménu doporučí obnovení. Historické záznamy se automaticky neslučují podle jména. U běžného tréninku se archivovaný člen odebraný před termínem bez skutečné docházky nezobrazuje jen kvůli starému RSVP; historická skutečná účast a výslovné skupinové soupisky zůstávají zachované. Stejné pravidlo v migraci 019 upravuje dokončení tréninku na serveru.
+
+Regrese: `npm test`, `npm run build`, `npm run test:database` (včetně `race_companion.sql`) a `npm run test:member-ui` (fiktivní API; změna odpovědi, reload, šířky 320/390/1440px, archivovaný člen a ochrana před novou duplicitou).

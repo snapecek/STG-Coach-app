@@ -350,3 +350,7 @@ Regrese: `npm test`, `npm run build`, `npm run test:database` (včetně `race_co
 Správa **Šablony** má čtyři samostatné části. Závodní šablony předvyplňují disciplínu, vzdálenost a další výchozí údaje; uložené pomůcky se vybírají v deníku klepnutím; minihry mají vlastní pravidla, hodnocení a režim jednotlivců nebo týmů. Vyhodnocení tréninku v deníku nyní zobrazuje i minihry, jejich účastníky, výsledky a pořadí a umožňuje dodatečně přidat neplánovanou hru. Tým má společný výsledek a účastník může být v jednom týmu dané hry. Použité šablony jsou kopie, jejich pozdější úpravy historii nemění.
 
 Vyžaduje migraci **020** po 019. Podrobnosti, pravidla týmového hodnocení a ověření: [docs/PRESET_LIBRARY_SETUP.md](docs/PRESET_LIBRARY_SETUP.md).
+
+## Pilotní testování
+
+První pilot: **1 trenér a 4 členové** v jednom klubu. [Testovací plán](docs/PILOT_TEST_PLAN.md) zahrnuje pozvánky a obnovu hesla, kapacitu/čekací listinu, vlastní šablony, neplánovanou týmovou minihru, dokončení deníku do analýzy a závod s doprovodem. UI upravíme až podle zpětné vazby z provozu. Automatická kontrola před pilotem: `python3 scripts/check-pilot-readiness.py`; skutečné doručení e-mailů a čtyři konkrétní účty se ověřují při pilotu.

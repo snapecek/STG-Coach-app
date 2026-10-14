@@ -255,3 +255,9 @@ Při vytváření, úpravě a kopírování události v kalendáři je pozadí o
 Skupiny jsou v Členové → Skupiny, vedle záložky Členové a hosté. Nemají samostatnou položku v hlavní navigaci. Hlavní akce se mění na Přidat člena / Přidat skupinu podle záložky; archivace, obnova, výběr členů a plánování ze skupiny zůstávají stejné. Jde o změnu umístění, nikoliv dat či oprávnění.
 
 Ověření: 122 unit testů a produkční build; fiktivní prohlížečový scénář kontroluje vnořenou navigaci, celý workflow skupin a ostré pozadí (`backdrop-filter: none`) bez přetečení na 1024/1440 px. Úprava nevyžaduje SQL ani zapnutí e-mailových připomenutí. Živé zápisové scénáře se pro tuto změnu navigace/CSS neopakovaly.
+
+### Plánování přímo vedle kalendáře
+
+Nová událost, úprava i kopie z kalendáře používají skutečný panel v rozložení stránky (`calendar-workspace`), nikoliv přesunutý popup. Od 900 px tvoří kalendář a formulář dva nepřekrývající se sloupce. Formulář nemá overlay ani `aria-modal`; kalendář zůstává dostupný a čitelný. Na menších displejích je formulář pod kalendářem a po otevření se k němu stránka posune. Zrušení/uložení panel odstraní a kalendář se opět rozšíří. Ostatní detaily událostí zůstávají samostatnými dialogy. Odstraněné jsou původní styly pevně umístěného draweru.
+
+Ověření: 122 unit testů, produkční build a fiktivní UI workflow. Kontrola na 1024/1440 px porovnává skutečné hranice kalendáře a formuláře, vyžaduje nulový počet overlayů/dialogů a zakazuje pevnou pozici panelu. Screenshot s fiktivními daty byl vizuálně zkontrolovaný; prošly také kopie, série, uložení a dokončení. Skupiny zůstávají pod Členy, e-maily zůstávají odložené. SQL ani jiné provozní nastavení se nemění.

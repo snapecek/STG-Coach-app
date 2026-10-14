@@ -1,6 +1,6 @@
 # Databázové kontroly
 
-`tenant_access.sql` se spouští až po všech dvanácti migracích v prázdném vývojovém Supabase projektu; při chybě proveďte ROLLBACK. Vkládá pouze fiktivní data a na konci je odstraní rollbackem.
+`tenant_access.sql` se spouští až po všech třinácti migracích v prázdném vývojovém Supabase projektu; při chybě proveďte ROLLBACK. Vkládá pouze fiktivní data a na konci je odstraní rollbackem.
 
 Kontroly: trenér vidí jen svůj klub, šablony, události a účast; nelze připojit šablonu nebo člena z jiného klubu; trenér nemůže přidělovat role; člen vidí události, ale ne registr ani účast a nemůže potvrzovat docházku; anonym nemůže číst registr.
 
@@ -25,6 +25,7 @@ docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/202610130010_event_tasks.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/202610130011_training_series.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/202610140012_weekly_goals.sql
+docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/202610140013_journal_distance.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/tenant_access.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/club_management.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/journal_photos.sql
@@ -36,6 +37,7 @@ docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/event_tasks.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/training_series.sql
 docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/weekly_goals.sql
+docker exec -i stg-rls-validation psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/journal_distance.sql
 docker rm -f stg-rls-validation
 ```
 
@@ -60,3 +62,5 @@ Výsledky závodů: po třetí migraci aplikujte `202610130004_race_results.sql`
 `training_series.sql` ověřuje atomické založení série, neměnný identifikátor, ochranu proběhlých termínů, zrušení/obnovu/přesun, odmítnutí zastaralého náhledu, rollback celé změny a zákaz přístupu člena či cizího klubu.
 
 `weekly_goals.sql` kontroluje klubové cíle, role trenéra/člena/anon, cizí klub, duplicitní typy, limity a atomický návrat při chybě.
+
+`journal_distance.sql` ověřuje skutečnou vzdálenost tréninku, limity, zákaz členského zápisu, opětovné otevření po změně a vyčištění při změně na závod.

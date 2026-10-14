@@ -4,7 +4,7 @@ import {dates,trainingDates} from './domain';
 import type {ClubAccess} from './supabase';
 export type MemberRow={id:string;club_id:string;name:string;kind:'member'|'guest';removed_at:string|null;purge_after:string|null;user_id?:string|null};
 export type TemplateRow={id:string;club_id:string;name:string;type:string;place:string;minutes:number;plan:string};
-export type EventRow={id:string;club_id:string;template_id:string|null;name:string;starts_at:string;place:string;type:string;plan:string;duration_minutes:number;event_kind:'training'|'race';status:'scheduled'|'cancelled';actual_notes:string;completed_at:string|null;completed_by:string|null;actual_duration_minutes:number|null;perceived_effort:number|null;equipment:string[];race_distance_km?:number|null;race_registration_url?:string;capacity?:number|null;source_group_id?:string|null;group_name?:string;roster_only?:boolean;series_id?:string|null};
+export type EventRow={id:string;club_id:string;template_id:string|null;name:string;starts_at:string;place:string;type:string;plan:string;duration_minutes:number;event_kind:'training'|'race';status:'scheduled'|'cancelled';actual_notes:string;completed_at:string|null;completed_by:string|null;actual_duration_minutes:number|null;perceived_effort:number|null;equipment:string[];race_distance_km?:number|null;race_registration_url?:string;capacity?:number|null;source_group_id?:string|null;group_name?:string;roster_only?:boolean;series_id?:string|null;actual_distance_km?:number|null};
 export type ParticipationRow={club_id:string;event_id:string;member_id:string;response:'yes'|'no'|'maybe'|null;attended:boolean|null;confirmed_by:string|null;seat_status?:'confirmed'|'waiting'|null;reservation_order?:number|null};
 export type ClubData={members:MemberRow[];templates:TemplateRow[];events:EventRow[];participation:ParticipationRow[]};
 export const emptyClubData=():ClubData=>({members:[],templates:[],events:[],participation:[]});
@@ -37,7 +37,7 @@ export async function loadClubData(client:SupabaseClient,club:ClubAccess,signal?
    let responseResult=await (signal?q.abortSignal(signal):q);
    // Keep the previous club workflow usable while migration 007 is being applied.
    if(responseResult.error?.code==='42703'&&(table==='events'||table==='participation')){
-    const previous=columns.split(',').filter(c=>!['capacity','seat_status','reservation_order','source_group_id','group_name','roster_only','series_id'].includes(c)).join(',');
+    const previous=columns.split(',').filter(c=>!['capacity','seat_status','reservation_order','source_group_id','group_name','roster_only','series_id','actual_distance_km'].includes(c)).join(',');
     let fallback=client.from(table).select(previous).eq('club_id',club.id);
     fallback=table==='participation'?fallback.order('event_id').order('member_id'):fallback.order('id');
     fallback=fallback.range(offset,offset+size-1);responseResult=await (signal?fallback.abortSignal(signal):fallback);
@@ -49,7 +49,7 @@ export async function loadClubData(client:SupabaseClient,club:ClubAccess,signal?
  const [members,templates,events,participation]=await Promise.all([
   canManage(club)?readAll<MemberRow>('members','id,club_id,name,kind,removed_at,purge_after,user_id'):Promise.resolve([]),
   readAll<TemplateRow>('templates','id,club_id,name,type,place,minutes,plan'),
-  readAll<EventRow>('events','id,club_id,template_id,name,starts_at,place,type,plan,duration_minutes,event_kind,status,actual_notes,completed_at,completed_by,actual_duration_minutes,perceived_effort,equipment,race_distance_km,race_registration_url,capacity,source_group_id,group_name,roster_only,series_id'),
+  readAll<EventRow>('events','id,club_id,template_id,name,starts_at,place,type,plan,duration_minutes,event_kind,status,actual_notes,completed_at,completed_by,actual_duration_minutes,perceived_effort,equipment,race_distance_km,race_registration_url,capacity,source_group_id,group_name,roster_only,series_id,actual_distance_km'),
   canManage(club)?readAll<ParticipationRow>('participation','club_id,event_id,member_id,response,attended,confirmed_by,seat_status,reservation_order'):Promise.resolve([])
  ]);
  return {members,templates,events:events.sort((a,b)=>a.starts_at.localeCompare(b.starts_at)),participation};
@@ -87,8 +87,8 @@ export async function editTemplate(client:SupabaseClient,club:ClubAccess,id:stri
 export async function deleteTemplate(client:SupabaseClient,club:ClubAccess,id:string){
  staff(club);await verify(client);return checked<{id:string}>(await client.from('templates').delete().eq('club_id',club.id).eq('id',id).select('id').single(),'Šablonu se nepodařilo smazat.');
 }
-export async function updateEvent(client:SupabaseClient,club:ClubAccess,id:string,patch:Partial<Pick<EventRow,'name'|'starts_at'|'place'|'type'|'plan'|'duration_minutes'|'event_kind'|'status'|'actual_notes'|'actual_duration_minutes'|'perceived_effort'|'equipment'|'template_id'|'race_distance_km'|'race_registration_url'|'capacity'>>){
- staff(club);validateCapacity(patch.capacity);validateRaceDetails(patch);if(patch.duration_minutes!==undefined&&(!Number.isInteger(patch.duration_minutes)||patch.duration_minutes<5||patch.duration_minutes>480))throw new Error('Délka musí být 5 až 480 minut.');
+export async function updateEvent(client:SupabaseClient,club:ClubAccess,id:string,patch:Partial<Pick<EventRow,'name'|'starts_at'|'place'|'type'|'plan'|'duration_minutes'|'event_kind'|'status'|'actual_notes'|'actual_duration_minutes'|'actual_distance_km'|'perceived_effort'|'equipment'|'template_id'|'race_distance_km'|'race_registration_url'|'capacity'>>){
+ staff(club);validateCapacity(patch.capacity);if(patch.actual_distance_km!=null&&(!Number.isFinite(patch.actual_distance_km)||patch.actual_distance_km<0||patch.actual_distance_km>10000))throw new Error('Vzdálenost musí být od 0 do 10 000 km.');validateRaceDetails(patch);if(patch.duration_minutes!==undefined&&(!Number.isInteger(patch.duration_minutes)||patch.duration_minutes<5||patch.duration_minutes>480))throw new Error('Délka musí být 5 až 480 minut.');
  if(patch.actual_duration_minutes!==undefined&&patch.actual_duration_minutes!==null&&(!Number.isInteger(patch.actual_duration_minutes)||patch.actual_duration_minutes<1||patch.actual_duration_minutes>1440))throw new Error('Skutečná délka musí být 1 až 1440 minut.');
  if(patch.perceived_effort!==undefined&&patch.perceived_effort!==null&&(!Number.isInteger(patch.perceived_effort)||patch.perceived_effort<1||patch.perceived_effort>10))throw new Error('Náročnost musí být 1 až 10.');
  if(patch.equipment!==undefined&&(patch.equipment.length>30||patch.equipment.some(tag=>!tag.trim()||tag.length>40)))throw new Error('Zadejte nejvýše 30 pomůcek, každou do 40 znaků.');

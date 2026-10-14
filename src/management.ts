@@ -8,3 +8,16 @@ export function reviewMembers(data:ClubData,event:EventRow):MemberRow[]{return d
 export function reviewReady(data:ClubData,event:EventRow,now=Date.now(),results:RaceResult[]=[]){const roster=reviewMembers(data,event);if(event.event_kind==='race')return event.status==='scheduled'&&eventEnd(event)<=now&&roster.length>0&&roster.every(m=>{const p=data.participation.find(p=>p.event_id===event.id&&p.member_id===m.id),r=results.find(r=>r.event_id===event.id&&r.member_id===m.id);return p?.response==='companion'?p.attended!=null:!!r&&p?.attended===(r.status!=='dns')});return event.status==='scheduled'&&eventEnd(event)<=now&&!!event.actual_notes.trim()&&roster.length>0&&roster.every(m=>data.participation.some(p=>p.member_id===m.id&&p.event_id===event.id&&p.attended!==null));}
 export function calendarCells(year:number,month:number){const first=new Date(Date.UTC(year,month,1));const mondayOffset=(first.getUTCDay()+6)%7;return Array.from({length:42},(_,i)=>new Date(Date.UTC(year,month,1-mondayOffset+i)).toISOString().slice(0,10));}
 export function participationSummary(data:ClubData,event:EventRow){const roster=reviewMembers(data,event);const responses=roster.map(m=>data.participation.find(p=>p.event_id===event.id&&p.member_id===m.id));return {yes:responses.filter(p=>p?.response==='yes'&&p.seat_status!=='waiting').length,waiting:responses.filter(p=>p?.response==='yes'&&p.seat_status==='waiting').length,no:responses.filter(p=>p?.response==='no').length,maybe:responses.filter(p=>p?.response==='maybe').length,unknown:responses.filter(p=>!p?.response).length,unconfirmed:responses.filter(p=>p?.attended==null).length};}
+
+export type TrainingCompletionIssue={kind:'cancelled'|'time'|'notes'|'attendance'|'empty';members?:MemberRow[]};
+export function trainingCompletionIssues(data:ClubData,event:EventRow,now:number):TrainingCompletionIssue[]{
+ if(event.completed_at)return [];
+ if(event.status==='cancelled')return [{kind:'cancelled'}];
+ const issues:TrainingCompletionIssue[]=[];
+ if(eventEnd(event)>now)issues.push({kind:'time'});
+ if(!event.actual_notes.trim())issues.push({kind:'notes'});
+ const roster=reviewMembers(data,event);
+ if(!roster.length)issues.push({kind:'empty'});
+ else{const missing=roster.filter(m=>!data.participation.some(p=>p.event_id===event.id&&p.member_id===m.id&&p.attended!=null));if(missing.length)issues.push({kind:'attendance',members:missing});}
+ return issues;
+}

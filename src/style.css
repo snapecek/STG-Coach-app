@@ -53,3 +53,7 @@
 @media(max-width:640px){.is-week .calendar-week{display:none}}
 @media(min-width:1150px){.event-drawer.overlay{backdrop-filter:none;-webkit-backdrop-filter:none}.event-drawer .editor-footer{position:sticky;bottom:-25px;z-index:2;background:#1a2029;padding:16px 0;margin-top:12px}.event-drawer .editor-footer .primary{width:100%}}
 .email-reminder>small{display:block;font-size:10px;margin-top:5px}.email-reminder>button:disabled{opacity:.5;cursor:default}
+/* Calendar planning stays sharp at every viewport size. */
+.calendar-editing .event-drawer.overlay{backdrop-filter:none;-webkit-backdrop-filter:none;background:transparent}
+.members-tabs{display:flex;gap:5px;padding:5px;background:#202934;border-radius:12px;margin:0 0 22px;width:fit-content}.members-tabs button{background:transparent;color:#aeb9c8;padding:11px 17px;font-size:12px;border-radius:8px}.members-tabs button[aria-selected=true]{background:#364353;color:#ffb317}
+@media(min-width:900px) and (max-width:1149px){.calendar-editing .club-content{padding-right:390px}.event-drawer.overlay{pointer-events:none;align-items:stretch;justify-content:flex-end;padding:110px 16px 16px}.event-drawer .dialog{pointer-events:auto;width:365px;max-width:365px;max-height:calc(100dvh - 126px);padding:22px 18px;margin:0;border:1px solid #34404e}.calendar-editing .calendar-heading{flex-wrap:wrap}.calendar-editing .calendar-view-switch{flex-basis:100%;margin-left:0;justify-content:center}.calendar-editing .calendar-day{min-height:95px}}

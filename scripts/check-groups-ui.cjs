@@ -28,7 +28,7 @@ const path=require('node:path');
   }const response=await context.request.fetch('http://127.0.0.1:8770'+u.pathname+u.search,{method:req.method(),headers:req.headers(),data:req.postDataBuffer()||undefined});await route.fulfill({response});});
   page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.name));
   const saved=text=>page.getByRole('status').filter({hasText:text}).waitFor();
-  const sidebar=async name=>{await page.getByRole('button',{name:'Otevřít navigaci',exact:true}).click();await page.getByRole('navigation',{name:'Hlavní navigace',exact:true}).getByRole('button',{name,exact:true}).click();};
+  const sidebar=async name=>{await page.getByRole('button',{name:'Otevřít navigaci',exact:true}).click();await page.getByRole('navigation',{name:'Hlavní navigace',exact:true}).getByRole('button',{name:name==='Skupiny'?'Členové':name,exact:true}).click();if(name==='Skupiny')await page.getByRole('tab',{name:'Skupiny',exact:true}).click();};
   const calendar=async()=>{await page.getByRole('navigation',{name:'Mobilní navigace',exact:true}).getByRole('button',{name:'Kalendář',exact:true}).click();await page.locator('.calendar-day').first().waitFor();};
   const dialog=()=>page.getByRole('dialog');const tab=name=>dialog().getByRole('tab',{name,exact:true}).click();
   stage='login';await page.goto('http://127.0.0.1:5173');await page.getByLabel('E-mail',{exact:true}).fill(process.env.STG_TEST_EMAIL);await page.getByLabel('Heslo',{exact:true}).fill(process.env.STG_TEST_PASSWORD);await page.getByRole('button',{name:'Přihlásit se',exact:true}).click();await page.getByLabel('Klub',{exact:true}).selectOption(club);await page.getByRole('heading',{name:'K dokončení',exact:true}).waitFor();

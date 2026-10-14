@@ -1,0 +1,7 @@
+import {it,expect,vi} from 'vitest';
+import type {SupabaseClient} from '@supabase/supabase-js';
+import {validateWeeklyGoals,saveWeeklyGoals} from './weeklyGoals';
+const club={id:'club',name:'Fiktivní klub',role:'coach' as const};
+it('přijme prázdné cíle a odmítne duplicity, necelé minuty a překročení',()=>{expect(()=>validateWeeklyGoals([])).not.toThrow();for(const goals of [[{training_type:'Běh',target_minutes:0}],[{training_type:'Běh',target_minutes:1.5}],[{training_type:'Běh',target_minutes:10081}],[{training_type:'Běh',target_minutes:60},{training_type:' Běh ',target_minutes:90}]])expect(()=>validateWeeklyGoals(goals)).toThrow()});
+it('člen a neověřený účet nemohou cíle ukládat',async()=>{const rpc=vi.fn();const client={rpc,auth:{getUser:async()=>({data:{user:null},error:null})}} as unknown as SupabaseClient;await expect(saveWeeklyGoals(client,{...club,role:'member'},[])).rejects.toThrow();await expect(saveWeeklyGoals(client,club,[])).rejects.toThrow();expect(rpc).not.toHaveBeenCalled()});
+it('cíle uloží jednou RPC do výslovně vybraného klubu',async()=>{const rpc=vi.fn(async()=>({error:null}));const client={rpc,auth:{getUser:async()=>({data:{user:{id:'coach'}},error:null})}} as unknown as SupabaseClient;await saveWeeklyGoals(client,club,[{training_type:' Běh ',target_minutes:150}]);expect(rpc).toHaveBeenCalledWith('save_weekly_goals',{target_club:club.id,goals:[{training_type:'Běh',target_minutes:150}]})});

@@ -1,0 +1,7 @@
+import type {SupabaseClient} from '@supabase/supabase-js';
+import type {ClubAccess} from './supabase';
+import {canManage} from './clubData';
+export type WeeklyGoal={training_type:string;target_minutes:number};
+export function validateWeeklyGoals(goals:WeeklyGoal[]){if(goals.length>12||new Set(goals.map(g=>g.training_type.trim())).size!==goals.length||goals.some(g=>!g.training_type.trim()||g.training_type.trim().length>40||!Number.isInteger(g.target_minutes)||g.target_minutes<1||g.target_minutes>10080))throw new Error('Vyplňte nejvýše 12 různých typů a cíle mezi 1 minutou a 168 hodinami.');}
+export async function loadWeeklyGoals(client:SupabaseClient,club:ClubAccess){if(!canManage(club))throw new Error('Cíle spravuje trenér nebo správce.');const {data,error}=await client.from('club_weekly_goals').select('training_type,target_minutes').eq('club_id',club.id).order('training_type');if(error)throw new Error('Cíle nelze načíst. Ověřte připojení a migraci 012.');return data as WeeklyGoal[];}
+export async function saveWeeklyGoals(client:SupabaseClient,club:ClubAccess,goals:WeeklyGoal[]){if(!canManage(club))throw new Error('Cíle spravuje trenér nebo správce.');validateWeeklyGoals(goals);const {data,error:authError}=await client.auth.getUser();if(authError||!data.user)throw new Error('Přihlaste se znovu.');const {error}=await client.rpc('save_weekly_goals',{target_club:club.id,goals:goals.map(g=>({...g,training_type:g.training_type.trim()}))});if(error)throw new Error('Cíle se nepodařilo uložit. Obnovte data a zkuste to znovu.');}

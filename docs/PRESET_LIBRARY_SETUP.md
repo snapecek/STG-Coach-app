@@ -10,7 +10,7 @@ Nový frontend nabízí dosavadní individuální minihry i před migrací. Doku
 
 V **Šablony** jsou části **Tréninky**, **Závody**, **Pomůcky**, **Minihry**.
 
-- Tréninkové šablony zůstávají stejné. Vlastní závodní šablona ukládá disciplínu, délku trasy, časové okno, výchozí místo a organizační pokyny. Při plánování závodu vyberte šablonu a upravte místo, název a termín. Výchozí příklady: běh 10 km a Spartan Sprint/Super/Beast/Ultra; vzdálenosti jsou výchozí hodnoty, které lze upravit podle konkrétního závodu.
+- Tréninkové šablony zůstávají stejné. Vlastní závodní šablona ukládá disciplínu, délku trasy, časové okno, výchozí místo a organizační pokyny. Při plánování závodu vyberte šablonu a upravte místo, název a termín. Aplikace neobsahuje přednastavené závodní šablony; klub si vytváří vlastní.
 - Pomůcka má jeden název (nejvýše 40 znaků, bez čárky). V zápisu deníku klepněte na uložené pomůcky. Původní ruční zadání a historické pomůcky zůstávají podporované. Výběr i ruční text se ukládají společně, normalizují a zbavují duplicit; platí limit 30 pomůcek.
 - Šablona minihry ukládá název, pravidla, hodnocení (čas/opakování/vzdálenost/body) a režim Jednotlivci/Týmy. Účastníky a konkrétní týmové soupisky vyberete pro daný trénink.
 

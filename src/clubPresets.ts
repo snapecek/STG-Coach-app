@@ -6,7 +6,6 @@ import type {GameScoring} from './trainingGames';
 export type PresetKind='race'|'equipment'|'game';
 export type PresetSettings={discipline?:string;distance_km?:number|null;minutes?:number;place?:string;notes?:string;scoring?:GameScoring;mode?:'individual'|'teams'};
 export type ClubPreset={id:string;club_id:string;kind:PresetKind;name:string;settings:PresetSettings};
-export const standardRacePresets:ClubPreset[]=[['10 km','Silniční běh',10],['Spartan Sprint','OCR',5],['Spartan Super','OCR',10],['Spartan Beast','OCR',21],['Spartan Ultra','OCR',50]].map(([name,discipline,distance],i)=>({id:'standard-race-'+i,club_id:'',kind:'race',name:String(name),settings:{discipline:String(discipline),distance_km:Number(distance),minutes:180,place:'',notes:''}}));
 export function validatePreset(kind:PresetKind,name:string,s:PresetSettings){
  if(!name.trim()||name.trim().length>(kind==='equipment'?40:80))throw new Error('Vyplňte platný název šablony.');
  if(kind==='equipment'&&/[,\n]/.test(name))throw new Error('Jedna šablona pomůcky má jeden název bez čárky nebo nového řádku.');

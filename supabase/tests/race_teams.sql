@@ -1,7 +1,7 @@
 begin;
 insert into auth.users(id) values ('10000000-0000-4000-8000-000000000001'),('10000000-0000-4000-8000-000000000002');
 insert into clubs(id,name) values ('20000000-0000-4000-8000-000000000001','Fiktivní týmy'),('20000000-0000-4000-8000-000000000002','Cizí klub');
-insert into club_roles values ('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001','coach'),('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000002','member');
+insert into club_roles values ('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001','coach'),('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000002','member'),('20000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000002','coach');
 insert into members(id,club_id,name,kind) values ('30000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','Fiktivní první','member'),('30000000-0000-4000-8000-000000000002','20000000-0000-4000-8000-000000000001','Fiktivní druhý','guest'),('30000000-0000-4000-8000-000000000003','20000000-0000-4000-8000-000000000002','Cizí','member');
 insert into events(id,club_id,name,starts_at,place,type,event_kind) values ('50000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','Fiktivní týmový závod',now()-interval '2 days','Park','OCR','race');
 insert into participation(club_id,event_id,member_id,attended) select '20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001',id,true from members where club_id='20000000-0000-4000-8000-000000000001';
@@ -27,6 +27,7 @@ select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-00000000
 do $$begin
  if exists(select 1 from race_teams) or exists(select 1 from race_team_members) then raise exception 'FAIL member read';end if;
  begin perform delete_race_team('20000000-0000-4000-8000-000000000001','80000000-0000-4000-8000-000000000001',4);raise exception 'FAIL member delete';exception when insufficient_privilege then null;end;
+ begin perform delete_race_team('20000000-0000-4000-8000-000000000002','80000000-0000-4000-8000-000000000001',4);raise exception 'FAIL foreign coach delete';exception when raise_exception then if sqlerrm like 'FAIL%' then raise;end if;end;
  begin update race_teams set name='Forbidden';raise exception 'FAIL direct update';exception when insufficient_privilege then null;end;
 end $$;
 select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);

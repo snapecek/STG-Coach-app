@@ -308,3 +308,15 @@ Migrace 015 je uživatelem potvrzená jako úspěšně aplikovaná. Následně p
 ### Oprava mobilní navigace
 
 Spodní lišta trenéra/správce nyní obsahuje také Deník a Šablony, tedy všech sedm záložek. Nevyřazuje je samostatný mobilní filtr. Počet sloupců odpovídá dostupným oprávněním; členský účet má nadále jen své záložky. Kompaktní rozložení používá tlačítka vysoká alespoň 48 px. Prohlížečový test na 320/390 px kontroluje viditelnost a přímé otevření Deníku/Šablon, dotykové plochy nejméně 44 × 44 px a nepřetékající dokument. Databázová migrace není potřeba.
+
+## Etapa 17 — závodní týmy
+
+Detail závodu → Výsledky má přepínač Jednotlivci / Týmy. Týmy mají vlastní názvy, kategorie a uložené soupisky z tohoto závodu; jeden závodník může být jen v jednom týmu. Tréninkové skupiny, RSVP, docházka a individuální výsledky se tím nemění. Týmový čas zadává trenér samostatně podle pravidel závodu, nevzniká součtem individuálních časů. Klubové pořadí rozlišuje kategorie, shodné časy, DNF/DNS a rozpor s ověřenou docházkou.
+
+Migrace [016](supabase/migrations/202610140016_race_teams.sql) je uživatelem potvrzená jako provedená. Týmy jsou soukromé pro trenéry/správce klubu, přímý zápis tabulek je zakázaný. RPC uloží soupisku atomicky a kontrolují revizi při souběžných změnách. Skutečná změna soupisky smaže týmový stav a čas, přejmenování je zachová. Smazání týmu vyžaduje potvrzení a ponechá individuální evidenci. Retenční smazání člena vymaže jeho vazbu a neznovuotevře historické dokončení.
+
+Dokončení závodu vyžaduje dosavadní individuální výsledky a, jsou-li týmy založené, i jejich týmové výsledky s odpovídající docházkou. Nová etapa je dodatečná týmová klasifikace, nikoliv samostatný štafetový režim. Závody bez týmů fungují dál. JSON export schemaVersion 6 obsahuje `raceTeams`; filtr člena neexportuje osobní vazby ostatních členů jeho týmu. Počet celé soupisky je uveden samostatně. Závodní čas se nepřičítá k tréninkovému objemu.
+
+Pravidla a omezení: [Závodní týmy](docs/RACE_TEAMS_SETUP.md). Ověřeno 149 unit testů, produkční build, všech 16 migrací / 15 SQL sad a souběžné rezervace. Fiktivní prohlížečový workflow pokrývá vytvoření dvou týmů, ruční časy a pořadí, výhradní členství, změnu soupisky, bezpečné smazání, reload a rozložení 320/1440 px. E-mailová připomenutí a automatické sociální publikování zůstávají odložené.
+
+Živý cílený test `npm run test:race-teams-ui` prošel proti Supabase po aplikování 016: dvoučlenný tým s vlastním časem 00:40:00.000 oproti individuálním 00:32:15.500 / 00:33:00.000, dokončení a reload, schemaVersion 6 s vybraným členem bez osobní vazby spoluhráče (`roster_size: 2`), změna soupisky s vymazáním týmového výsledku a nové dokončení, potvrzené smazání se zachováním individuálních výsledků. Vlastní fiktivní událost a oba členové byly smazané; ověřené jsou i prázdné týmové vazby po úklidu. Kompletní fiktivní UI scénář, SQL a unit testy prošly.

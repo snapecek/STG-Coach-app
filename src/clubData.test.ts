@@ -38,7 +38,8 @@ describe('Cloudový adaptér',()=>{
 describe('Bezpečné vytvoření závodu',()=>{
  const input={id:'race',name:'Závod',place:'Park',type:'OCR',plan:'Pokyny',starts_at:'2026-10-13T08:00:00Z',duration_minutes:180,race_distance_km:8,race_registration_url:'https://example.invalid/race'};
  it('závod a soupisku zapisuje v jedné transakční RPC',async()=>{const m=mock();await createClubRace(m.client,club,input,['member']);expect(m.rpc).toHaveBeenCalledWith('create_club_race',{target_club:club.id,race:input,entrants:['member']});expect(m.tables).toEqual([])});
- it('odmítá prázdnou nebo duplicitní soupisku před zápisem',async()=>{const m=mock();await expect(createClubRace(m.client,club,input,[])).rejects.toThrow();await expect(createClubRace(m.client,club,input,['member','member'])).rejects.toThrow();expect(m.rpc).not.toHaveBeenCalled()});
+ it('povoluje závod bez účastníků',async()=>{const m=mock();await createClubRace(m.client,club,input,[]);expect(m.rpc).toHaveBeenCalledWith('create_club_race',{target_club:club.id,race:input,entrants:[]})});
+ it('odmítá duplicitní soupisku před zápisem',async()=>{const m=mock();await expect(createClubRace(m.client,club,input,['member','member'])).rejects.toThrow();expect(m.rpc).not.toHaveBeenCalled()});
  it('odmítá nebezpečné odkazy a neplatné vzdálenosti',()=>{for(const url of ['javascript:alert(1)','http://example.invalid','https://user:password@example.invalid','https://example.invalid/a b'])expect(()=>validateRaceDetails({race_registration_url:url})).toThrow();for(const distance of [0,-1,Infinity,1001])expect(()=>validateRaceDetails({race_distance_km:distance})).toThrow()});
 });
 

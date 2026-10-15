@@ -25,3 +25,7 @@ Nejprve spusťte migraci 021 v Supabase SQL Editoru, potom nasaďte odpovídají
 ## Sdílená paleta kalendáře (migrace 022)
 
 Nejprve spusťte `supabase/migrations/202610150022_event_type_colors.sql`, potom nasaďte odpovídající frontend. Trenér nebo správce může ve formuláři nové i upravované události pod zaměřením/disciplínou kliknout na jednu z osmi barev. Barva se ukládá okamžitě a samostatně od události, pro daný typ a druh události v celém klubu. Platí i pro starší události a členský kalendář. Tlačítko „Obnovit výchozí barvu“ vrátí původní barvu. Tréninky a závody mají nezávislé nastavení; změna palety nemění docházku, výsledky ani dokončení událostí.
+
+### Rozšíření na 16 barev (migrace 023)
+
+Po migraci 022 spusťte `supabase/migrations/202610150023_calendar_palette_16.sql`. Poté nasaďte frontend s 16 barvami. Původních osm barev i nastavené klubové barvy zůstávají zachované; přibývá limetková, azurová, indigová, purpurová, korálová, měděná, mátová a stříbrná.

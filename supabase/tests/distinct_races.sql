@@ -10,7 +10,7 @@ do $$begin
  if (select count(*) from public.participation)<>1 then raise exception 'FAIL race enrolled whole club';end if;
  begin update public.events set completed_at=now();raise exception 'FAIL missing outcomes';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
  begin perform public.create_club_race('20000000-0000-4000-8000-000000000001','{}',array['30000000-0000-4000-8000-000000000003']::uuid[]);raise exception 'FAIL foreign entrant';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
- begin perform public.create_club_race('20000000-0000-4000-8000-000000000001','{}',array[]::uuid[]);raise exception 'FAIL empty roster';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
+ begin perform public.create_club_race('20000000-0000-4000-8000-000000000001','{}',array[]::uuid[]);raise exception 'FAIL invalid race details';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
 end $$;
 update public.participation set attended=true;
 insert into public.race_results values ('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000001','dns',null,'');

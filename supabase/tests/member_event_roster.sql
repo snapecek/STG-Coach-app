@@ -18,7 +18,7 @@ do $$declare r jsonb;begin
  if (select count(*) from member_event_roster('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001'))<>2 then raise exception 'FAIL whole club roster';end if;
  select to_jsonb(x) into r from member_event_roster('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001') x where is_self;
  if r is null or r ? 'attended' or r ? 'email' or r ? 'user_id' then raise exception 'FAIL minimal own roster';end if;
- begin perform member_event_roster('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002');raise exception 'FAIL uninvited race';exception when insufficient_privilege then null;end;
+ if (select count(*) from member_event_roster('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002') where is_self and response is null)<>1 then raise exception 'FAIL open race roster';end if;
  begin perform member_event_roster('20000000-0000-4000-8000-000000000002','50000000-0000-4000-8000-000000000001');raise exception 'FAIL foreign club';exception when insufficient_privilege then null;end;
  if exists(select 1 from members) or exists(select 1 from participation) then raise exception 'FAIL staff access expanded';end if;
 end $$;

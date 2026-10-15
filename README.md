@@ -1,4 +1,4 @@
-# STG Coach
+# Trenomi
 
 Mobilní aplikace pro malé sportovní kluby: React, TypeScript, Vite, Tailwind CSS a Supabase. České tmavé rozhraní s oranžovými akcenty. OCR Timer není součástí projektu.
 
@@ -354,3 +354,9 @@ Vyžaduje migraci **020** po 019. Podrobnosti, pravidla týmového hodnocení a 
 ## Pilotní testování
 
 První pilot: **1 trenér a 4 členové** v jednom klubu. [Testovací plán](docs/PILOT_TEST_PLAN.md) zahrnuje pozvánky a obnovu hesla, kapacitu/čekací listinu, vlastní šablony, neplánovanou týmovou minihru, dokončení deníku do analýzy a závod s doprovodem. UI upravíme až podle zpětné vazby z provozu. Automatická kontrola před pilotem: `python3 scripts/check-pilot-readiness.py`; skutečné doručení e-mailů a čtyři konkrétní účty se ověřují při pilotu.
+
+## Značka Trenomi
+
+Veřejné podklady jsou v `public/brand`, barvy v `public/brand/brand-tokens.css`. Tmavé UI používá SVG varianty `-dark`, úzká mobilní hlavička pouze symbol. Světlé plochy používají `trenomi-logo.svg`. Manifest zachovává původní `start_url` i implicitní `id` a `scope`; interní identifikátory, přihlašovací callbacky a klíče úložišť zůstávají původní. Není potřeba SQL migrace. Existující instalace si nový název a ikony převezmou podle aktualizačního cyklu prohlížeče.
+
+Kontrola značky: `STG_BRAND_ONLY=1 npm run test:member-ui` proti spuštěnému testovacímu Vite; používá stejné fiktivní Supabase nastavení jako ostatní UI kontroly. Text připomínkových e-mailů je aktualizován ve zdroji Edge Function `remind-event`; její nasazení v Supabase je samostatné od webového deploye.

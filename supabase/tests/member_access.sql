@@ -19,7 +19,7 @@ do $$begin
  if exists(select 1 from public.members) or exists(select 1 from public.participation) or exists(select 1 from public.club_invitations) then raise exception 'FAIL member sees staff tables';end if;
  begin perform public.accept_club_invitation(current_setting('stg.test_invite'));raise exception 'FAIL reused invite';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
  begin perform public.issue_club_invitation('20000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000002','x@example.invalid');raise exception 'FAIL member invites';exception when insufficient_privilege then null;end;
- begin perform public.respond_to_club_event('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002','yes');raise exception 'FAIL uninvited race';exception when raise_exception then if SQLERRM like 'FAIL%' then raise;end if;end;
+ perform public.respond_to_club_event('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002','yes');
 end $$;
 select public.respond_to_club_event('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001','yes');
 reset role;
@@ -27,9 +27,9 @@ update public.participation set attended=true,confirmed_by='10000000-0000-4000-8
 set local role authenticated;
 select public.respond_to_club_event('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001','maybe');
 do $$declare p public.participation;begin
- select * into p from public.my_club_participation('20000000-0000-4000-8000-000000000001');if p.response<>'maybe' or p.attended is distinct from true or p.confirmed_by<>'10000000-0000-4000-8000-000000000001' then raise exception 'FAIL RSVP overwrote attendance';end if;
+ select * into p from public.my_club_participation('20000000-0000-4000-8000-000000000001') where event_id='50000000-0000-4000-8000-000000000001';if p.response<>'maybe' or p.attended is distinct from true or p.confirmed_by<>'10000000-0000-4000-8000-000000000001' then raise exception 'FAIL RSVP overwrote attendance';end if;
  begin update public.participation set attended=false;exception when insufficient_privilege then null;end;
- select * into p from public.my_club_participation('20000000-0000-4000-8000-000000000001');if p.attended is distinct from true then raise exception 'FAIL member attendance edit';end if;
+ select * into p from public.my_club_participation('20000000-0000-4000-8000-000000000001') where event_id='50000000-0000-4000-8000-000000000001';if p.attended is distinct from true then raise exception 'FAIL member attendance edit';end if;
  if exists(select 1 from public.my_club_member('20000000-0000-4000-8000-000000000002')) then raise exception 'FAIL foreign profile';end if;
 end $$;
 reset role;

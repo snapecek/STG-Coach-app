@@ -1,0 +1,6 @@
+import {it,expect} from 'vitest';
+import {eventTypeColor,typeColorKey,saveEventTypeColor,type EventTypeColor} from './eventTypeColors';
+import type {SupabaseClient} from '@supabase/supabase-js';
+const colors:EventTypeColor[]=[{id:'1',club_id:'c',event_kind:'training',type_key:'síla',color:'#bba7ed'},{id:'2',club_id:'c',event_kind:'race',type_key:'síla',color:'#70b5ff'}];
+it('rozlišuje stejný typ tréninku a závodu a sjednocuje velikost písmen',()=>{expect(typeColorKey(' SÍLA ')).toBe('síla');expect(eventTypeColor({event_kind:'training',type:'Síla'},colors)).toBe('#bba7ed');expect(eventTypeColor({event_kind:'race',type:'Síla'},colors)).toBe('#70b5ff');expect(eventTypeColor({event_kind:'race',type:'OCR'},colors)).toBe('#ff925c');expect(eventTypeColor({event_kind:'training',type:'Běh'},[])).toBe('#78c3ba')});
+it('nepovolí členu měnit klubovou paletu ani odeslat libovolné CSS',async()=>{const client={} as SupabaseClient;await expect(saveEventTypeColor(client,{id:'c',name:'Klub',role:'member'},'training','Síla','#bba7ed')).rejects.toThrow('trenér');await expect(saveEventTypeColor(client,{id:'c',name:'Klub',role:'coach'},'race','OCR','url(https://example.invalid)')).rejects.toThrow('palety')});

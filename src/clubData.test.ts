@@ -11,7 +11,7 @@ describe('Čas a opakování',()=>{
  it('odmítá cizí šablonu',()=>expect(()=>buildEventRows('club-b',template,'2026-10-13','18:00',1)).toThrow());
 });
 describe('Cloudový adaptér',()=>{
- it('každé čtení filtruje club_id',async()=>{const m=mock();await loadClubData(m.client,club);expect(m.tables).toEqual(['members','templates','events','participation']);expect(m.filters).toEqual(Array(4).fill(['club_id',club.id]))});
+ it('každé čtení filtruje club_id',async()=>{const m=mock();await loadClubData(m.client,club);expect(m.tables).toEqual(['members','templates','events','participation','event_type_colors']);expect(m.filters).toEqual(Array(5).fill(['club_id',club.id]))});
  it('načte další stránku registru místo tichého oříznutí',async()=>{
   const ranges:unknown[][]=[];
   const client={auth:{getUser:async()=>({data:{user:{id:'trainer'}},error:null})},from:(table:string)=>{
@@ -19,7 +19,7 @@ describe('Cloudový adaptér',()=>{
   }} as unknown as SupabaseClient;
   const data=await loadClubData(client,club);expect(data.members).toHaveLength(500);expect(ranges).toEqual([[0,499],[500,999]]);
  });
- it('členovi vůbec nenačítá registr ani účast',async()=>{const m=mock();await loadClubData(m.client,{...club,role:'member'});expect(m.tables).toEqual(['templates','events'])});
+ it('členovi vůbec nenačítá registr ani účast',async()=>{const m=mock();await loadClubData(m.client,{...club,role:'member'});expect(m.tables).toEqual(['templates','events','event_type_colors'])});
  it('člen nesmí zapisovat ani při chybě UI',async()=>{const m=mock();await expect(addMember(m.client,{...club,role:'member'},'Fiktivní člen','member')).rejects.toThrow();expect(m.tables).toEqual([])});
  it('neověřený účet nečte tabulky',async()=>{const m=mock();m.auth.getUser.mockResolvedValue({data:{user:null as never},error:null});await expect(loadClubData(m.client,club)).rejects.toThrow();expect(m.tables).toEqual([])});
  it('nového člena sváže s klubem',async()=>{const m=mock();await addMember(m.client,club,' Fiktivní host ','guest');expect(m.writes[0]).toMatchObject({club_id:club.id,name:'Fiktivní host',kind:'guest'})});

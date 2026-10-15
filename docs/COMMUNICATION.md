@@ -8,7 +8,7 @@ Pokud migrace ještě není nahraná, chat a podněty zobrazí vysvětlení s č
 
 ## Umístění a chování
 
-- **Chat** v navigaci trenéra i člena nabízí společný klubový chat a přepínač konverzací jednotlivých událostí. Na velmi úzkém telefonu lze spodní navigaci posouvat vodorovně, aby tlačítka zůstala dostatečně velká.
+- **Chat** vedle nabídky **Můj účet** u trenéra i člena nabízí společný klubový chat a přepínač konverzací jednotlivých událostí. Spodní mobilní navigace obsahuje ostatní hlavní části bez vodorovného posouvání. Záložky v detailu události se na mobilu zobrazují ve dvou řádcích.
 - V detailu události má trenér záložku **Chat**, člen rozbalovací tlačítko **Chat události**. Historie je společná s konverzací téže události v hlavním chatu.
 - Zprávy jsou prostý text do 2 000 znaků, s autorem a časem. Uživatel může po potvrzení smazat vlastní zprávu. Načítá se posledních 50 zpráv, starší přes tlačítko. Nové zprávy se obnovují po 10 sekundách, počty nepřečtených po 15 sekundách i po lokální akci. Při skryté kartě se periodické dotazy pozastaví; návrat do karty provede obnovu. Nejde o push notifikace do telefonu.
 - Přečtení se ukládá na serveru samostatně pro účet, klub a konverzaci, jen po skutečně načtené zprávy při zobrazení konce konverzace. Vlastní zprávy nejsou započtené mezi nepřečtené.

@@ -2,6 +2,7 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {CloudWorkspace} from './CloudWorkspace';
 import './style.css';
+import './light-theme.css';
 // Bookmarks to the original trainer prototype now open the single club app.
 // Keep local demo data untouched; never import it into a real club automatically.
 const url=new URL(window.location.href);

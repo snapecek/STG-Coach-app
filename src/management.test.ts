@@ -61,3 +61,5 @@ it('explains missing journal notes and only actually unverified attendance',()=>
  expect(trainingCompletionIssues(data,ready,Date.parse(event.starts_at)).map(i=>i.kind)).toContain('time');
  expect(trainingCompletionIssues(data,{...ready,status:'cancelled'},now)).toEqual([{kind:'cancelled'}]);
 });
+
+it('includes a member-invited guest only in the booked event roster',()=>{const event={id:'event',event_kind:'training',starts_at:'2026-10-15T10:00:00Z'} as import('./clubData').EventRow;const guest={id:'guest',name:'Guest',kind:'guest',event_guest:true,removed_at:null} as import('./clubData').MemberRow;const data={members:[guest],participation:[]} as unknown as import('./clubData').ClubData;expect(reviewMembers(data,event)).toEqual([]);data.participation=[{member_id:'guest',event_id:'event'} as import('./clubData').ParticipationRow];expect(reviewMembers(data,event)).toEqual([guest]);expect(reviewMembers(data,{...event,id:'other'})).toEqual([])});

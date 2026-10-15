@@ -363,4 +363,8 @@ Kontrola značky: `STG_BRAND_ONLY=1 npm run test:member-ui` proti spuštěnému 
 
 ## Klubový chat, chat událostí a podněty
 
-Komunikace je společná pro členy a trenéry. Chat najdete v navigaci i u jednotlivých událostí; podněty v nabídce Můj účet. Nové funkce vyžadují jednorázově [migraci 024](supabase/migrations/202610150024_chat_feedback.sql). Postup nasazení, oprávnění, obnovování zpráv a kontroly jsou v [dokumentaci komunikace](docs/COMMUNICATION.md).
+Obecný chat je soukromý mezi členem a trenéry klubu, chat jednotlivé události je společný. Chat najdete vedle Můj účet, podněty uvnitř této nabídky. Na migraci 024 navazuje [025 – soukromé konverzace](supabase/migrations/202610150025_private_coach_chat.sql). Postup nasazení, oprávnění, obnovování zpráv a kontroly jsou v [dokumentaci komunikace](docs/COMMUNICATION.md).
+
+## Světlý režim, mobil a hosté členů
+
+V nabídce Můj účet je přepínač vzhledu. Mobilní viewport a formuláře jsou upravené pro otevření v prohlížeči bez automatického přiblížení. Člen může po potvrzení účasti přihlásit hosta bez účtu na konkrétní trénink; tato část vyžaduje [migraci 026](supabase/migrations/202610150026_member_training_guests.sql). Postup a pravidla popisuje [dokumentace vzhledu a hostů](docs/THEME_MOBILE_GUESTS.md).

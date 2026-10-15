@@ -1,0 +1,286 @@
+/* Light counterparts of the existing dark surfaces. Semantic event colors and the brand orange remain unchanged. */
+html[data-theme="light"]{color-scheme:light;background:#f4f6f9;color:#202a38;--surface:#fff;--raised:#edf1f6;--border:#cbd4df;--muted:#526174;--teal:#247f76}
+html[data-theme="light"]{background:#f0f2f4;color:#252c37}
+html[data-theme="light"] button:hover{background:#e7eaee}
+html[data-theme="light"] .danger-text{color:#762719!important}
+html[data-theme="light"] .brand-light{color:#3d4652}
+html[data-theme="light"] .avatar{background:#e7eeee;color:#1e3e37}
+html[data-theme="light"] .auth-screen{background:radial-gradient(ellipse at 80% 0,#e8e9ed 0,transparent 45%),#f0f2f4}
+html[data-theme="light"] .cloud-screen:has(.cloud-dashboard){background:#f0f2f4}
+html[data-theme="light"] .cloud-card:has(.cloud-dashboard)>label select{background:#f0f2f5;border-color:#bdc5d0}
+html[data-theme="light"] .overview-hero{background:linear-gradient(105deg,#e7eaee,#f0f2f5);border:1px solid #bdc6d0}
+html[data-theme="light"] .overview-hero .eyebrow{color:#60432f}
+html[data-theme="light"] .hero-track{color:#3e4751}
+html[data-theme="light"] .event-card:hover{background:#e7eaee}
+html[data-theme="light"] .event-top>svg{color:#3d4651}
+html[data-theme="light"] .tag{background:#e7eaee;color:#232d39}
+html[data-theme="light"] .race .tag{color:#4c2510}
+html[data-theme="light"] .event-date{color:#3b4754}
+html[data-theme="light"] .review-list>span{color:#763819}
+html[data-theme="light"] .plan{border:1px dashed #bfc5cf}
+html[data-theme="light"] .notice{color:#1d3f39}
+html[data-theme="light"] .auth-error{color:#4c2310}
+html[data-theme="light"] .member-row,html[data-theme="light"] .template-row{border-bottom:1px solid #bec5cf}
+html[data-theme="light"] .row-actions button{background:#e7eaee}
+html[data-theme="light"] .member-filters .active,html[data-theme="light"] .calendar-filters button[aria-pressed=true]{background:#e7eaee;color:#1f2b3d}
+html[data-theme="light"] .journal-tags span{background:#e7eaee;color:#364658}
+html[data-theme="light"] .calendar-grid{background:#e7eaee;border:1px solid #bec5d0}
+html[data-theme="light"] .calendar-day{background:#f0f2f5}
+html[data-theme="light"] .calendar-day.outside{background:#f0f2f5}
+html[data-theme="light"] .calendar-day.selected{background:#e7eaef}
+html[data-theme="light"] .day-number{color:#394555}
+html[data-theme="light"] .calendar-day.outside .day-number{color:#3f4750}
+html[data-theme="light"] .calendar-event{color:#1b413b}
+html[data-theme="light"] .calendar-event.race{color:#4c2510}
+html[data-theme="light"] .agenda-entry{background:#e7eaef}
+html[data-theme="light"] .overlay{background:#eef2f7cb}
+html[data-theme="light"] .dialog{background:#f0f2f5;border:1px solid #bec5d0}
+html[data-theme="light"] .close{background:#eff2f5;color:#384656}
+html[data-theme="light"] label{color:#242d38}
+html[data-theme="light"] input:not([type=checkbox]),html[data-theme="light"] select,html[data-theme="light"] textarea{background:#eff2f6;border:1px solid #bec5d0;color:#1f2c3d}
+html[data-theme="light"] input::placeholder,html[data-theme="light"] textarea::placeholder{color:#3e4650}
+html[data-theme="light"] .kind-switch button{background:#eff2f6;border:1px solid #bdc6d1;color:#374657}
+html[data-theme="light"] .kind-switch button.selected{color:#4c2510}
+html[data-theme="light"] .form-section-title{color:#1f2d3d}
+html[data-theme="light"] .entrant-picker{background:#eff2f6}
+html[data-theme="light"] .detail-hero{background:linear-gradient(120deg,#e6efef,#eff2f5)}
+html[data-theme="light"] .detail-hero.race{background:linear-gradient(120deg,#f1e9e5,#eae8ed)}
+html[data-theme="light"] .detail-date span{color:#4e4641}
+html[data-theme="light"] .race .detail-kind{color:#4c2510}
+html[data-theme="light"] .detail-tabs{background:#eff2f5}
+html[data-theme="light"] .detail-tabs button[aria-selected=true]{color:#763a19}
+html[data-theme="light"] .detail-facts b{color:#232c39}
+html[data-theme="light"] .detail-block{background:#eff2f6}
+html[data-theme="light"] .external-action{color:#4c2510}
+html[data-theme="light"] .event-actions button{background:#e6eaef}
+html[data-theme="light"] .journal-panel form button{background:#e8edec;color:#1c4039}
+html[data-theme="light"] .journal-panel form .danger-text{background:#ede8e8}
+html[data-theme="light"] .photo-grid figure{background:#eff2f6}
+html[data-theme="light"] .photo-grid figure>button{background:#eff2f6dd;color:#763319}
+html[data-theme="light"] .photo-upload{background:#eff2f6;color:#1a2d42}
+@media(max-width:760px){
+html[data-theme="light"] .club-sidebar.opened{background:#e6eaef;border:1px solid #bcc4d2}
+html[data-theme="light"] .sidebar-toggle{color:#374557}
+html[data-theme="light"] .mobile-club-nav{background:#eff2f5f5;border-top:1px solid #bbc5d3}
+html[data-theme="light"] .mobile-club-nav button{color:#3a4555}
+}
+html[data-theme="light"] .response-buttons button{background:#e7eaef}
+html[data-theme="light"] .response-buttons .yes[aria-pressed=true]{color:#16463d}
+html[data-theme="light"] .response-buttons .no[aria-pressed=true]{color:#4c1e10}
+html[data-theme="light"] .response-buttons .maybe[aria-pressed=true]{color:#4c3710}
+html[data-theme="light"] .waiting-label{color:#765019}
+html[data-theme="light"] .confirmed-label{color:#216e5b}
+html[data-theme="light"] .reservation-state{background:#e7ecef;color:#3a4955}
+html[data-theme="light"] .reservation-state.waiting{background:#f0ebe6;color:#764f19;border:1px solid #d5c9b9}
+html[data-theme="light"] .reservation-state.confirmed{background:#e3f2ef;color:#226d5d;border:1px solid #b9d5ce}
+html[data-theme="light"] .training-group>p{color:#3b4554}
+html[data-theme="light"] .group-people>span{background:#e7eaee}
+html[data-theme="light"] .training-group.archived .group-icon{background:#e8eaee}
+html[data-theme="light"] .task-row.done .task-check{background:#e4f1ee}
+html[data-theme="light"] .task-context>span{color:#232d38}
+html[data-theme="light"] .schedule-calendar small{color:#3c4753}
+html[data-theme="light"] .schedule-calendar button{border:1px solid #bcc6d2;background:#eff2f6}
+html[data-theme="light"] .schedule-calendar button[aria-pressed=true]{background:#e3f2ef;color:#2e2e2e}
+html[data-theme="light"] .schedule-summary{background:#eff3f6}
+html[data-theme="light"] .schedule-summary span{background:#e5ecf0}
+html[data-theme="light"] .coach-overview{color:#1f2d3c}
+html[data-theme="light"] .coach-day p{color:#3d4652}
+html[data-theme="light"] .overview-section-label{color:#3d4652}
+html[data-theme="light"] .coach-panel{background:#f0f2f5;border:1px solid #bbc5d3}
+html[data-theme="light"] .spotlight-meta{color:#3c4653}
+html[data-theme="light"] .spotlight-meta>b{color:#765719}
+html[data-theme="light"] .spotlight-title>svg{color:#3e4751}
+html[data-theme="light"] .response-total span{color:#3d4652}
+html[data-theme="light"] .response-stack{background:#e6eaef}
+html[data-theme="light"] .response-legend{color:#3a4655}
+html[data-theme="light"] .unanswered{border-top:1px solid #bbc6d2}
+html[data-theme="light"] .unanswered>small{color:#3d4652}
+html[data-theme="light"] .unanswered>div span{background:#e6eaef}
+html[data-theme="light"] .unanswered>button{color:#765719;border:1px solid #d5cbb9}
+html[data-theme="light"] .event-avatars .avatar{border:2px solid #bbc5d3}
+html[data-theme="light"] .attendance-shortcut{background:#eff2f5;border:1px solid #bcc5d2;color:#1f2d3c}
+html[data-theme="light"] .empty-event{color:#3d4652}
+html[data-theme="light"] .empty-event h3{color:#1f2d3c}
+html[data-theme="light"] .attendance-trend .eyebrow{color:#3d4652}
+html[data-theme="light"] .attendance-bars small{color:#3b4754}
+html[data-theme="light"] .trend-range{color:#3d4652}
+html[data-theme="light"] .panel-title .text-button{color:#765719}
+html[data-theme="light"] .week-cell{background:#eff2f6;border:1px solid #bbc5d3}
+html[data-theme="light"] .week-cell>header span{color:#3d4652}
+html[data-theme="light"] .week-event{background:#e3eef2;color:#195f76}
+html[data-theme="light"] .week-event.race{background:#f2eee3;color:#765819}
+html[data-theme="light"] .week-event small{color:#3a4655}
+html[data-theme="light"] .volume-row>div{background:#e6eaef}
+html[data-theme="light"] .volume-row strong{color:#394656}
+html[data-theme="light"] .regularity-row>span{color:#3d4652}
+html[data-theme="light"] .regularity-row small{color:#3d4652}
+html[data-theme="light"] .regularity-row>strong{color:#196476}
+html[data-theme="light"] .empty-hint{color:#3d4652}
+html[data-theme="light"] .cloud-dashboard .review-list>button{background:#f0f2f5;border-color:#bbc5d3}
+html[data-theme="light"] .cloud-dashboard .cloud-section{border-top:1px solid #bbc5d3}
+@media(min-width:821px){
+html[data-theme="light"] .club-sidebar{border-bottom:1px solid #bbc5d3}
+}
+html[data-theme="light"] .positive{color:#1b7325}
+html[data-theme="light"] .negative{color:#76191d}
+html[data-theme="light"] .attention-panel>button{border-bottom:1px solid #bbc6d2;color:#1f2d3c}
+html[data-theme="light"] .attention-panel small{color:#3d4652}
+html[data-theme="light"] .attention-panel>button>svg{color:#3d4652}
+html[data-theme="light"] .weekly-volume>.text-button{color:#765719}
+html[data-theme="light"] .weekly-goal-editor{border-top:1px solid #bbc6d2}
+html[data-theme="light"] .spotlight-title:hover{color:#765719}
+html[data-theme="light"] .calendar-view-switch{background:#e6eaef}
+html[data-theme="light"] .calendar-view-switch button[aria-pressed=true]{background:#e6eaef;color:#765719}
+html[data-theme="light"] .email-reminder>button{color:#765719;border:1px solid #d5cbb9}
+html[data-theme="light"] .reminder-preview{background:#eff2f6}
+html[data-theme="light"] .email-reminder [role=alert]{color:#763819}
+html[data-theme="light"] .members-tabs{background:#e6eaef}
+html[data-theme="light"] .members-tabs button{color:#3a4555}
+html[data-theme="light"] .members-tabs button[aria-selected=true]{background:#e6eaef;color:#765719}
+html[data-theme="light"] .calendar-editor{border:1px solid #bcc6d2;background:#eff2f5}
+@media(min-width:900px){
+html[data-theme="light"] .calendar-editor .editor-footer{background:#eff2f5}
+}
+html[data-theme="light"] .journal-heading p{color:#3d4652}
+html[data-theme="light"] .journal-type-pills button{border:1px solid #bcc6d2}
+html[data-theme="light"] .journal-kpis article{background:#f0f2f5;border:1px solid #bbc5d3}
+html[data-theme="light"] .journal-kpis small{color:#3d4652}
+html[data-theme="light"] .journal-kpis article>span{color:#3d4652}
+html[data-theme="light"] .journal-data-note{color:#3d4652}
+html[data-theme="light"] .journal-chart-legend span{color:#384656}
+html[data-theme="light"] .weekly-total{color:#232d39}
+html[data-theme="light"] .weekly-segments{background:#e6eaef}
+html[data-theme="light"] .stacked-week>small{border-top:1px solid #bdc6d1;color:#3d4652}
+html[data-theme="light"] .journal-heatmap th{color:#3a4555}
+html[data-theme="light"] .journal-heatmap tbody th{color:#1f2d3c}
+html[data-theme="light"] .journal-heatmap th small{color:#3d4652}
+html[data-theme="light"] .journal-heatmap td>span{background:#e6eaef;color:#3c4653}
+html[data-theme="light"] .journal-heatmap td>span.has-attendance{color:#4c3c10}
+html[data-theme="light"] .journal-records .panel-title .text-button{color:#765719}
+html[data-theme="light"] .journal-record-table th{color:#3d4652;border-bottom:1px solid #bbc5d3}
+html[data-theme="light"] .journal-record-table td{border-bottom:1px solid #bbc5d3}
+html[data-theme="light"] .journal-record-table td>small{color:#3d4652}
+html[data-theme="light"] .journal-record-link{color:#1f2d3c}
+html[data-theme="light"] .journal-record-link>svg{color:#3d4652}
+html[data-theme="light"] .journal-record-link:hover{color:#765719}
+html[data-theme="light"] .journal-note{color:#3a4655}
+html[data-theme="light"] .journal-rpe>span{background:#e6eaef}
+html[data-theme="light"] .journal-pagination{color:#3a4555}
+html[data-theme="light"] .journal-pagination button{background:#e6eaf0}
+html[data-theme="light"] .journal-entry-picker>button{background:#e6eaf0;border:1px solid #bcc6d2}
+html[data-theme="light"] .journal-entry-picker small{color:#3d4652}
+html[data-theme="light"] .attendance-stats article,html[data-theme="light"] .attendance-panel{background:var(--panel,#f0f2f5);border:1px solid #bcc5d1}
+html[data-theme="light"] .attendance-stats small{color:#3d4552}
+html[data-theme="light"] .attendance-matrix th:first-child{background:#f0f2f5}
+html[data-theme="light"] .attendance-matrix thead th:not(:first-child){background:#eff2f6}
+html[data-theme="light"] .attendance-matrix small{color:#3d4552}
+html[data-theme="light"] .attendance-cell{color:#384657;background:#e6eaef}
+html[data-theme="light"] .attendance-cell.present,html[data-theme="light"] .attendance-cell.yes{background:#e3f2ec;color:#1c7329}
+html[data-theme="light"] .attendance-cell.absent,html[data-theme="light"] .attendance-cell.no{background:#f2e3e6;color:#76191d}
+html[data-theme="light"] .attendance-cell.excused{background:#e9e4f1;color:#24104c}
+html[data-theme="light"] .attendance-cell.maybe,html[data-theme="light"] .attendance-cell.waiting{background:#f2ede3;color:#765a19}
+html[data-theme="light"] .attendance-percent{color:#1c7329}
+html[data-theme="light"] .attendance-bulk{border-top:1px solid #bcc5d1}
+html[data-theme="light"] .attendance-group-pills button{color:#262d36;border:1px solid #bbc5d3}
+html[data-theme="light"] .journal-detail-header .eyebrow{color:#765719}
+html[data-theme="light"] .closed-record{color:#1a752c;background:#e3f2ec}
+html[data-theme="light"] .pending-record{color:#765719;background:#f2ede3}
+html[data-theme="light"] .journal-photo-hero{border:1px solid #bbc5d3;background:#eff2f6}
+html[data-theme="light"] .journal-photo-placeholder{color:#3d4652;background:repeating-linear-gradient(135deg,#eff2f5,#eff2f5 20px,#e6eaef 20px,#e6eaef 40px)}
+html[data-theme="light"] .journal-hero-metrics small{color:#3c4653}
+html[data-theme="light"] .journal-gallery .photo-grid .journal-photo-choice{border:2px solid #bbc5d3}
+html[data-theme="light"] .journal-gallery .photo-grid figure>button:not(.journal-photo-choice){background:#eff2f6d9}
+html[data-theme="light"] .journal-detail-kpis article{background:#f0f2f5;border:1px solid #bbc5d3}
+html[data-theme="light"] .journal-detail-kpis small{color:#3c4652}
+html[data-theme="light"] .journal-detail-kpis span{color:#3c4652}
+html[data-theme="light"] .journal-evaluation-charts .panel-title small{color:#3d4652}
+html[data-theme="light"] .journal-attendance-strip{background:#e6eaef}
+html[data-theme="light"] .journal-attendance-breakdown>span{color:#3b4653}
+html[data-theme="light"] .performance-bar-row>span{background:#e6eaef}
+html[data-theme="light"] .journal-coach-notes p{color:#252d37}
+html[data-theme="light"] .journal-coach-notes details{border-top:1px solid #bbc5d3;color:#3c4653}
+html[data-theme="light"] .performance-table th,html[data-theme="light"] .performance-table td{border-bottom:1px solid #bbc5d3}
+html[data-theme="light"] .performance-table small{color:#764f19}
+html[data-theme="light"] .measured-sections form{border-top:1px solid #bbc5d3}
+html[data-theme="light"] .journal-share-panel canvas{border:1px solid #bbc5d3;background:#eff2f5}
+html[data-theme="light"] .share-format-tabs{background:#eff2f5;border:1px solid #bbc5d3}
+html[data-theme="light"] .share-dimensions{color:#3c4653}
+html[data-theme="light"] .journal-change-photo{background:#eff2f6e6;border:1px solid #bbc5d3}
+html[data-theme="light"] .journal-detail-main .journal-back{color:#765719}
+html[data-theme="light"] .race-result-switch{background:#eff2f6;border:1px solid #bbc5d3}
+html[data-theme="light"] .race-team-summary span{background:#eff2f6;border:1px solid #bbc5d3;color:#3a4655}
+html[data-theme="light"] .race-team-summary b{color:#202d3c}
+html[data-theme="light"] .race-team-card{background:#eff2f6;border:1px solid #bbc5d3}
+html[data-theme="light"] .race-team-card header small{color:#394756}
+html[data-theme="light"] .race-team-icon{color:#765719}
+html[data-theme="light"] .race-team-rank{color:#765719}
+html[data-theme="light"] .race-team-entrants>span{background:#e6eaef;color:#232e39}
+html[data-theme="light"] .race-team-card .preserve-lines{color:#3a4755}
+html[data-theme="light"] .race-teams-empty{border:1px dashed #bbc5d3;color:#3b4754}
+html[data-theme="light"] .race-team-editor{background:#eff2f6;border:1px solid #bbc5d3}
+html[data-theme="light"] .race-team-picker{border:1px solid #bbc5d3}
+html[data-theme="light"] .race-team-picker label{border-bottom:1px solid #bbc6d3}
+html[data-theme="light"] .games-empty{border:1px dashed #bbc5d3;color:#3a4754}
+html[data-theme="light"] .training-game-card{background:#eff2f6;border:1px solid #bbc5d3}
+html[data-theme="light"] .game-kind-label{color:#765719}
+html[data-theme="light"] .game-coverage{color:#394656}
+html[data-theme="light"] .game-results-table th,html[data-theme="light"] .game-results-table td{border-bottom:1px solid #bbc5d3}
+html[data-theme="light"] .game-results-table thead th{color:#3a4755}
+html[data-theme="light"] .game-results-table .game-leading{color:#765719}
+html[data-theme="light"] .game-unverified{color:#765319}
+html[data-theme="light"] .game-editor{background:#eff2f6;border:1px solid #bbc5d3}
+html[data-theme="light"] .game-player-picker{border:1px solid #bbc5d3}
+html[data-theme="light"] .game-player-picker label{border-bottom:1px solid #bbc6d3}
+@media(max-width:600px){
+html[data-theme="light"] .game-results-table tr{border-bottom:1px solid #bbc5d3}
+html[data-theme="light"] .game-results-table td:nth-child(3){color:#394656}
+}
+html[data-theme="light"] .member-bell{border:1px solid #bbc5d3;background:#eff2f5}
+html[data-theme="light"] .member-dashboard .eyebrow{color:#3a4754}
+html[data-theme="light"] .member-featured,html[data-theme="light"] .member-attendance-card,html[data-theme="light"] .member-response-summary,html[data-theme="light"] .member-detail-hero,html[data-theme="light"] .member-alerts{border:1px solid #bbc5d3;background:#eff2f5}
+html[data-theme="light"] .member-featured-top{color:#3a4754}
+html[data-theme="light"] .member-featured-top>b{color:#765719}
+html[data-theme="light"] .member-dashboard .response-buttons button{background:#eff2f5;border:1px solid #bbc5d3;color:#222d3a}
+html[data-theme="light"] .member-featured-counts{color:#3a4754}
+html[data-theme="light"] .member-week-days button{border:1px solid #bbc5d3;background:#eff2f5}
+html[data-theme="light"] .member-schedule>.member-event-heading{border-top:1px solid #bbc5d3}
+html[data-theme="light"] .member-schedule small{color:#3a4754}
+html[data-theme="light"] .member-rsvp-badge{background:#e6eaef;color:#374557}
+html[data-theme="light"] .member-rsvp-badge.yes{background:#e3f2ec;color:#197639}
+html[data-theme="light"] .member-rsvp-badge.no{background:#f1e4e7;color:#76191d}
+html[data-theme="light"] .member-rsvp-badge.maybe,html[data-theme="light"] .member-rsvp-badge.waiting{background:#f2eee3;color:#765a19}
+html[data-theme="light"] .member-attendance-card h2{color:#3a4754}
+html[data-theme="light"] .member-attendance-card small{color:#3a4754}
+html[data-theme="light"] .member-detail-hero>p svg{color:#3a4754}
+html[data-theme="light"] .member-response-bar{background:#e5eaf0}
+html[data-theme="light"] .member-response-counts small{color:#3a4754}
+html[data-theme="light"] .member-roster li{border-top:1px solid #bbc5d3}
+html[data-theme="light"] .member-avatar{background:#e6eaef}
+html[data-theme="light"] .member-alerts>button{border-top:1px solid #bbc5d3}
+html[data-theme="light"] .member-alerts small{color:#3a4754}
+html[data-theme="light"] .member-history-status{border-bottom:1px solid #bbc5d3}
+html[data-theme="light"] .member-history-status span{color:#3a4754}
+html[data-theme="light"] .response-buttons .companion[aria-pressed="true"],html[data-theme="light"] .member-rsvp-badge.companion{background:#e3ebf2;color:#10304c}
+html[data-theme="light"] .completion-checklist{border:1px solid #d5cab9;background:#f5f3f0}
+html[data-theme="light"] .member-invitation-status.pending b{color:#765a19}
+html[data-theme="light"] .member-invitation-status.linked b,html[data-theme="light"] .member-invitation-status.accepted b{color:#256a49}
+html[data-theme="light"] .member-invitation-status.revoked b,html[data-theme="light"] .member-invitation-status.expired b,html[data-theme="light"] .member-invitation-status.unavailable{color:#761919}
+html[data-theme="light"] .attendance-kind-tabs button{border:1px solid #bbc5d3}
+html[data-theme="light"] .attendance-cell.companion{background:#e3ecf2;color:#195876}
+html[data-theme="light"] .calendar .agenda-entry[style] .event-symbol{background:#eff2f612}
+html[data-theme="light"] .week-event.overview-event-color{color:#1f2d3c}
+html[data-theme="light"] .work-queue-row{border-top:1px solid #bbc5d3}
+html[data-theme="light"] .work-queue-row p{color:#374758}
+html[data-theme="light"] .weekly-volume-total>strong{color:#1f2d3c}
+html[data-theme="light"] .header-chat[aria-pressed=true],html[data-theme="light"] .orange,html[data-theme="light"] .feedback-status,html[data-theme="light"] .feedback-card summary{color:#8a5200}
+html[data-theme="light"] .chat-message p{color:inherit}
+html[data-theme="light"] :is(input,select,textarea){color:#202a38}
+html[data-theme="light"] :is(.primary,.theme-switch button[aria-pressed=true],.chat-badge){color:#101216}
+/* Preserve the shared orange selection pattern in the light palette. */
+html[data-theme="light"] .cloud-dashboard button[role="tab"][aria-selected="true"],
+html[data-theme="light"] .cloud-dashboard :is(.calendar-view-switch,.calendar-filters,.schedule-calendar,.journal-type-pills,.attendance-group-pills,.share-format-tabs,.share-template-tabs,.race-result-switch,.response-buttons,.equipment-picker) button[aria-pressed="true"],
+html[data-theme="light"] .cloud-dashboard :is(.member-filters,.mobile-club-nav) button.active,
+html[data-theme="light"] .cloud-dashboard .kind-switch button.selected{background:var(--orange);color:#10151b;border-color:var(--orange)}
+html[data-theme="light"] .spotlight.overview-event-color .spotlight-meta>b,html[data-theme="light"] .member-featured.overview-event-color .member-featured-top>b{color:color-mix(in srgb,var(--event-color) 45%,#14332e)}
+html[data-theme="light"] .cloud-dashboard .club-sidebar button.active{background:var(--orange);color:#10151b;border-color:var(--orange)}
+html[data-theme="light"] :is(button,a,input,select,textarea,summary):focus-visible{outline-color:#8a5200}

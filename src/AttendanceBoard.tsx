@@ -16,7 +16,7 @@ function TrainingAttendanceBoard({data,groups,now,busy,client,club,onOpen,onChan
  const [month,setMonth]=useState(''),[group,setGroup]=useState(''),[search,setSearch]=useState(''),[page,setPage]=useState(0),[columns,setColumns]=useState(0),[selected,setSelected]=useState('');
  const events=attendanceEvents(data,month,now),visible=events.slice(columns*10,columns*10+10),groupIds=groups.find(g=>g.id===group)?.member_ids;
  const rosters=new Map(events.map(e=>[e.id,attendanceRoster(data,e)]));
- const members=data.members.filter(m=>(!groupIds||groupIds.includes(m.id))&&(!m.removed_at||events.some(e=>rosters.get(e.id)?.has(m.id)))&&m.name.toLocaleLowerCase('cs').includes(search.toLocaleLowerCase('cs'))).sort((a,b)=>a.name.localeCompare(b.name,'cs'));
+ const members=data.members.filter(m=>(!m.event_guest||events.some(e=>rosters.get(e.id)?.has(m.id)))&&(!groupIds||groupIds.includes(m.id))&&(!m.removed_at||events.some(e=>rosters.get(e.id)?.has(m.id)))&&m.name.toLocaleLowerCase('cs').includes(search.toLocaleLowerCase('cs'))).sort((a,b)=>a.name.localeCompare(b.name,'cs'));
  const memberIds=new Set(members.map(m=>m.id));const rows=(event:EventRow)=>data.participation.filter(p=>p.event_id===event.id&&memberIds.has(p.member_id));
  const recent=new Set(data.events.filter(e=>e.event_kind==='training'&&e.status==='scheduled'&&Date.parse(e.starts_at)<=now&&Date.parse(e.starts_at)>=now-56*86400000).map(e=>e.id));
  const rate=attendanceRate(data.participation.filter(p=>recent.has(p.event_id)&&memberIds.has(p.member_id)));

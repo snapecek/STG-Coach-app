@@ -4,9 +4,9 @@ import {ChevronLeft,ChevronRight,Plus,MapPin,Trophy,Dumbbell} from 'lucide-react
 import {weekDates} from './overview';
 import type {ClubData,EventRow} from './clubData';
 import {participationSummary,calendarCells,pragueDate,pragueTime} from './management';
-export function ClubCalendar({events,data,colors=data?.eventTypeColors,onOpen,onCreate}:{colors?:EventTypeColor[];data?:ClubData;events:EventRow[];onOpen:(id:string)=>void;onCreate?:(date:string)=>void}){
+export function ClubCalendar({events,data,initialDate='',colors=data?.eventTypeColors,onOpen,onCreate}:{initialDate?:string;colors?:EventTypeColor[];data?:ClubData;events:EventRow[];onOpen:(id:string)=>void;onCreate?:(date:string)=>void}){
  const [view,setView]=useState('month');
- const now=pragueDate(new Date().toISOString());const [month,setMonth]=useState(now.slice(0,7)),[selected,setSelected]=useState(now),[kind,setKind]=useState('');const [year,monthNumber]=month.split('-').map(Number),visible=events.filter(e=>!kind||e.event_kind===kind);
+ const now=pragueDate(new Date().toISOString());const [month,setMonth]=useState((initialDate||now).slice(0,7)),[selected,setSelected]=useState(initialDate||now),[kind,setKind]=useState('');const [year,monthNumber]=month.split('-').map(Number),visible=events.filter(e=>!kind||e.event_kind===kind);
  function move(amount:number){if(view==='week'){const next=new Date(Date.parse(selected+'T12:00:00Z')+amount*7*86400000).toISOString().slice(0,10);setSelected(next);setMonth(next.slice(0,7));return;}const date=new Date(Date.UTC(year,monthNumber-1+amount,1));setMonth(date.toISOString().slice(0,7));setSelected(date.toISOString().slice(0,10));}
  const cells=view==='week'?weekDates(Date.parse(selected+'T12:00:00Z')):calendarCells(year,monthNumber-1);
  const colorStyle=(e:EventRow)=>{const color=eventTypeColor(e,colors);return {'--event-color':color,backgroundColor:color,borderColor:color,color:'#10151b'} as import('react').CSSProperties;};

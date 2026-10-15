@@ -19,3 +19,5 @@ describe('Závody v analýze',()=>{
  it('nepřevádí starší závodní údaje na zaměření a minuty tréninku',()=>{const race={...event,event_kind:'race' as const,type:'Síla',actual_duration_minutes:180};const summary=analysisSummary(data,[race]);expect(summary.minutes).toBe(0);expect(summary.recordedDurations).toBe(0);expect(summary.byType).toEqual([{type:'Závody',count:1}]);expect(summary.byEquipment).toEqual([])});
  it('tréninkové filtry nezahrnou starší závod se stejnými hodnotami',()=>{const race={...event,id:'race',event_kind:'race' as const};const mixed={...data,events:[race]};expect(filterAnalysis(mixed,{...noFilters,type:'Běh'})).toEqual([]);expect(filterAnalysis(mixed,{...noFilters,equipment:'gumy'})).toEqual([])});
 });
+
+it('v analýze zachová skutečnou vzdálenost a rozliší zaznamenanou nulu od chybějící hodnoty',()=>{const s=analysisSummary(data,[{...event,actual_distance_km:0},{...event,id:'second',actual_distance_km:11.2},{...event,id:'unknown',actual_distance_km:null},{...event,id:'race-distance',event_kind:'race',actual_distance_km:42}]);expect(s.distance).toBe(11.2);expect(s.recordedDistances).toBe(2)});

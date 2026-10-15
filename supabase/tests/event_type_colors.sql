@@ -20,6 +20,14 @@ do $$begin
 end $$;
 select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
 insert into event_type_colors(club_id,event_kind,type_key,color) values ('20000000-0000-4000-8000-000000000001','training','síla','#bba7ed'),('20000000-0000-4000-8000-000000000001','race','síla','#70b5ff');
+-- Every additional swatch can be stored, while the existing race color is preserved.
+do $$declare swatch text;begin
+ foreach swatch in array array['#c4e86b','#8adcf4','#969fff','#df8cf1','#ff7f9f','#e9ad66','#43d6c5','#e2e8f0'] loop
+  update event_type_colors set color=swatch where event_kind='training';
+  if (select color from event_type_colors where event_kind='training')<>swatch then raise exception 'FAIL extended palette';end if;
+ end loop;
+ if (select color from event_type_colors where event_kind='race')<>'#70b5ff' then raise exception 'FAIL existing color changed';end if;
+end $$;
 update event_type_colors set color='#f3a0cb' where event_kind='training';
 do $$begin
  begin insert into event_type_colors(club_id,event_kind,type_key,color) values ('20000000-0000-4000-8000-000000000002','training','síla','#bba7ed');raise exception 'FAIL foreign club write';exception when insufficient_privilege then null;end;

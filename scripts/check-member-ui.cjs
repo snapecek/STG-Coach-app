@@ -73,6 +73,24 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
  }
  async function login(page){await page.goto('http://127.0.0.1:5173');await page.getByLabel('E-mail',{exact:true}).fill(user.email);await page.getByLabel('Heslo',{exact:true}).fill('fictional-password');assert.equal(await page.getByLabel('Heslo',{exact:true}).getAttribute('type'),'password');await page.getByRole('button',{name:'Zobrazit heslo: Heslo',exact:true}).click();assert.equal(await page.getByLabel('Heslo',{exact:true}).getAttribute('type'),'text');assert.equal(await page.getByLabel('Heslo',{exact:true}).inputValue(),'fictional-password');await page.getByRole('button',{name:'Skrýt heslo: Heslo',exact:true}).click();assert.equal(await page.getByLabel('Heslo',{exact:true}).getAttribute('type'),'password');await page.getByRole('button',{name:'Přihlásit se',exact:true}).click();}
  try{
+  if(process.env.STG_RACE_ATTENDANCE_ONLY==='1'){
+   const v=await context('coach',false,false,true),p=v.page,state=v.state(),past=new Date(Date.now()-2*86400000).toISOString();
+   state.events.find(e=>e.id===events[1].id).starts_at=past;state.participation.find(r=>r.event_id===events[1].id).attended=true;
+   state.participation.push({club_id:club,event_id:events[1].id,member_id:state.people[1].id,response:'companion',attended:true});state.people[1].removed_at=new Date().toISOString();
+   const pending={...events[1],id:'50000000-0000-4000-8000-000000000096',name:'Fiktivní neověřený závod',starts_at:past};state.events.push(pending);state.participation.push({club_id:club,event_id:pending.id,member_id:member,response:'yes',attended:null});
+   state.participation.push({club_id:club,event_id:events[2].id,member_id:member,response:'companion',attended:null});
+   await p.setViewportSize({width:1440,height:1000});await login(p);await p.getByRole('navigation',{name:'Hlavní navigace',exact:true}).getByRole('button',{name:'Docházka',exact:true}).click();
+   assert.equal(await p.getByRole('tab',{name:'Tréninky',exact:true}).getAttribute('aria-selected'),'true');await p.getByRole('tab',{name:'Závody',exact:true}).click();
+   const panel=p.getByRole('tabpanel',{name:'Závody',exact:true});await panel.locator('.attendance-matrix').waitFor();assert.equal(await panel.getByText(events[0].name,{exact:true}).count(),0);
+   const own=panel.getByRole('row').filter({has:p.getByRole('rowheader',{name:'Fiktivní člen',exact:true})});assert.equal(await own.locator('td').last().textContent(),'1');
+   await panel.getByRole('button',{name:'Fiktivní člen · '+pending.name+' · Neověřeno · Zúčastním se',exact:true}).waitFor();await panel.getByRole('button',{name:'Fiktivní člen · '+events[2].name+' · Doprovod',exact:true}).waitFor();
+   await panel.getByRole('button',{name:'Fiktivní host skupiny · '+events[1].name+' · Zúčastnil/a se · Doprovod',exact:true}).waitFor();await panel.getByText('Archivovaný člen',{exact:true}).waitFor();
+   for(const width of [390,1440]){await p.setViewportSize({width,height:1000});assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}
+   await panel.getByLabel('Hledat člena v závodní docházce',{exact:true}).fill('nenalezeno');await panel.getByText('Žádní členové pro vybraný filtr.',{exact:true}).waitFor();await panel.getByLabel('Hledat člena v závodní docházce',{exact:true}).fill('');
+   await panel.getByRole('button',{name:'Fiktivní člen · '+events[1].name+' · Zúčastnil/a se',exact:true}).click();await p.getByRole('dialog').waitFor();assert.equal(await p.getByRole('tab',{name:'Účast',exact:true}).getAttribute('aria-selected'),'true');await p.getByRole('button',{name:'Zavřít',exact:true}).click();
+   await p.getByRole('tab',{name:'Tréninky',exact:true}).click();assert.equal(await p.getByRole('tabpanel',{name:'Tréninky',exact:true}).getByText(events[1].name,{exact:true}).count(),0);await p.getByRole('tabpanel',{name:'Tréninky',exact:true}).getByText(events[0].name,{exact:true}).first().waitFor();
+   await v.c.unrouteAll({behavior:'ignoreErrors'});await v.c.close();console.log('PASS race attendance tabs: past actual vs RSVP, companion, archived history, totals, search, responsive table, detail and training separation');await browser.close();return;
+  }
   if(process.env.STG_OPEN_RACES_ONLY==='1'){
    const v=await context('coach'),p=v.page;
    await p.setViewportSize({width:1440,height:1000});await login(p);

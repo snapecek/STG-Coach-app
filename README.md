@@ -360,3 +360,7 @@ První pilot: **1 trenér a 4 členové** v jednom klubu. [Testovací plán](doc
 Veřejné podklady jsou v `public/brand`, barvy v `public/brand/brand-tokens.css`. Tmavé UI používá SVG varianty `-dark`, úzká mobilní hlavička pouze symbol. Světlé plochy používají `trenomi-logo.svg`. Manifest zachovává původní `start_url` i implicitní `id` a `scope`; interní identifikátory, přihlašovací callbacky a klíče úložišť zůstávají původní. Není potřeba SQL migrace. Existující instalace si nový název a ikony převezmou podle aktualizačního cyklu prohlížeče.
 
 Kontrola značky: `STG_BRAND_ONLY=1 npm run test:member-ui` proti spuštěnému testovacímu Vite; používá stejné fiktivní Supabase nastavení jako ostatní UI kontroly. Text připomínkových e-mailů je aktualizován ve zdroji Edge Function `remind-event`; její nasazení v Supabase je samostatné od webového deploye.
+
+## Klubový chat, chat událostí a podněty
+
+Komunikace je společná pro členy a trenéry. Chat najdete v navigaci i u jednotlivých událostí; podněty v nabídce Můj účet. Nové funkce vyžadují jednorázově [migraci 024](supabase/migrations/202610150024_chat_feedback.sql). Postup nasazení, oprávnění, obnovování zpráv a kontroly jsou v [dokumentaci komunikace](docs/COMMUNICATION.md).

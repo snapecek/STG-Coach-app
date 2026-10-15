@@ -1,0 +1,11 @@
+import type {SupabaseClient} from '@supabase/supabase-js';
+export type ChatMessage={id:number;author_name:string;body:string;created_at:string;is_own:boolean};
+export type ChatThread={event_id:string|null;unread:number;last_id:number};
+export type Feedback={id:string;author_name:string;category:'bug'|'broken'|'idea';title:string;body:string;status:'new'|'in_progress'|'done';staff_note:string;created_at:string;updated_at:string;is_own:boolean;has_image:boolean};
+export const feedbackCategories={bug:'Chyba',broken:'Nefunkčnost',idea:'Návrh na doplnění'};
+export const feedbackStatuses={new:'Nové',in_progress:'Řeší se',done:'Hotovo'};
+export function validateMessage(text:string){const value=text.trim();if(!value||value.length>2000)throw new Error('Zpráva musí mít 1 až 2 000 znaků.');return value;}
+export function validateFeedback(title:string,body:string){if(!title.trim()||title.trim().length>120||!body.trim()||body.trim().length>5000)throw new Error('Vyplňte název do 120 znaků a popis do 5 000 znaků.');return {title:title.trim(),body:body.trim()};}
+export function validateFeedbackImage(file:File){if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>5*1024*1024||!file.size)throw new Error('Obrázek musí být PNG, JPEG nebo WebP do 5 MB.');}
+export async function communicationRpc<T>(client:SupabaseClient,name:string,args:Record<string,unknown>):Promise<T>{const {data,error}=await client.rpc(name,args);if(error){if(['PGRST202','PGRST205','42883'].includes(error.code))throw new Error('Tato funkce potřebuje databázovou migraci 024. Po jejím nahrání zkuste načíst znovu.');if(error.message==='Too many messages')throw new Error('Odesíláte příliš rychle. Počkejte minutu a zkuste to znovu.');if(error.message==='Too many reports')throw new Error('Byl dosažen hodinový limit podnětů. Zkuste to později.');if(error.code==='42501')throw new Error('K této konverzaci nebo podnětu již nemáte přístup.');throw new Error('Akci nelze dokončit. Zkontrolujte připojení a zkuste to znovu.');}return data as T;}
+export const notifyChat=()=>window.dispatchEvent(new Event('trenomi-chat-changed'));

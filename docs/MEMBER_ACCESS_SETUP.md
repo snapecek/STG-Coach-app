@@ -11,3 +11,7 @@
 Trenér v registru zvolí **Pozvat účet**, zadá e-mail člena a odešle pozvánku. Nový účet dostane Auth pozvánku s nastavením hesla; existující účet přihlašovací odkaz. Člen přijme klubovou pozvánku po ověření e-mailu. Propojí se s existujícím ID člena, neimportuje kopii. Záznam propojený s jiným účtem nelze převzít. Odvolání pozvánky zruší klubové přijetí; již odeslaný Auth e-mail nelze stáhnout ze schránky.
 
 Doručování není součást běžných automatických testů: nevytvářejte účty ani neposílejte e-maily skutečným členům jako test. Lokální SQL ověřuje role a svázání s e-mailem; HTTP testy handleru používají falešné závislosti. Pro živé doručení použijte vlastní dobrovolně zvolený testovací e-mail a potvrďte jej ve schránce. Ověření dvou skutečných účtů je samostatná kontrola.
+
+## Přehled pozvánek v registru
+
+U každého člena se zobrazuje stav poslední pozvánky (zatím nepozván, čeká na přijetí, přijata, odvolána, vypršela) nebo propojený účet. Čas u „Pozvánka z“ je uložený čas vytvoření pozvánky, zobrazený v Europe/Prague; nejde o potvrzení doručení e-mailu. Přijetí a odvolání mají vlastní čas, pokud jsou zaznamenané. Stejné datum je dostupné v historii po otevření **Spravovat pozvánku**. Odeslání a odvolání přehled obnoví automaticky; po přijetí členem použijte **Obnovit data**. Pokud historii nelze načíst, aplikace ukáže neznámý stav místo tvrzení, že člen nebyl pozván. Přehled funguje i pro existující pozvánky a nevyžaduje další migraci.

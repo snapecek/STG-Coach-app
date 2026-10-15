@@ -4,8 +4,10 @@ import type {ClubAccess} from './supabase';
 import type {EventRow} from './clubData';
 export type EventTypeColor={id:string;club_id:string;event_kind:EventRow['event_kind'];type_key:string;color:string};
 export const typeColorPalette=[['Tyrkysová','#78c3ba'],['Oranžová','#ff925c'],['Modrá','#70b5ff'],['Zelená','#92d68b'],['Fialová','#bba7ed'],['Růžová','#f3a0cb'],['Žlutá','#f6d17c'],['Červená','#f2979b'],['Limetková','#c4e86b'],['Azurová','#8adcf4'],['Indigová','#969fff'],['Purpurová','#df8cf1'],['Korálová','#ff7f9f'],['Měděná','#e9ad66'],['Mátová','#43d6c5'],['Stříbrná','#e2e8f0']] as const;
+// Preserve the persisted palette value accepted by migration 023; render the current brand orange.
+export const displayTypeColor=(color:string)=>color.toLowerCase()==='#ff925c'?'#ffb317':color;
 export const typeColorKey=(type:string)=>type.trim().toLocaleLowerCase('cs');
-export function eventTypeColor(event:Pick<EventRow,'event_kind'|'type'>,colors:EventTypeColor[]=[]){return colors.find(c=>c.event_kind===event.event_kind&&c.type_key===typeColorKey(event.type))?.color||(event.event_kind==='race'?'#ff925c':'#78c3ba');}
+export function eventTypeColor(event:Pick<EventRow,'event_kind'|'type'>,colors:EventTypeColor[]=[]){return displayTypeColor(colors.find(c=>c.event_kind===event.event_kind&&c.type_key===typeColorKey(event.type))?.color||(event.event_kind==='race'?'#ffb317':'#78c3ba'));}
 export function overviewEventStyle(event:Pick<EventRow,'event_kind'|'type'>,colors:EventTypeColor[]=[]):CSSProperties{const color=eventTypeColor(event,colors);return {'--event-color':color,backgroundColor:color+'18'} as CSSProperties;}
 export async function saveEventTypeColor(client:SupabaseClient,club:ClubAccess,kind:EventRow['event_kind'],type:string,color:string|null){
  if(!['owner','coach'].includes(club.role))throw new Error('Barvy může měnit pouze trenér nebo správce.');

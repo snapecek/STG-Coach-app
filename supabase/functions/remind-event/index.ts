@@ -15,7 +15,7 @@ Deno.serve(reminderHandler(appUrl,{
  },
  async send(item,event,idempotency){
   const when=new Date(item.startsAt).toLocaleString('cs-CZ',{timeZone:'Europe/Prague',weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
-  const text=`Dobrý den, ${item.name},\n\nprosím potvrďte svou účast na události ${item.eventName}.\n${when} (Praha)\nMísto: ${item.place}\n\nOtevřete STG Coach a zvolte Jdu / Nejdu / Možná:\n${new URL('/',appUrl).href}\n\nPřipomenutí odeslal trenér vašeho klubu.`;
-  try{const response=await fetch('https://api.resend.com/emails',{method:'POST',signal:AbortSignal.timeout(12000),headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json','Idempotency-Key':idempotency},body:JSON.stringify({from,to:[item.email],subject:'STG Coach: potvrďte účast',text})});if(!response.ok)throw new Error('Provider rejected');}finally{await new Promise(resolve=>setTimeout(resolve,550));}
+  const text=`Dobrý den, ${item.name},\n\nprosím potvrďte svou účast na události ${item.eventName}.\n${when} (Praha)\nMísto: ${item.place}\n\nOtevřete Trenomi a zvolte Jdu / Nejdu / Možná:\n${new URL('/',appUrl).href}\n\nPřipomenutí odeslal trenér vašeho klubu.`;
+  try{const response=await fetch('https://api.resend.com/emails',{method:'POST',signal:AbortSignal.timeout(12000),headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json','Idempotency-Key':idempotency},body:JSON.stringify({from,to:[item.email],subject:'Trenomi: potvrďte účast',text})});if(!response.ok)throw new Error('Provider rejected');}finally{await new Promise(resolve=>setTimeout(resolve,550));}
  }
 }));

@@ -15,3 +15,9 @@ Doručování není součást běžných automatických testů: nevytvářejte �
 ## Přehled pozvánek v registru
 
 U každého člena se zobrazuje stav poslední pozvánky (zatím nepozván, čeká na přijetí, přijata, odvolána, vypršela) nebo propojený účet. Čas u „Pozvánka z“ je uložený čas vytvoření pozvánky, zobrazený v Europe/Prague; nejde o potvrzení doručení e-mailu. Přijetí a odvolání mají vlastní čas, pokud jsou zaznamenané. Stejné datum je dostupné v historii po otevření **Spravovat pozvánku**. Odeslání a odvolání přehled obnoví automaticky; po přijetí členem použijte **Obnovit data**. Pokud historii nelze načíst, aplikace ukáže neznámý stav místo tvrzení, že člen nebyl pozván. Přehled funguje i pro existující pozvánky a nevyžaduje další migraci.
+
+## Závody bez předem vybrané soupisky (migrace 021)
+
+Po migraci `supabase/migrations/202610150021_open_races.sql` lze uložit závod s prázdnou soupiskou. Všichni členové klubu najdou nové i dříve vytvořené závody v kalendáři. Po registraci u pořadatele odpoví „Zúčastním se“; tím vznikne jejich vlastní účast. Registraci u pořadatele aplikace neprovádí. Doprovod a ostatní odpovědi zůstávají dostupné. Odpovědi se uzavírají při začátku závodu a nemění trenérovu docházku. Skupinové tréninky zůstávají přístupné pouze své soupisce.
+
+Nejprve spusťte migraci 021 v Supabase SQL Editoru, potom nasaďte odpovídající frontend. Bez migrace původní databáze prázdnou soupisku stále odmítne.

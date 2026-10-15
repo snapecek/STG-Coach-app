@@ -115,7 +115,7 @@ export function validateRaceDetails(input:{race_distance_km?:number|null;race_re
  if(input.race_registration_url){try{const url=new URL(input.race_registration_url);if(url.protocol!=='https:'||url.username||url.password||input.race_registration_url.length>1000||/\s/.test(input.race_registration_url))throw new Error();}catch{throw new Error('Odkaz na registraci musí být platná HTTPS adresa bez přihlašovacích údajů.');}}
 }
 export async function createClubRace(client:SupabaseClient,club:ClubAccess,input:{id:string;name:string;place:string;type:string;plan:string;starts_at:string;duration_minutes:number;race_distance_km:number|null;race_registration_url:string},entrants:string[]){
- staff(club);validateRaceDetails(input);if(entrants.length<1||entrants.length>500||new Set(entrants).size!==entrants.length)throw new Error('Vyberte alespoň jednoho závodníka, nejvýše 500.');await verify(client);
+ staff(club);validateRaceDetails(input);if(entrants.length>500||new Set(entrants).size!==entrants.length)throw new Error('Vyberte nejvýše 500 různých účastníků.');await verify(client);
  return checked<EventRow>(await client.rpc('create_club_race',{target_club:club.id,race:{...input,name:text(input.name,'Název',80),place:text(input.place,'Místo'),type:text(input.type,'Disciplína',40)},entrants}),'Závod se nepodařilo vytvořit. Zkontrolujte soupisku a migraci databáze.');
 }
 export async function removeRaceEntrant(client:SupabaseClient,club:ClubAccess,eventId:string,memberId:string){

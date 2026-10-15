@@ -1,3 +1,4 @@
+import type {EventTypeColor} from './eventTypeColors';
 import {removeAllEventPhotos} from './photos';
 import type {SupabaseClient} from '@supabase/supabase-js';
 import {dates,trainingDates} from './domain';
@@ -6,7 +7,7 @@ export type MemberRow={id:string;club_id:string;name:string;kind:'member'|'guest
 export type TemplateRow={id:string;club_id:string;name:string;type:string;place:string;minutes:number;plan:string};
 export type EventRow={id:string;club_id:string;template_id:string|null;name:string;starts_at:string;place:string;type:string;plan:string;duration_minutes:number;event_kind:'training'|'race';status:'scheduled'|'cancelled';actual_notes:string;completed_at:string|null;completed_by:string|null;actual_duration_minutes:number|null;perceived_effort:number|null;equipment:string[];race_distance_km?:number|null;race_registration_url?:string;capacity?:number|null;source_group_id?:string|null;group_name?:string;roster_only?:boolean;series_id?:string|null;actual_distance_km?:number|null};
 export type ParticipationRow={club_id:string;event_id:string;member_id:string;response:'yes'|'no'|'maybe'|'companion'|null;attendance_excused?:boolean;attended:boolean|null;confirmed_by:string|null;seat_status?:'confirmed'|'waiting'|null;reservation_order?:number|null};
-export type ClubData={members:MemberRow[];templates:TemplateRow[];events:EventRow[];participation:ParticipationRow[]};
+export type ClubData={eventTypeColors?:EventTypeColor[];members:MemberRow[];templates:TemplateRow[];events:EventRow[];participation:ParticipationRow[]};
 export const emptyClubData=():ClubData=>({members:[],templates:[],events:[],participation:[]});
 export const canManage=(club:ClubAccess)=>club.role==='owner'||club.role==='coach';
 export const clubTimeZone='Europe/Prague';
@@ -46,13 +47,14 @@ export async function loadClubData(client:SupabaseClient,club:ClubAccess,signal?
    result.push(...rows);if(rows.length<size)return result;
   }
  }
- const [members,templates,events,participation]=await Promise.all([
+ const [members,templates,events,participation,eventTypeColors]=await Promise.all([
   canManage(club)?readAll<MemberRow>('members','id,club_id,name,kind,removed_at,purge_after,user_id'):Promise.resolve([]),
   readAll<TemplateRow>('templates','id,club_id,name,type,place,minutes,plan'),
   readAll<EventRow>('events','id,club_id,template_id,name,starts_at,place,type,plan,duration_minutes,event_kind,status,actual_notes,completed_at,completed_by,actual_duration_minutes,perceived_effort,equipment,race_distance_km,race_registration_url,capacity,source_group_id,group_name,roster_only,series_id,actual_distance_km'),
-  canManage(club)?readAll<ParticipationRow>('participation','club_id,event_id,member_id,response,attended,confirmed_by,seat_status,reservation_order,attendance_excused'):Promise.resolve([])
+  canManage(club)?readAll<ParticipationRow>('participation','club_id,event_id,member_id,response,attended,confirmed_by,seat_status,reservation_order,attendance_excused'):Promise.resolve([]),
+  readAll<EventTypeColor>('event_type_colors','id,club_id,event_kind,type_key,color')
  ]);
- return {members,templates,events:events.sort((a,b)=>a.starts_at.localeCompare(b.starts_at)),participation};
+ return {members,templates,eventTypeColors,events:events.sort((a,b)=>a.starts_at.localeCompare(b.starts_at)),participation};
 }
 export async function addMember(client:SupabaseClient,club:ClubAccess,name:string,kind:MemberRow['kind']){
  staff(club);if(!['member','guest'].includes(kind))throw new Error('Neplatný typ člena.');await verify(client);

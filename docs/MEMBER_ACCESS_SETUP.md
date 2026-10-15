@@ -21,3 +21,7 @@ U každého člena se zobrazuje stav poslední pozvánky (zatím nepozván, ček
 Po migraci `supabase/migrations/202610150021_open_races.sql` lze uložit závod s prázdnou soupiskou. Všichni členové klubu najdou nové i dříve vytvořené závody v kalendáři. Po registraci u pořadatele odpoví „Zúčastním se“; tím vznikne jejich vlastní účast. Registraci u pořadatele aplikace neprovádí. Doprovod a ostatní odpovědi zůstávají dostupné. Odpovědi se uzavírají při začátku závodu a nemění trenérovu docházku. Skupinové tréninky zůstávají přístupné pouze své soupisce.
 
 Nejprve spusťte migraci 021 v Supabase SQL Editoru, potom nasaďte odpovídající frontend. Bez migrace původní databáze prázdnou soupisku stále odmítne.
+
+## Sdílená paleta kalendáře (migrace 022)
+
+Nejprve spusťte `supabase/migrations/202610150022_event_type_colors.sql`, potom nasaďte odpovídající frontend. Trenér nebo správce může ve formuláři nové i upravované události pod zaměřením/disciplínou kliknout na jednu z osmi barev. Barva se ukládá okamžitě a samostatně od události, pro daný typ a druh události v celém klubu. Platí i pro starší události a členský kalendář. Tlačítko „Obnovit výchozí barvu“ vrátí původní barvu. Tréninky a závody mají nezávislé nastavení; změna palety nemění docházku, výsledky ani dokončení událostí.

@@ -1,4 +1,5 @@
-import {useState} from 'react';
+import {useState,type ComponentProps} from 'react';
+import {RaceAttendanceBoard} from './RaceAttendanceBoard';
 import type {SupabaseClient} from '@supabase/supabase-js';
 import type {ClubAccess} from './supabase';
 import type {ClubData,EventRow,ParticipationRow} from './clubData';
@@ -10,7 +11,7 @@ import {EventReminder} from './EventReminder';
 const labels:Record<string,string>={present:'✓',absent:'×',excused:'O',unverified:'?',yes:'Ano',no:'Ne',maybe:'Mož.',unknown:'?',waiting:'Čeká'};
 const descriptions:Record<string,string>={present:'Přišel',absent:'Nepřišel',excused:'Omluven',unverified:'Neověřeno',yes:'Přijde',no:'Nepřijde',maybe:'Možná',unknown:'Bez odpovědi',waiting:'Čekací listina'};
 type Patch={response:ParticipationRow['response']}|{attended:boolean|null;attendance_excused?:boolean};
-export function AttendanceBoard({data,groups,now,busy,client,club,onOpen,onChange,onBulk}:{data:ClubData;groups:TrainingGroup[];now:number;busy:boolean;client:SupabaseClient;club:ClubAccess;onOpen:(id:string)=>void;onChange:(event:string,member:string,patch:Patch)=>void;onBulk:(event:EventRow,members:string[])=>void}){
+function TrainingAttendanceBoard({data,groups,now,busy,client,club,onOpen,onChange,onBulk}:{data:ClubData;groups:TrainingGroup[];now:number;busy:boolean;client:SupabaseClient;club:ClubAccess;onOpen:(id:string)=>void;onChange:(event:string,member:string,patch:Patch)=>void;onBulk:(event:EventRow,members:string[])=>void}){
  const [month,setMonth]=useState(''),[group,setGroup]=useState(''),[search,setSearch]=useState(''),[page,setPage]=useState(0),[columns,setColumns]=useState(0),[selected,setSelected]=useState('');
  const events=attendanceEvents(data,month,now),visible=events.slice(columns*10,columns*10+10),groupIds=groups.find(g=>g.id===group)?.member_ids;
  const rosters=new Map(events.map(e=>[e.id,attendanceRoster(data,e)]));
@@ -30,4 +31,9 @@ export function AttendanceBoard({data,groups,now,busy,client,club,onOpen,onChang
  {!members.length&&<p className="muted">Žádní členové pro vybraný filtr.</p>}{!events.length&&<p className="muted">V tomto období nejsou žádné tréninky.</p>}
  <div className="attendance-pagination"><button disabled={!columns} onClick={()=>setColumns(v=>v-1)}>Předchozí termíny</button><span>{Math.min(columns*10+1,events.length)}–{Math.min((columns+1)*10,events.length)} z {events.length}</span><button disabled={(columns+1)*10>=events.length} onClick={()=>setColumns(v=>v+1)}>Další termíny</button><button disabled={!page} onClick={()=>setPage(v=>v-1)}>Předchozí členové</button><span>{Math.min(page*10+1,members.length)}–{Math.min((page+1)*10,members.length)} z {members.length}</span><button disabled={(page+1)*10>=members.length} onClick={()=>setPage(v=>v+1)}>Další členové</button></div>
  <div className="attendance-bulk"><label>Hromadná docházka<select aria-label="Trénink pro hromadnou docházku" value={chosen?.id||''} onChange={e=>setSelected(e.target.value)}><option value="" disabled>Vyberte trénink</option>{events.filter(e=>Date.parse(e.starts_at)<=now).map(e=><option key={e.id} value={e.id}>{pragueDate(e.starts_at)} · {e.name}</option>)}</select></label><button disabled={busy||!chosen||!unverified.length} onClick={()=>chosen&&onBulk(chosen,unverified.map(m=>m.id))}>Označit neověřené přítomné ({unverified.length})</button>{next&&<EventReminder key={next.id} client={client} club={club} eventId={next.id}/>}</div></section></div>;
+}
+
+export function AttendanceBoard(props:ComponentProps<typeof TrainingAttendanceBoard>){
+ const [kind,setKind]=useState<'training'|'race'>('training');
+ return <><div className="attendance-kind-tabs" role="tablist" aria-label="Druh docházky"><button id="attendance-training-tab" role="tab" aria-selected={kind==='training'} aria-controls="attendance-kind-panel" onClick={()=>setKind('training')}>Tréninky</button><button id="attendance-race-tab" role="tab" aria-selected={kind==='race'} aria-controls="attendance-kind-panel" onClick={()=>setKind('race')}>Závody</button></div><div id="attendance-kind-panel" role="tabpanel" aria-labelledby={kind==='training'?'attendance-training-tab':'attendance-race-tab'}>{kind==='training'?<TrainingAttendanceBoard {...props}/>:<RaceAttendanceBoard data={props.data} now={props.now} onOpen={props.onOpen}/>}</div></>;
 }

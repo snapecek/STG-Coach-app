@@ -6,7 +6,7 @@ Název, logo, práva trenérů, založení dalšího klubu a archivaci spravuje 
 
 ## Archivace a záloha
 
-Po potvrzení přesným názvem klubu se volitelně připraví ZIP do zařízení: `data.json` a skutečné soubory z privátních úložišť. ZIP má název `Název klubu_backup_RRRR-MM-DD.zip`, podle názvu klubu a data vytvoření snímku v časové zóně Europe/Prague. Znaky nepovolené v názvech souborů se nahradí pomlčkou. Pokud příprava selže, archivace se nevyvolá. Limitem exportu do paměti prohlížeče je 256 MB; stažení ZIP lze vypnout.
+Po potvrzení přesným názvem klubu se volitelně připraví ZIP do zařízení: `data.json` a skutečné soubory z privátních úložišť. ZIP má název `Název_klubu_backup_RRRR_MM_DD.zip`, podle názvu klubu a data vytvoření snímku v časové zóně Europe/Prague. Mezery, pomlčky a znaky nepovolené v názvech souborů se nahradí podtržítkem. Pokud příprava selže, archivace se nevyvolá. Limitem exportu do paměti prohlížeče je 256 MB; stažení ZIP lze vypnout.
 
 Samotná databázová archivace **vždy** atomicky vytvoří chráněný JSON snímek všech klubových tabulek, označení v chatu a seznamu uložených souborů. Pokud kopie selže, transakce klub nearchivuje. Soubory a živá data zůstanou zmrazené. Archivační zámky serializují běžné zápisy a archivaci. Existující denní úklid archivovaných členů zmrazené kluby vynechává.
 

@@ -240,3 +240,32 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .archived-clubs{margin:20px 0}
 .archived-club-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--border)}
 .archived-club-row small{display:block;color:var(--muted);margin-top:5px}
+
+/* Denser member event cards, with full-size touch targets. */
+.member-dashboard .member-featured{padding:14px 16px;margin-bottom:16px;border-radius:14px}
+.member-featured .member-featured-top{font-size:12px;gap:8px;flex-wrap:wrap}
+.member-featured .member-event-heading{padding:10px 0}
+.member-featured h2{font-size:21px;line-height:1.25;overflow-wrap:anywhere}
+.member-featured .member-featured-counts{font-size:12px;line-height:1.4;margin:8px 0 0}
+.member-dashboard .response-buttons{gap:6px;margin:8px 0}
+.member-dashboard .response-buttons button{min-height:44px;padding:8px 5px;font-size:12px;border-radius:10px}
+.member-detail-dialog{padding:16px}
+.member-dashboard .member-detail-hero{padding:12px;margin:28px 0 10px;gap:5px 10px;grid-template-columns:48px minmax(0,1fr);border-radius:12px}
+.member-detail-hero>.member-date{grid-row:1/span 3;width:48px;padding:6px 3px;border-radius:10px}
+.member-detail-hero .member-date b{font-size:24px}
+.member-detail-hero .member-date small{font-size:10px}
+.member-detail-hero h2{font-size:19px;line-height:1.25;margin:4px 0}
+.member-detail-hero>div>p{margin:4px 0;font-size:12px}
+.member-detail-hero>p{grid-column:2;font-size:12px;gap:6px;line-height:1.4;min-width:0}
+.member-detail-hero>p svg{width:14px;height:14px}
+.member-detail-dialog .member-response-title{font-size:15px;margin:10px 0 6px}
+.member-detail-dialog .member-training-plan{margin:10px 0;padding:10px 12px}
+.member-detail-dialog .member-training-plan h3{font-size:15px;margin:0 0 6px}
+.member-detail-dialog .member-training-plan p{font-size:13px;line-height:1.45;margin:0}
+.member-detail-dialog .member-response-summary{padding:8px 10px;margin:10px 0}
+.member-detail-dialog .member-roster{margin:8px 0}
+.member-detail-dialog .member-roster li{padding:7px 0}
+@media(max-width:640px){.member-detail-dialog{padding:12px}.member-dashboard .member-featured{padding:12px}.member-featured h2{font-size:20px}}
+.member-dashboard .member-featured .own-response,.member-detail-dialog .own-response{padding:0 0 6px}
+.member-featured .reservation-state,.member-detail-dialog .reservation-state{padding:8px 10px;margin:6px 0;font-size:12px}
+.member-featured .own-attendance,.member-detail-dialog .own-attendance{margin:8px 0 0}

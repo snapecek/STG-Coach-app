@@ -169,3 +169,15 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%;min-width:0}body,#root{
 .personal-tasks-pending .section-title h3{margin:0;font-size:17px}
 .personal-tasks-pending .task-row{padding:10px 0}
 .personal-tasks-pending .task-row:last-child{border-bottom:0}
+.conversation-picker{position:relative;margin:0 0 18px;min-width:0}
+.conversation-picker>span{display:block;margin-bottom:8px;color:var(--muted)}
+.conversation-trigger,.conversation-options button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;min-height:48px;background:var(--surface);border:1px solid var(--border);color:inherit;padding:12px}
+.conversation-trigger>span,.conversation-options button>span{flex:1;min-width:0;overflow-wrap:anywhere}
+.conversation-trigger>svg{flex-shrink:0}
+.conversation-total{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 6px;border-radius:50%;background:color-mix(in srgb,var(--orange) 16%,var(--surface));color:var(--orange);font-size:12px;flex-shrink:0;font-variant-numeric:tabular-nums}
+.conversation-options{position:absolute;left:0;right:0;top:100%;z-index:25;max-height:55dvh;overflow:auto;overscroll-behavior:contain;background:var(--raised);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px #0005;padding:6px}
+.conversation-options button{border-color:transparent;background:transparent;border-radius:8px}
+.conversation-options button:hover,.conversation-options button:focus-visible,.conversation-options button[aria-selected=true]{background:color-mix(in srgb,var(--orange) 10%,var(--surface));border-color:var(--orange)}
+.conversation-options small{display:block;color:var(--muted);margin-top:4px}
+.conversation-group{font-size:12px;font-weight:600;color:var(--muted);padding:10px 8px}
+html[data-theme="light"] .conversation-total{color:#8a5200}

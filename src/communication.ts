@@ -1,6 +1,6 @@
 import type {SupabaseClient} from '@supabase/supabase-js';
 export type ChatMessage={id:number;author_name:string;body:string;created_at:string;is_own:boolean};
-export type ChatThread={event_id:string|null;conversation_id?:string|null;unread:number;last_id:number};
+export type ChatThread={event_id:string|null;conversation_id?:string|null;unread:number;last_id:number;message_count?:number};
 export type Feedback={id:string;author_name:string;category:'bug'|'broken'|'idea';title:string;body:string;status:'new'|'in_progress'|'done';staff_note:string;created_at:string;updated_at:string;is_own:boolean;has_image:boolean};
 export const feedbackCategories={bug:'Chyba',broken:'Nefunkčnost',idea:'Návrh na doplnění'};
 export const feedbackStatuses={new:'Nové',in_progress:'Řeší se',done:'Hotovo'};

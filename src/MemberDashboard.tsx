@@ -17,6 +17,7 @@ export function MemberDashboard({client,club,chatRequest,onChatStateChange}:{cli
  const guestTrigger=useRef<HTMLElement|null>(null);
  function closeGuests(){if(guestBusy)return;setGuestEventId('');requestAnimationFrame(()=>guestTrigger.current?.focus())}
  const chat=useChatThreads(client,club.id);
+ const chatReturnPage=useRef('Přehled');
  const [roster,setRoster]=useState<MemberRosterRow[]>([]),[rosterError,setRosterError]=useState(''),[rosterLoading,setRosterLoading]=useState(false),[rosterVersion,setRosterVersion]=useState(0),[alerts,setAlerts]=useState(false),[allTasks,setAllTasks]=useState(false);
  const [tasks,setTasks]=useState<EventTask[]>([]),[taskError,setTaskError]=useState('');
  const [data,setData]=useState<ClubData>(emptyClubData),[member,setMember]=useState<OwnMember|null>(null),[page,setPage]=useState('Přehled'),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[version,setVersion]=useState(0),[eventId,setEventId]=useState(''),[now,setNow]=useState(Date.now);const lock=useRef(false);
@@ -32,7 +33,7 @@ export function MemberDashboard({client,club,chatRequest,onChatStateChange}:{cli
  const nearest=upcoming[0],today=pragueDate(new Date(now).toISOString()),attendance=ownAttendance(data.events,data.participation,now),counts=rosterCounts(roster),pending=pendingEventTasks(tasks,new Set(data.events.filter(e=>e.status==='scheduled').map(e=>e.id))),unanswered=upcoming.filter(e=>Date.parse(e.starts_at)>now&&!data.participation.find(p=>p.event_id===e.id)?.response),history=data.events.filter(e=>eventEnd(e)<now&&e.status==='scheduled'&&data.participation.some(p=>p.event_id===e.id)).slice().reverse();
  const rosterEvent=current?.id||nearest?.id;
  useEffect(()=>{let alive=true;setRoster([]);setRosterError('');if(!rosterEvent||!member)return;setRosterLoading(true);loadMemberEventRoster(client,club.id,rosterEvent).then(rows=>{if(alive)setRoster(rows)}).catch(err=>{if(alive)setRosterError(err.message)}).finally(()=>{if(alive)setRosterLoading(false)});return()=>{alive=false}},[client,club.id,rosterEvent,member?.id,rosterVersion,version]);
- useEffect(()=>{if(chatRequest?.clubId===club.id)navigate('Chat')},[chatRequest,club.id]);
+ useEffect(()=>{if(chatRequest?.clubId!==club.id)return;if(page==='Chat')navigate(chatReturnPage.current);else{chatReturnPage.current=page;navigate('Chat')}},[chatRequest,club.id]);
  useEffect(()=>{onChatStateChange?.({unread:chat.unread,active:page==='Chat'})},[chat.unread,page,onChatStateChange]);
  function navigate(value:string){setPage(value);setAlerts(false);setEventId(value==='Docházka'?(nearest?.id||''):'')}
  function dateTile(event:EventRow){const d=new Date(event.starts_at);return <span className="member-date"><small>{d.toLocaleDateString('cs-CZ',{timeZone:'Europe/Prague',weekday:'short'})}</small><b>{d.toLocaleDateString('cs-CZ',{timeZone:'Europe/Prague',day:'numeric'})}</b><small>{d.toLocaleDateString('cs-CZ',{timeZone:'Europe/Prague',month:'short'})}</small></span>}

@@ -203,3 +203,21 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .cloud-dashboard>.club-content>.page-title{flex-wrap:wrap}
 .page-title>div:first-child{min-width:0}
 @media(max-width:760px){.cloud-dashboard:not(.member-dashboard) .page-title>div:first-child{flex:1 1 calc(100% - 64px)}.cloud-dashboard:not(.member-dashboard) .page-title>.primary{margin-left:auto}}
+.club-identity{display:flex;align-items:center;gap:12px;min-width:0}
+.club-identity>span:last-child{overflow-wrap:anywhere;min-width:0}
+.club-logo-placeholder{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--muted);flex-shrink:0;overflow:hidden}
+.club-logo-placeholder img{width:100%;height:100%;object-fit:contain;padding:4px}
+.club-settings{display:grid;gap:18px;max-width:860px}
+.settings-panel{padding:22px;border:1px solid var(--border);background:var(--surface);border-radius:16px;min-width:0}
+.settings-panel h2{font-size:19px;margin:0 0 12px}
+.settings-panel>p{margin:12px 0;line-height:1.6}
+.settings-panel .theme-switch{margin:18px 0 0}
+.settings-panel .club-identity{font-size:19px;font-weight:600}
+.settings-panel input[type=file]{max-width:100%;font-size:16px}
+.settings-people{list-style:none;padding:0;margin:16px 0}
+.settings-people li{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border)}
+.settings-people li span{color:var(--muted)}
+.settings-confirm{border:1px solid var(--orange);border-radius:12px;padding:14px;margin-top:16px}
+.settings-confirm p{margin:0 0 12px}
+.settings-confirm button{margin:4px 8px 0 0}
+@media(max-width:760px){.settings-panel{padding:16px}.page-title .club-identity{font-size:24px}.club-logo-placeholder{width:46px;height:46px;border-radius:12px}.club-identity{gap:10px}}

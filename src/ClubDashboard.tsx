@@ -38,6 +38,7 @@ type Confirmation={title:string;message:string;label:string;action:()=>Promise<v
 export function ClubDashboard({client,club,chatRequest,onChatStateChange}:{client:SupabaseClient;club:ClubAccess;chatRequest?:{clubId:string;serial:number}|null;onChatStateChange?:(state:{unread:number;active:boolean})=>void}){
  const [data,setData]=useState<ClubData>(emptyClubData),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[retry,setRetry]=useState(0),[page,setPage]=useState('Přehled'),[modal,setModal]=useState<Modal>(null),[editingTemplate,setEditingTemplate]=useState(''),[eventId,setEventId]=useState(''),[search,setSearch]=useState(''),[archived,setArchived]=useState(false),[formDate,setFormDate]=useState(()=>pragueDate(new Date().toISOString())),[confirm,setConfirm]=useState<Confirmation|null>(null),[sidebarOpen,setSidebarOpen]=useState(false);
  const chat=useChatThreads(client,club.id);
+ const chatReturnPage=useRef('Přehled');
  const presets=useClubPresets(client,club);const [presetTab,setPresetTab]=useState<'training'|PresetKind>('training');
  const [detailTab,setDetailTab]=useState('info');const [tasks,setTasks]=useState<EventTask[]>([]),[taskError,setTaskError]=useState('');
  const [groups,setGroups]=useState<TrainingGroup[]>([]),[groupLoading,setGroupLoading]=useState(true),[groupError,setGroupError]=useState(''),[editingGroup,setEditingGroup]=useState(''),[eventGroup,setEventGroup]=useState('');
@@ -74,7 +75,7 @@ export function ClubDashboard({client,club,chatRequest,onChatStateChange}:{clien
  const nav=[{name:'Přehled',icon:LayoutDashboard},{name:'Kalendář',icon:CalendarDays},{name:'Docházka',icon:ClipboardCheck},{name:'Členové',icon:Users},{name:'Analýza',icon:ChartNoAxesCombined},{name:'Deník',icon:ClipboardCheck},{name:'Šablony',icon:Dumbbell}].filter(n=>manage||['Přehled','Kalendář'].includes(n.name));
  const setEvent=(row:EventRow)=>{if(mounted.current)setData(s=>({...s,events:s.events.map(e=>e.id===row.id?row:e).sort((a,b)=>a.starts_at.localeCompare(b.starts_at))}));};
  const setMember=(row:ClubData['members'][number])=>{if(mounted.current)setData(s=>({...s,members:s.members.map(m=>m.id===row.id?row:m)}));};
- useEffect(()=>{if(chatRequest?.clubId===club.id)navigate('Chat')},[chatRequest,club.id]);
+ useEffect(()=>{if(chatRequest?.clubId!==club.id)return;if(page==='Chat')navigate(chatReturnPage.current);else{chatReturnPage.current=page;navigate('Chat')}},[chatRequest,club.id]);
  useEffect(()=>{onChatStateChange?.({unread:chat.unread,active:page==='Chat'})},[chat.unread,page,onChatStateChange]);
  function navigate(name:string){setCalendarDate('');setJournalId('');setPage(name);setModal(null);setEventId('');setSidebarOpen(false);}
  function newEvent(date=pragueDate(new Date().toISOString()),groupId=''){setEventGroup(groupId);setFormDate(date);setEventId('');setModal('event');}

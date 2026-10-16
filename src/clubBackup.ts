@@ -7,8 +7,8 @@ export function makeBackupZip(entries:{name:string;data:Uint8Array<ArrayBuffer>}
  const end=new Uint8Array(22),e=new DataView(end.buffer);e.setUint32(0,0x06054b50,true);e.setUint16(8,entries.length,true);e.setUint16(10,entries.length,true);e.setUint32(12,centralSize,true);e.setUint32(16,offset,true);return new Blob([...parts,...central,end],{type:'application/zip'});
 }
 export function clubBackupFilename(name:string,createdAt:string){
- const safeName=name.normalize('NFC').replace(/[<>:"/\\|?*\u0000-\u001f]/g,'-').trim().replace(/[. ]+$/g,'').slice(0,100)||'Klub';
- const date=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Prague',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(createdAt));
+ const safeName=name.normalize('NFC').trim().replace(/[<>:"/\\|?*\u0000-\u001f\s\-–—]+/g,'_').replace(/[._]+$/g,'').slice(0,100)||'Klub';
+ const date=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Prague',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(createdAt)).replace(/-/g,'_');
  return safeName+'_backup_'+date+'.zip';
 }
 export async function downloadClubBackup(client:SupabaseClient,clubId:string){const backup=await settingsRpc<ClubBackup>(client,'export_club_backup',{target_club:clubId});const entries=[{name:'data.json',data:new TextEncoder().encode(JSON.stringify(backup,null,2))}];let bytes=entries[0].data.byteLength;for(const file of backup.files){const {data,error}=await client.storage.from(file.bucket).download(file.path);if(error||!data)throw new Error('Soubor v záloze nelze načíst. Klub nebyl archivován.');bytes+=data.size;if(bytes>256*1024*1024)throw new Error('Záloha je pro stažení v prohlížeči příliš velká. Klub nebyl archivován; chráněná archivní kopie je dostupná i bez stažení ZIP.');entries.push({name:'files/'+file.bucket+'/'+file.path,data:new Uint8Array(await data.arrayBuffer())});}const blob=makeBackupZip(entries),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=clubBackupFilename(backup.club.name,backup.created_at);link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);}

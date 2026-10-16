@@ -132,3 +132,40 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%;min-width:0}body,#root{
 @media(max-width:760px){html input:not([type=checkbox]):not([type=radio]):not([type=file]),html textarea,html select{font-size:16px!important}.auth-screen{width:100%;min-width:0}.cloud-card{max-width:100%}.dialog{width:100%;max-width:calc(100vw - 24px)}.chat-message{min-width:0}}
 
 .member-guests{border-top:1px solid var(--border);margin-top:20px;padding-top:20px}.member-guests>p{margin:12px 0}.guest-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);overflow-wrap:anywhere}.guest-row>div{min-width:0}.guest-row small{display:block;color:var(--muted);margin-top:5px}.guest-row button{flex-shrink:0}
+
+/* Compact event detail and visible personal work. */
+.member-dashboard .member-detail-hero{padding:16px;margin:18px 0 16px;border-radius:16px;gap:8px 14px;grid-template-columns:54px minmax(0,1fr)}
+.member-detail-hero .member-date{width:54px;padding:8px}
+.member-detail-hero h2{font-size:21px;margin:5px 0}
+.member-detail-hero>p{font-size:14px;margin:0;gap:8px}
+.member-response-title{font-size:17px;margin:14px 0 10px}
+.member-response-summary{padding:12px 14px;margin:14px 0;border-radius:12px}
+.member-response-summary .member-response-bar{height:5px}
+.member-response-summary .member-response-counts{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:9px}
+.member-response-counts>div{display:flex;align-items:baseline;gap:5px}
+.member-response-summary .member-response-counts b{font-size:16px}
+.member-response-summary .member-response-counts small{font-size:12px}
+.member-roster li{padding:9px 0;gap:9px}
+.member-roster .member-avatar{width:30px;height:30px;min-width:30px;font-size:11px}
+.response-buttons.with-guest{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.personal-tasks-pending,#member-open-tasks{border:1px solid var(--orange);border-left:4px solid var(--orange);background:color-mix(in srgb,var(--orange) 8%,var(--surface));padding:14px;border-radius:12px;margin:16px 0}
+.personal-tasks-pending h3,#member-open-tasks h2{margin-top:0}
+.compact-event-chat{margin:14px 0}
+.compact-event-chat h3{font-size:16px;margin:0 0 8px}
+.compact-event-chat .chat-messages{max-height:240px;overscroll-behavior:contain}
+.compact-event-chat .chat-message{padding:10px 12px}
+.compact-event-chat .chat-message p{margin:6px 0 0}
+.compact-event-chat form{margin-top:10px}
+.guest-modal-overlay{z-index:120}
+.guest-dialog{max-width:500px}
+.guest-dialog .member-guests{margin-top:20px}
+.unread-conversations{padding:14px;border:1px solid var(--orange);border-radius:14px;background:color-mix(in srgb,var(--orange) 8%,var(--surface));margin-bottom:20px}
+.unread-conversations h2{font-size:17px;margin:0 0 10px}
+.unread-conversations>button{display:flex;justify-content:space-between;align-items:center;text-align:left;width:100%;gap:12px;margin-top:6px;min-height:44px;border-color:var(--orange)}
+.unread-conversations>button span{overflow-wrap:anywhere}
+.unread-conversations>button>b{background:var(--orange);color:#101216;border-radius:20px;min-width:26px;padding:3px 8px;text-align:center}
+@media(max-width:640px){.response-buttons.with-guest{grid-template-columns:repeat(2,minmax(0,1fr))}.member-dashboard .member-detail-hero{padding:12px;gap:8px 10px}.member-detail-hero h2{font-size:19px}.member-response-summary{padding:10px}.member-response-summary .member-response-counts{gap:6px 12px}}
+.personal-tasks-pending .section-title{margin-bottom:6px}
+.personal-tasks-pending .section-title h3{margin:0;font-size:17px}
+.personal-tasks-pending .task-row{padding:10px 0}
+.personal-tasks-pending .task-row:last-child{border-bottom:0}

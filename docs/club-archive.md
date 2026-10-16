@@ -1,0 +1,19 @@
+# Správa a archivace klubu
+
+Migrace 030 ponechává současné role a vlastníka. Jedinečný index dovoluje v klubu nejvýše jednoho vlastníka; nekonzistentní existující vlastnictví se neslučuje automaticky. Vlastníka nelze z aplikace odebrat ani převést na trenéra.
+
+Název, logo, práva trenérů, založení dalšího klubu a archivaci spravuje vlastník. Ostatní trenéři si v Nastavení mění pouze osobní vzhled. Odebrání trenérské role ponechá aktivnímu propojenému členovi členský přístup a historii; jinak odstraní klubový přístup.
+
+## Archivace a záloha
+
+Po potvrzení přesným názvem klubu se volitelně připraví ZIP do zařízení: `data.json` a skutečné soubory z privátních úložišť. Pokud příprava selže, archivace se nevyvolá. Limitem exportu do paměti prohlížeče je 256 MB; stažení ZIP lze vypnout.
+
+Samotná databázová archivace **vždy** atomicky vytvoří chráněný JSON snímek všech klubových tabulek, označení v chatu a seznamu uložených souborů. Pokud kopie selže, transakce klub nearchivuje. Soubory a živá data zůstanou zmrazené. Archivační zámky serializují běžné zápisy a archivaci. Existující denní úklid archivovaných členů zmrazené kluby vynechává.
+
+Archivní kopie nemá pro aplikační účty přímé oprávnění ke čtení, změně ani smazání. Členům a trenérům se klub přestane zobrazovat. Vlastník jej může obnovit přes kartu Archivované kluby, a to do času `expires_at = created_at + interval '3 months'`.
+
+## Konec období obnovy
+
+Po třech kalendářních měsících přestane archiv zobrazovat a obnovovat aplikační API. Migrace úmyslně nepřidává nevratný automatický úklid databázových kopií a souborů: jejich fyzická skartace je oddělená údržba provozovatele, která se provádí mimo aplikační účty. Tím nelze hlavním správcem v aplikaci obejít ochranu archivní zálohy. Není to náhrada nezávislých provozních záloh Supabase.
+
+Archivace a obnova se ověřují pouze na fiktivních datech; produkční kontroly nemají provádět archivaci, obnovu, nahrávání loga nebo změny rolí.

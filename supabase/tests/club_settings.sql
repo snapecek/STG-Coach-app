@@ -15,7 +15,7 @@ do $$begin
  begin perform add_club_coach('20000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000003');raise exception 'FAIL self promotion';exception when insufficient_privilege then null;end;
  begin perform create_managed_club('Nepovolený');raise exception 'FAIL member club creation';exception when insufficient_privilege then null;end;
 end $$;
-select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002"}',true);
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
 do $$begin
  if (select count(*) from club_settings_people('20000000-0000-4000-8000-000000000001'))<>3 then raise exception 'FAIL candidate filtering';end if;
  begin perform get_club_profile('20000000-0000-4000-8000-000000000002');raise exception 'FAIL foreign branding';exception when insufficient_privilege then null;end;
@@ -34,7 +34,7 @@ do $$begin
 end $$;
 select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000003"}',true);
 do $$begin if (select count(*) from storage.objects where bucket_id='club-logos')<>1 then raise exception 'FAIL member logo read';end if;end $$;
-select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002"}',true);
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
 select set_club_logo('20000000-0000-4000-8000-000000000001',null);
 delete from storage.objects where bucket_id='club-logos';
 select add_club_coach('20000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000003');

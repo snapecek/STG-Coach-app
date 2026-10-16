@@ -3,6 +3,9 @@ export type InviteDependencies={
  issue:(bearer:string,clubId:string,memberId:string,email:string)=>Promise<{id:string;token:string}>;
  send:(email:string,redirect:string)=>Promise<void>;
  revoke:(bearer:string,id:string)=>Promise<void>;
+ issueApplication?:(bearer:string,clubId:string,email:string)=>Promise<{id:string;token:string}>;
+ revokeApplication?:(bearer:string,id:string)=>Promise<void>;
+ confirmApplicationSent?:(bearer:string,id:string)=>Promise<void>;
 };
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function invitationHandler(appUrl:string,deps:InviteDependencies){
@@ -19,17 +22,20 @@ export function invitationHandler(appUrl:string,deps:InviteDependencies){
   if(!/^Bearer \S{20,8000}$/.test(bearer))return reply(401,{error:'Přihlaste se znovu.'});
   let input:Record<string,unknown>;
   try{const body=await request.text();if(body.length>8000)return reply(413,{error:'Požadavek je příliš dlouhý.'});input=JSON.parse(body);}catch{return reply(400,{error:'Neplatný požadavek.'});}
-  if(!input||typeof input.clubId!=='string'||!uuid.test(input.clubId)||typeof input.memberId!=='string'||!uuid.test(input.memberId)||typeof input.email!=='string')return reply(400,{error:'Zkontrolujte klub, člena a e-mail.'});
+  const application=input?.mode==='application';
+  if(input?.mode!==undefined&&!application)return reply(400,{error:'Neplatný typ pozvánky.'});
+  if(!input||typeof input.clubId!=='string'||!uuid.test(input.clubId)||(!application&&(typeof input.memberId!=='string'||!uuid.test(input.memberId)))||typeof input.email!=='string')return reply(400,{error:'Zkontrolujte klub, člena a e-mail.'});
   const email=input.email.trim().toLowerCase();if(email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return reply(400,{error:'Zadejte platný e-mail.'});
   let invitation:{id:string;token:string}|undefined;
   try{
    if(!await deps.authorize(bearer,input.clubId))return reply(403,{error:'Pozvánky spravuje trenér nebo správce klubu.'});
-   invitation=await deps.issue(bearer,input.clubId,input.memberId,email);
-   const link=new URL(site.href);link.searchParams.set('club-invite',invitation.token);
+   if(application){if(!deps.issueApplication||!deps.revokeApplication||!deps.confirmApplicationSent)throw new Error('Application invitations unavailable');invitation=await deps.issueApplication(bearer,input.clubId,email);}else invitation=await deps.issue(bearer,input.clubId,input.memberId as string,email);
+   const link=new URL(site.href);link.searchParams.set(application?'join-invite':'club-invite',invitation.token);
    await deps.send(email,link.href);
+   if(application)await deps.confirmApplicationSent!(bearer,invitation.id);
    return reply(200,{id:invitation.id,link:link.href,delivery:'queued'});
   }catch{
-   if(invitation){try{await deps.revoke(bearer,invitation.id);}catch{/* Do not leak tokens, email addresses or provider errors. */}}
+   if(invitation){try{if(application)await deps.revokeApplication?.(bearer,invitation.id);else await deps.revoke(bearer,invitation.id);}catch{/* Do not leak tokens, email addresses or provider errors. */}}
    return reply(502,{error:'Pozvánku se nepodařilo odeslat. Zkontrolujte SMTP, nastavení Auth a propojení člena. Zkuste to později.'});
   }
  };

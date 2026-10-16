@@ -1,0 +1,56 @@
+begin;
+insert into auth.users(id) select ('10000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid from generate_series(1,5)n;
+insert into clubs(id,name) values('20000000-0000-4000-8000-000000000001','Klub'),('20000000-0000-4000-8000-000000000002','Cizí');
+insert into club_roles values('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001','coach'),('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000002','member'),('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000003','member'),('20000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000004','coach'),('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000005','member');
+insert into members(id,club_id,user_id,name,kind) select ('30000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,'20000000-0000-4000-8000-000000000001',('10000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,'Člen '||n,'member' from generate_series(2,5)n where n<>4;
+update members set removed_at=now() where user_id='10000000-0000-4000-8000-000000000005';
+insert into events(id,club_id,name,starts_at,place,type,roster_only,group_name) values('50000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','Veřejný trénink',now()+interval '2 days','Park','Běh',false,''),('50000000-0000-4000-8000-000000000002','20000000-0000-4000-8000-000000000001','Soukromý trénink',now()+interval '2 days','Park','Běh',true,'Skupina');
+insert into participation(club_id,event_id,member_id,response) values('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002','30000000-0000-4000-8000-000000000003','yes');
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002"}',true);
+select set_config('test.contact',(select id::text from coach_chat_contacts('20000000-0000-4000-8000-000000000001')),true);
+do $$begin
+ if (select count(*) from chat_mention_candidates('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001'))<>2 then raise exception 'FAIL candidate isolation/self/archive';end if;
+ if exists(select 1 from chat_mention_candidates('20000000-0000-4000-8000-000000000001',null,current_setting('test.contact')::uuid) where role='member') then raise exception 'FAIL private candidate leak';end if;
+ begin perform chat_mention_candidates('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002');raise exception 'FAIL hidden event candidates';exception when insufficient_privilege then null;end;
+ begin perform send_conversation_message_with_mentions('20000000-0000-4000-8000-000000000001',null,current_setting('test.contact')::uuid,'@Člen 3',array['10000000-0000-4000-8000-000000000003'::uuid]);raise exception 'FAIL private forged recipient';exception when insufficient_privilege then null;end;
+ begin perform 1 from chat_mentions;raise exception 'FAIL direct mentions read';exception when insufficient_privilege then null;end;
+end $$;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
+do $$begin
+ if exists(select 1 from chat_mention_candidates('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002') where user_id='10000000-0000-4000-8000-000000000002') then raise exception 'FAIL hidden event recipient';end if;
+ begin perform send_conversation_message_with_mentions('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001',null,'Bez jména',array['10000000-0000-4000-8000-000000000002'::uuid]);raise exception 'FAIL missing mention text';exception when insufficient_privilege then null;end;
+ begin perform send_conversation_message_with_mentions('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001',null,'@Člen 5',array['10000000-0000-4000-8000-000000000005'::uuid]);raise exception 'FAIL archived recipient';exception when insufficient_privilege then null;end;
+end $$;
+select set_config('test.message',send_conversation_message_with_mentions('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001',null,'Ahoj @Člen 2',array['10000000-0000-4000-8000-000000000002'::uuid,'10000000-0000-4000-8000-000000000002'::uuid])::text,true);
+select send_conversation_message('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001',null,'Jméno @Člen 2 bez výběru osoby');
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000003"}',true);
+do $$begin
+ if exists(select 1 from list_chat_mentions('20000000-0000-4000-8000-000000000001')) then raise exception 'FAIL other inbox';end if;
+ begin perform read_chat_mention('20000000-0000-4000-8000-000000000001',current_setting('test.message')::bigint);raise exception 'FAIL mark another user';exception when insufficient_privilege then null;end;
+end $$;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002"}',true);
+do $$begin
+ if (select count(*) from list_chat_mentions('20000000-0000-4000-8000-000000000001'))<>1 then raise exception 'FAIL dedup/no plain-text ping';end if;
+ if not exists(select 1 from list_conversation_messages_with_mentions('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001') where id=current_setting('test.message')::bigint and jsonb_array_length(mentions)=1) then raise exception 'FAIL structured mentions';end if;
+end $$;
+select read_chat_mention('20000000-0000-4000-8000-000000000001',current_setting('test.message')::bigint);
+do $$begin if exists(select 1 from list_chat_mentions('20000000-0000-4000-8000-000000000001')) then raise exception 'FAIL persist read';end if;end $$;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
+select set_config('test.delete',send_conversation_message_with_mentions('20000000-0000-4000-8000-000000000001',null,current_setting('test.contact')::uuid,'Soukromě @Člen 2',array['10000000-0000-4000-8000-000000000002'::uuid])::text,true);
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002"}',true);
+do $$begin if not exists(select 1 from list_chat_mentions('20000000-0000-4000-8000-000000000001') where conversation_id=current_setting('test.contact')::uuid) then raise exception 'FAIL private inbox';end if;end $$;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
+select delete_chat_message('20000000-0000-4000-8000-000000000001',current_setting('test.delete')::bigint);
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002"}',true);
+do $$begin if exists(select 1 from list_chat_mentions('20000000-0000-4000-8000-000000000001')) then raise exception 'FAIL deleted notification';end if;end $$;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000004"}',true);
+do $$begin begin perform list_chat_mentions('20000000-0000-4000-8000-000000000001');raise exception 'FAIL cross club inbox';exception when insufficient_privilege then null;end;end $$;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
+select send_conversation_message_with_mentions('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002',null,'@Člen 3',array['10000000-0000-4000-8000-000000000003'::uuid]);
+reset role;
+delete from participation where event_id='50000000-0000-4000-8000-000000000002';
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000003"}',true);
+do $$begin if exists(select 1 from list_chat_mentions('20000000-0000-4000-8000-000000000001')) then raise exception 'FAIL revoked event inbox';end if;end $$;
+rollback;

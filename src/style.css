@@ -181,3 +181,25 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%;min-width:0}body,#root{
 .conversation-options small{display:block;color:var(--muted);margin-top:4px}
 .conversation-group{font-size:12px;font-weight:600;color:var(--muted);padding:10px 8px}
 html[data-theme="light"] .conversation-total{color:#8a5200}
+.conversation-archive-tabs{display:flex;gap:6px;margin:0 0 14px;flex-wrap:wrap}
+.conversation-archive-tabs button{min-height:44px;border:1px solid var(--border);background:var(--surface);color:var(--muted)}
+.conversation-archive-tabs button[aria-pressed=true]{border-color:var(--orange);color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--surface))}
+.mention-composer{position:relative;min-width:0}
+.mention-suggestions{border:1px solid var(--border);border-radius:12px;background:var(--raised);padding:5px;margin-bottom:8px;max-height:230px;overflow:auto}
+.mention-suggestions button{display:flex;justify-content:space-between;gap:12px;width:100%;text-align:left;padding:12px;min-height:44px;background:transparent;border:1px solid transparent}
+.mention-suggestions button[aria-selected=true]{border-color:var(--orange);background:color-mix(in srgb,var(--orange) 12%,var(--surface))}
+.mention-suggestions small{color:var(--muted)}
+.chat-mention{background:color-mix(in srgb,var(--orange) 18%,var(--surface));color:var(--orange);border-radius:4px;padding:1px 3px;overflow-wrap:anywhere}
+.notification-bell{position:relative;flex-shrink:0;margin-left:auto}
+.member-bell{padding:0;display:flex;align-items:center;justify-content:center}
+.member-bell>svg{display:block;flex-shrink:0;margin:0}
+.notification-panel{position:absolute;right:0;top:58px;width:360px;max-width:calc(100vw - 32px);z-index:35;max-height:70dvh;overflow:auto;overscroll-behavior:contain;box-shadow:0 14px 38px #0006;margin:0;padding:18px;background:var(--surface);border-color:var(--border)}
+.notification-panel h2{font-size:18px;margin:0 0 12px}
+.notification-panel h3{font-size:14px;margin:18px 0 6px}
+.notification-panel>button{border-color:var(--border)}
+.notification-panel button p{font-size:13px;margin:8px 0;overflow-wrap:anywhere}
+html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-archive-tabs button[aria-pressed=true]{color:#8a5200}
+.notification-bell .member-bell{background:var(--surface);border-color:var(--border);color:inherit}
+.cloud-dashboard>.club-content>.page-title{flex-wrap:wrap}
+.page-title>div:first-child{min-width:0}
+@media(max-width:760px){.cloud-dashboard:not(.member-dashboard) .page-title>div:first-child{flex:1 1 calc(100% - 64px)}.cloud-dashboard:not(.member-dashboard) .page-title>.primary{margin-left:auto}}

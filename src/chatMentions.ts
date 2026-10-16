@@ -1,0 +1,6 @@
+export type MentionPerson={user_id:string;name:string;role?:string};
+export type MentionNotice={message_id:number;event_id:string|null;conversation_id:string|null;author_name:string;body:string;created_at:string;event_name:string|null};
+export const normalizeMention=(s:string)=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('cs');
+export function mentionQuery(text:string,caret:number){const prefix=text.slice(0,caret),at=prefix.match(/(?:^|\s)@([^@\n]{0,80})$/);if(at)return {start:caret-at[1].length-1,end:caret,query:at[1],explicit:true};const word=prefix.match(/(?:^|\s)([\p{L}]{2,})$/u);return word?{start:caret-word[1].length,end:caret,query:word[1],explicit:false}:null;}
+export function selectedMentionIds(text:string,people:MentionPerson[]){return [...new Set(people.filter(p=>text.includes('@'+p.name)).map(p=>p.user_id))];}
+export function messageSegments(text:string,people:MentionPerson[]=[]){const names=[...new Set(people.map(p=>'@'+p.name))].sort((a,b)=>b.length-a.length);if(!names.length)return [{text,mention:false}];const pattern=new RegExp('('+names.map(n=>n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')','g');return text.split(pattern).filter(Boolean).map(text=>({text,mention:names.includes(text)}));}

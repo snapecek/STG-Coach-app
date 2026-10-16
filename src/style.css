@@ -329,3 +329,4 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .application-statuses article{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-top:1px solid var(--border)}
 .application-statuses article span{color:var(--muted);font-size:13px}
 @media(max-width:760px){.admission-email-form{display:block}.admission-email-form button{width:100%;margin-top:10px}.admission-request{align-items:start;flex-direction:column}.admission-request .row-actions{width:100%}.admission-requests .panel-title{flex-wrap:wrap}.membership-admissions{padding:12px}.cloud-card:has(.account-actions)>.applicant-panel{padding-top:16px}}
+.user-menu-panel>a.text-button{display:block;margin-top:14px}

@@ -2,12 +2,11 @@ import type {ReactNode} from 'react';
 import {LogoEditor} from './LogoEditor';
 import {downloadClubBackup} from './clubBackup';
 import {useEffect,useRef,useState} from 'react';
-import {ImagePlus} from 'lucide-react';
+import {ClubIdentity} from './ClubIdentity';
 import type {SupabaseClient} from '@supabase/supabase-js';
 import type {ClubAccess} from './supabase';
 import {ThemeSwitch} from './ThemeSwitch';
 import {settingsRpc,updateClubLogo,validateClubName,validateLogo,type SettingsPerson,type ClubProfile} from './clubSettings';
-export function ClubIdentity({name,logoUrl=''}:{name:string;logoUrl?:string}){const [failed,setFailed]=useState(false);useEffect(()=>setFailed(false),[logoUrl]);return <span className="club-identity"><span className="club-logo-placeholder">{logoUrl&&!failed?<img src={logoUrl} alt={'Logo klubu '+name} onError={()=>setFailed(true)}/>:<ImagePlus size={25} aria-label="Místo pro logo klubu"/>}</span><span>{name}</span></span>}
 export function ClubSettings({client,club,profile,logoUrl,profileError,onProfileChanged,onCreated,onBusyChange,onUpdated,onArchived,personalSettings}:{personalSettings?:ReactNode;client:SupabaseClient;club:ClubAccess;profile:ClubProfile|null;logoUrl:string;profileError:string;onProfileChanged:()=>void;onCreated:(club:ClubAccess)=>void;onBusyChange:(busy:boolean)=>void;onUpdated:(club:ClubAccess)=>void;onArchived:()=>void}){
  const owner=club.role==='owner';
  const [cropFile,setCropFile]=useState<File|null>(null),[clubName,setClubName]=useState(club.name),[remove,setRemove]=useState<SettingsPerson|null>(null),[archiving,setArchiving]=useState(false),[confirmationName,setConfirmationName]=useState(''),[localBackup,setLocalBackup]=useState(true);

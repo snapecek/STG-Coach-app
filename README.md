@@ -368,3 +368,8 @@ Obecný chat je soukromý mezi členem a trenéry klubu, chat jednotlivé událo
 ## Světlý režim, mobil a hosté členů
 
 V nabídce Můj účet je přepínač vzhledu. Mobilní viewport a formuláře jsou upravené pro otevření v prohlížeči bez automatického přiblížení. Člen může po potvrzení účasti přihlásit hosta bez účtu na konkrétní trénink; tato část vyžaduje [migraci 026](supabase/migrations/202610150026_member_training_guests.sql). Postup a pravidla popisuje [dokumentace vzhledu a hostů](docs/THEME_MOBILE_GUESTS.md).
+
+
+### Přihlášky nových členů (032)
+
+V sekci Členové lze pozvat zájemce pouze e-mailem bez zakládání člena. Vyplní si jméno a příjmení a vybere klub; přístup vznikne až po potvrzeném schválení trenérem. Při schválení lze zachovat historii existujícího hosta/člena. Původní přidávání a přímé pozvánky zůstávají dostupné. Samostatná registrace je nová volitelná možnost, která mění starší doporučení nechat signups vypnuté. [Aktivace migrace, funkce invite-member a registrací](docs/MEMBERSHIP_APPLICATIONS_SETUP.md).

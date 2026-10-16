@@ -10,6 +10,9 @@ const admin=createClient(url,service,options);
 Deno.serve(invitationHandler(appUrl,{
  async authorize(bearer,clubId){const client=scoped(bearer);const {data,error}=await client.auth.getUser();if(error||!data.user)return false;const role=await client.rpc('has_club_role',{target:clubId,roles:['owner','coach']});return !role.error&&role.data===true;},
  async issue(bearer,clubId,memberId,email){const {data,error}=await scoped(bearer).rpc('issue_club_invitation',{target_club:clubId,target_member:memberId,target_email:email});if(error||!data)throw new Error('Invitation failed');return data;},
+ async issueApplication(bearer,clubId,email){const {data,error}=await scoped(bearer).rpc('issue_join_invitation',{target_club:clubId,target_email:email});if(error||!data)throw new Error('Application invitation failed');return data;},
+ async revokeApplication(bearer,id){const {error}=await scoped(bearer).rpc('revoke_join_invitation',{invitation_id:id});if(error)throw new Error('Revocation failed');},
+ async confirmApplicationSent(bearer,id){const {error}=await scoped(bearer).rpc('mark_join_invitation_sent',{invitation_id:id});if(error)throw new Error('Delivery acknowledgement failed');},
  async send(email,redirect){
   const invitation=await admin.auth.admin.inviteUserByEmail(email,{redirectTo:redirect});
   if(!invitation.error)return;

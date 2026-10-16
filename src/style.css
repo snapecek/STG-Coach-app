@@ -269,3 +269,13 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .member-dashboard .member-featured .own-response,.member-detail-dialog .own-response{padding:0 0 6px}
 .member-featured .reservation-state,.member-detail-dialog .reservation-state{padding:8px 10px;margin:6px 0;font-size:12px}
 .member-featured .own-attendance,.member-detail-dialog .own-attendance{margin:8px 0 0}
+
+.mobile-create-event{display:none}
+@media(max-width:760px){
+ .cloud-dashboard:not(.member-dashboard) .sidebar-toggle,.page-title .overview-create-event{display:none}
+ .coach-day{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+ .coach-day>div{min-width:0;flex:1}
+ .coach-day h2{font-size:22px;letter-spacing:-.4px}
+ .coach-day p{font-size:11px;line-height:1.5}
+ .coach-day .mobile-create-event{display:flex;align-items:center;justify-content:center;gap:5px;min-height:44px;padding:8px 10px;font-size:11px;flex-shrink:0}
+}

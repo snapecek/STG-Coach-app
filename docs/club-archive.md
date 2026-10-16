@@ -4,6 +4,8 @@ Migrace 030 ponechává současné role a vlastníka. Jedinečný index dovoluje
 
 Název, logo, práva trenérů, založení dalšího klubu a archivaci spravuje vlastník. Ostatní trenéři si v Nastavení mění pouze osobní vzhled. Odebrání trenérské role ponechá aktivnímu propojenému členovi členský přístup a historii; jinak odstraní klubový přístup.
 
+Osobní volba primárního klubu v Nastavení se ukládá do metadat přihlášeného účtu (`primary_club_id`). Při vstupu se znovu načte z Auth a použije pouze tehdy, pokud účet má ke klubu stále přístup. Pozvánka má přednost, ostatní kluby zůstávají v horním přepínači a ruční přepnutí nemění primární klub.
+
 ## Archivace a záloha
 
 Po potvrzení přesným názvem klubu se volitelně připraví ZIP do zařízení: `data.json` a skutečné soubory z privátních úložišť. ZIP má název `Název_klubu_backup_RRRR_MM_DD.zip`, podle názvu klubu a data vytvoření snímku v časové zóně Europe/Prague. Mezery, pomlčky a znaky nepovolené v názvech souborů se nahradí podtržítkem. Pokud příprava selže, archivace se nevyvolá. Limitem exportu do paměti prohlížeče je 256 MB; stažení ZIP lze vypnout.

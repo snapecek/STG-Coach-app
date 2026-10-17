@@ -359,3 +359,5 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .simplified-overview .spotlight>p{margin:6px 0;font-size:12px;line-height:1.5}
 .simplified-overview .attendance-shortcut{margin-top:6px;padding:8px 12px;min-height:36px;font-size:12px}
 @media(max-width:760px){.simplified-overview .spotlight{padding:14px}.simplified-overview .spotlight-title h3{font-size:20px}.simplified-overview .attendance-shortcut{min-height:44px}}
+
+.event-edit-delete-actions{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.event-edit-delete-actions>button{white-space:nowrap}

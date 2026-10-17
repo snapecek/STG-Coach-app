@@ -1,0 +1,20 @@
+import {useEffect,useRef,useState} from 'react';
+import type {SupabaseClient} from '@supabase/supabase-js';
+import type {ClubAccess} from './supabase';
+import {validateEventLocation,type EventLocation} from './eventLocation';
+import {loadSavedLocations,saveLocation,deleteSavedLocation,type SavedLocation} from './savedLocations';
+
+export function SavedLocationPicker({client,club,value,place,disabled,onChange,onPlaceChange}:{client:SupabaseClient;club:ClubAccess;value:EventLocation|null;place:string;disabled?:boolean;onChange:(value:EventLocation|null)=>void;onPlaceChange?:(name:string)=>void}){
+ const [rows,setRows]=useState<SavedLocation[]>([]),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[selected,setSelected]=useState(''),[name,setName]=useState(''),[saving,setSaving]=useState(false),[removing,setRemoving]=useState(false),[version,setVersion]=useState(0);
+ const alive=useRef(true),lock=useRef(false);
+ useEffect(()=>{alive.current=true;return()=>{alive.current=false}},[]);
+ useEffect(()=>{let active=true;setLoading(true);setError('');loadSavedLocations(client,club).then(rows=>{if(active)setRows(rows)}).catch(e=>{if(active)setError(e.message)}).finally(()=>{if(active)setLoading(false)});return()=>{active=false}},[client,club.id,version]);
+ async function write(action:()=>Promise<void>){if(lock.current)return;lock.current=true;setBusy(true);setError('');setNotice('');try{await action()}catch(e){if(alive.current)setError(e instanceof Error?e.message:'Místo nelze uložit.')}finally{lock.current=false;if(alive.current)setBusy(false)}}
+ return <section className="saved-location-picker" aria-label="Uložená místa klubu">
+  <label>Uložená místa<select aria-label="Uložená místa" value={selected} disabled={disabled||busy||loading} onChange={e=>{const row=rows.find(r=>r.id===e.target.value);setSelected(e.target.value);setRemoving(false);setNotice('');if(row){onChange(validateEventLocation(row.event_location));onPlaceChange?.(row.name)}}}><option value="">{loading?'Načítám místa…':'Vyberte uložené místo…'}</option>{rows.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></label>
+  <div className="map-tools">{value&&<button type="button" disabled={disabled||busy||loading} onClick={()=>{setSaving(true);setName(place);setRemoving(false)}}>Uložit místo pro příště</button>}{selected&&<button type="button" disabled={disabled||busy} onClick={()=>{setRemoving(true);setSaving(false)}}>Odebrat uložené místo</button>}</div>
+  {saving&&<div className="saved-location-save"><label>Název uloženého místa<input aria-label="Název uloženého místa" maxLength={200} value={name} disabled={disabled||busy} placeholder="Např. Judo hala, Workout Dubina…" onChange={e=>setName(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')e.preventDefault()}}/></label><button type="button" disabled={disabled||busy||!value||!name.trim()} onClick={()=>void write(async()=>{const row=await saveLocation(client,club,name,value!);if(alive.current){setRows(r=>[...r,row].sort((a,b)=>a.name.localeCompare(b.name,'cs')));setSelected(row.id);setSaving(false);setNotice('Místo se šipkami a pokyny je uložené pro celý klub.')}})}>Uložit místo</button><button type="button" disabled={busy} onClick={()=>setSaving(false)}>Zrušit</button></div>}
+  {removing&&<div className="saved-location-remove"><p>Odebrat „{rows.find(r=>r.id===selected)?.name}“ z uložených míst? Mapy v událostech a šablonách zůstanou zachované.</p><button type="button" disabled={disabled||busy} onClick={()=>void write(async()=>{await deleteSavedLocation(client,club,selected);if(alive.current){setRows(r=>r.filter(v=>v.id!==selected));setSelected('');setRemoving(false);setNotice('Místo bylo odebráno ze seznamu.')}})}>Potvrdit odebrání místa</button><button type="button" disabled={busy} onClick={()=>setRemoving(false)}>Zrušit</button></div>}
+  {error&&<p className="auth-error" role="alert">{error} <button type="button" disabled={busy||loading} onClick={()=>setVersion(v=>v+1)}>Zkusit znovu</button></p>}{notice&&<p role="status">{notice}</p>}
+ </section>;
+}

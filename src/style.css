@@ -374,3 +374,15 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .share-template-cards button{position:relative}
 .share-template-cards button>.share-template-number{position:absolute;top:9px;left:9px;box-shadow:0 1px 5px #0006}
 .share-template-picker summary>.share-template-number{margin-right:5px}
+
+/* Sharing is a separate workspace, leaving the journal its full width. */
+.training-journal-detail{grid-template-columns:minmax(0,1fr)}
+.journal-header-actions{flex-wrap:wrap}
+.journal-share-dialog{width:min(600px,calc(100% - 24px));max-width:none;max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--border,#354151);border-radius:16px;background:var(--panel,#171c23);color:var(--text,#eef1f5);overflow:auto;overscroll-behavior:contain}
+.journal-share-dialog::backdrop{background:#000b}
+.journal-share-dialog-toolbar{display:flex;justify-content:flex-end;position:sticky;top:0;z-index:3;background:var(--panel,#171c23);padding:10px 14px;border-bottom:1px solid var(--border,#354151)}
+.journal-share-dialog-toolbar button{display:flex;align-items:center;gap:6px;padding:8px 12px}
+.journal-share-dialog .journal-share-panel{position:static;border:0;margin:0;padding:18px;box-shadow:none}
+.journal-detail-status{min-width:0;max-width:100%}
+.journal-header-actions{max-width:100%;flex-shrink:1}
+@media(max-width:480px){.journal-header-actions{gap:6px}.journal-header-actions>button{padding:8px;font-size:11px;gap:4px}}

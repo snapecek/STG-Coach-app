@@ -77,7 +77,7 @@ Regresní ověření okna a výběru: `CHROMIUM_PATH=/usr/bin/chromium npm run t
 
 ### Titulní fotografie tréninku (migrace 036)
 
-V deníku otevřete trénink → **Upravit** → pod galerií zvolte **Zvolit titulní**. Volba se ukládá okamžitě, označí se jako **Titulní fotografie** a při opakovaném otevření má přednost před dřívějším dočasným výběrem. **Zrušit titulní fotografii** vrátí automatický výběr. Při odstranění souboru galerie bezpečně použije dostupnou fotografii.
+V deníku otevřete trénink, klepněte na miniaturu fotografie a přímo pod snímkem zvolte **Uložit jako hlavní fotografii**. Volba se ukládá okamžitě, tlačítko potvrdí **Hlavní fotografie uložena** a při opakovaném otevření má přednost před dřívějším dočasným výběrem. **Zrušit hlavní fotografii** vrátí automatický výběr. Při odstranění souboru galerie bezpečně použije dostupnou fotografii.
 
 Nejdříve spusťte `supabase/migrations/202610170036_training_cover_photo.sql` v Supabase SQL Editoru. Přidává pouze volitelný sloupec `events.cover_photo_path` s kontrolou souboru ze stejného klubu a události. Dosavadní fotografie se nepřesouvají a volba titulní fotografie nemění dokončení tréninku. Nastavení chrání stávající oprávnění trenérů a archivace klubu. Edge funkce se nemění.
 
@@ -111,3 +111,5 @@ Všech 15 šablon má číslo na miniatuře i u vybraného názvu; původní č�
 Po vložení loga a názvu klubu lze v záložce **Samolepky** zapnout **Ohraničení loga** a vybrat jeho barvu. Nezávisle lze zapnout **Pozadí loga**, zvolit barvu a posuvníkem nastavit **Průhlednost pozadí** (0 % plné, 100 % průhledné). Ve výchozím stavu jsou pozadí i rámeček vypnuté. Průhlednost platí jen pro pozadí; původní logo a název zůstávají plně viditelné a samotný soubor se nemění. Odstranění a následné vrácení prvku obnovuje také tyto volby.
 
 U vloženého loga jsou také **Šířka čáry** (při zapnutém ohraničení), **Zaoblení rohů** a **Odsazení rámečku** (při zapnutém pozadí nebo ohraničení). Odsazení zvětšuje prostor kolem původního loga a názvu bez jejich změny velikosti. Ovládací plocha a úchyty odpovídají novému rozměru včetně tloušťky čáry. Zaoblení se omezuje podle výšky rámečku, aby posuvník odpovídal skutečnému tvaru. Parametry platí pro náhled i PNG a obnovují se spolu s odstraněným prvkem.
+
+U klubového prvku lze vypnout **Zobrazit název klubu** a ponechat pouze původní logo v kompaktním rámečku. Je-li název zapnutý, volba **Tučnější název klubu** použije sílu písma 800. Bez nahraného loga zůstává název zapnutý, aby prvek nebyl prázdný.

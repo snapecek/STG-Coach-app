@@ -2,15 +2,31 @@
 
 V trenérském Deníku otevřete záznam tréninku a panel **Sdílet trénink**.
 
-- **Fotografický plakát**: fotografie z galerie, výrazný název a skutečné údaje z deníku. Bez fotografie se použije grafické pozadí.
-- **Přehled výkonu**: velká dominantní hodnota (skutečná délka, případně vzdálenost nebo účast) a další zaznamenané údaje; fotografie není potřeba.
-- Dosavadní **Nejlepší výkony** zůstávají dostupné. Jména se nezahrnují, dokud je trenér výslovně nezapne.
+| Šablona | Kompozice |
+| --- | --- |
+| Fotografický plakát | Velká fotografie, samostatný spodní název s jemným žlutým akcentem a údaji. |
+| Přehled výkonu | Dominantní skutečná hodnota a další údaje, bez fotografie. |
+| Klubový deník | Světlá magazínová sazba: název nad fotografií, údaje pod ní. |
+| Sportovní poster | Žlutý titulkový pás a boční diagonální akcent, oba mimo fotografii. |
+| Galerijní rám | Světlý paspartový rám, fotografie a samostatný popisek. |
+| Filmový pás | Tmavá kompozice s jemnými linkami kolem fotografie. |
+| Boční panel | Fotografie vpravo a údaje vlevo; ve Story fotografie nahoře a dva sloupce pod ní. |
+| Čistá fotografie | Největší prostor pro fotografii a drobnější doprovodný text mimo ni. |
+| Nejlepší výkony | Dosavadní přehled měřených výsledků. Jména jsou ve výchozím stavu skrytá. |
 
+Volbu otevřete kliknutím na aktuální šablonu (**Změnit · 9 šablon**). Nabídka obsahuje miniatury a po volbě se zavře, aby panel zůstal krátký. Náhledy nabídky se vykreslují jen při jejím otevření.
+
+U všech sedmi fotografických šablon mají klubová hlavička, název, metriky i značka oddělené plochy mimo fotografii. Fotografie se neztmavuje a nepřekrývá textem. Dlouhé názvy se zalomí a podle dostupného prostoru zmenší či zkrátí výpustkou; každá textová plocha má vlastní ořez.
 Náhledové kartičky používají aktuální údaje. Grafika zahrnuje název a dostupné logo klubu, datum v časové zóně Europe/Prague, místo a oficiální logo Trenomi. Chybějící délka, vzdálenost či RPE se nevymýšlí. Výstup používá barvy #FFB317 a #101216 nezávisle na režimu aplikace.
 
 ## Fotografie a výřez
 
-Fotografii vyberte v galerii tréninku. Ve fotografické šabloně upravte **Přiblížení**, **Vodorovný posun** a **Svislý posun**. Posun pracuje v mezích fotografie, takže nevzniknou prázdné okraje. Při základním přiblížení může být jeden směr bez účinku, pokud fotografie tento rozměr přesně vyplňuje. **Obnovit výřez** vrátí střed a základní přiblížení. Výřez se vztahuje pouze na aktuální grafiku; původní soubor ani data tréninku se neupravují. Výběr jiné fotografie resetuje výřez.
+Fotografii vyberte v galerii tréninku. Ve všech fotografických šablonách lze volit:
+
+- **Vyplnit rámeček** (výchozí): fotografie zaplní vyhrazenou plochu, přesah se ořízne.
+- **Celá fotografie**: při základním přiblížení zůstane vidět celý snímek; rozdíl poměrů stran vyplní neutrální pozadí. Vhodné pro skupiny, kde nechcete nikoho oříznout.
+
+Dále upravte **Přiblížení**, **Vodorovný posun** a **Svislý posun**. **Obnovit výřez** vrátí střed a základní přiblížení při zachování vybraného způsobu zobrazení. Při vyplnění může být v základním přiblížení jeden posuv bez účinku, pokud fotografie daný rozměr přesně vyplňuje. Výřez ovlivňuje jen aktuální grafiku, nikoli původní soubor či data tréninku. Výběr jiné fotografie resetuje posun a přiblížení.
 
 ## Výstupy
 
@@ -27,4 +43,4 @@ Písma jsou hostována v `public/fonts`, aby export nezávisel na externím font
 
 Obě písma mají přiloženou licenci SIL Open Font License (`*-OFL.txt`). Používají se jen ve sdílené grafice.
 
-Kontroly: `npm run build`, `npm test`, `npm run test:share-ui` (běžící Vite na portu 5173; pro systémový Chromium lze nastavit `CHROMIUM_PATH=/usr/bin/chromium`). Poslední kontrola používá pouze smyšlená data a ověřuje devět PNG výstupů, přesnou shodu náhledu a stažení, posun/přiblížení/reset, chybějící fotku/logo, dlouhé české názvy, soukromí jmen a šířky 320/390/1440 px. Neukládá změny do Supabase.
+Kontroly: `npm run build`, `npm test`, `npm run test:share-ui` (běžící Vite na portu 5173; pro systémový Chromium lze nastavit `CHROMIUM_PATH=/usr/bin/chromium`). Poslední kontrola používá pouze smyšlená data a ověřuje 27 PNG výstupů všech devíti šablon a tří formátů, přesnou shodu náhledu a stažení, posun/přiblížení/reset, chybějící fotku/logo, dlouhé české názvy, soukromí jmen a šířky 320/390/1440 px. Navíc u 21 fotografických kombinací ověřuje každý pixel plochy fotografie, aby přes ni nebyl vykreslen text ani dekorace; jednotkové testy hlídají oddělení ploch a bezpečné okraje Stories. Neukládá změny do Supabase.

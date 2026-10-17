@@ -1,11 +1,11 @@
 import {drawShareStickers,type ShareSticker} from './shareStickers';
 import {photoPlacement} from './sharePhotoTransform';
-import {photoShareLayout,usesSharePhoto,sharePhotoPath,type GraphicBox} from './journalShareLayouts';
+import {photoShareLayout,usesSharePhoto,sharePhotoPath,type GraphicBox,isSignatureTemplate} from './journalShareLayouts';
 export {usesSharePhoto} from './journalShareLayouts';
 export const shareFormats={'1:1':{width:1080,height:1080,label:'Příspěvek 1:1'},'4:5':{width:1080,height:1350,label:'Příspěvek 4:5'},'9:16':{width:1080,height:1920,label:'Story 9:16'}};
 export type ShareFormat=keyof typeof shareFormats;
 export type ShareTemplate='stats'|'photo'|'best'|'editorial'|'sport'|'frame'|'cinema'|'split'|'clean'|'neon'|'track'|'ticket'|'distance'|'column'|'headline';
-export const shareTemplates=[{id:'photo',name:'Fotografický plakát'},{id:'stats',name:'Přehled výkonu'},{id:'editorial',name:'Klubový deník'},{id:'sport',name:'Sportovní poster'},{id:'frame',name:'Galerijní rám'},{id:'cinema',name:'Filmový pás'},{id:'split',name:'Boční panel'},{id:'clean',name:'Černobílý dokument'},{id:'best',name:'Nejlepší výkony'},{id:'neon',name:'Noční trénink'},{id:'track',name:'Atletická dráha'},{id:'ticket',name:'Klubová vstupenka'}] as const;
+export const shareTemplates=[{id:'photo',name:'Fotografický plakát'},{id:'stats',name:'Přehled výkonu'},{id:'editorial',name:'Klubový deník'},{id:'sport',name:'Sportovní poster'},{id:'frame',name:'Galerijní rám'},{id:'cinema',name:'Filmový pás'},{id:'split',name:'Šikmý start'},{id:'clean',name:'Černobílý dokument'},{id:'best',name:'Nejlepší výkony'},{id:'neon',name:'Noční intervaly'},{id:'track',name:'Sportovní manifest'},{id:'ticket',name:'Klubová vstupenka'}] as const;
 export const editorTemplates=[{id:'distance',name:'Kilometry'},{id:'column',name:'Sloupec dat'},{id:'headline',name:'Jen titulek'}] as const;
 export type ShareGraphic={showClubIdentity?:boolean;accent?:string;stickers?:ShareSticker[];team:string;title:string;photo:string|null;photoFit?:'contain'|'cover';clubLogo?:string;date?:string;place?:string;crop?:{x:number;y:number;zoom:number};format:ShareFormat;template:ShareTemplate;metrics:{value:string;label:string}[];best:{name:string;value:string}[]};
 const orange='#FFB317',background='#101216',white='#F5F6F7',muted='#A9AFB8';
@@ -80,21 +80,8 @@ function photoGraphic(ctx:CanvasRenderingContext2D,input:ShareGraphic,brand:HTML
    for(let y=p.y+8;y<p.y+p.height-10;y+=52){rounded(ctx,{x:16,y,width:24,height:34},'#D5D0C5',4);rounded(ctx,{x:1040,y,width:24,height:34},'#D5D0C5',4)}
    text(ctx,'AFTER HOURS / TRÉNINKOVÝ DENÍK',58,p.y-8,964,15,orange);
    line(ctx,58,m.y-15,1022,m.y-15,'#D5D0C5',1);break;
-  case 'split':
-   rounded(ctx,{x:t.x-12,y:t.y-16,width:t.width+24,height:t.height+20},orange,0);l.ink=background;
-   if(input.format!=='9:16'){ctx.save();ctx.font='800 300px "Trenomi Display"';ctx.strokeStyle='#FFB31735';ctx.lineWidth=2;ctx.strokeText('T',-5,p.y+p.height-8);ctx.restore()}
-   break;
   case 'clean':
    ctx.fillStyle=orange;ctx.fillRect(0,t.y,12,t.height);break;
-  case 'neon':{
-   const glow=ctx.createRadialGradient(1030,100,10,1030,100,height);glow.addColorStop(0,'#2F5B4D');glow.addColorStop(.8,'#101A1B');ctx.fillStyle=glow;ctx.fillRect(0,0,1080,height);
-   sharePhotoPath(ctx,{x:p.x-8,y:p.y-8,width:p.width+16,height:p.height+16},'neon',input.photoFit??'cover');ctx.strokeStyle=(input.accent||'#BEFFD9');ctx.lineWidth=2;ctx.stroke();
-   for(let x=0;x<1080;x+=36)for(let y=top;y<height;y+=36){ctx.fillStyle='#C9FFE516';ctx.fillRect(x,y,2,2)}
-   for(const [x,y,sx,sy] of [[p.x-12,p.y-12,1,1],[p.x+p.width+12,p.y-12,-1,1],[p.x-12,p.y+p.height+12,1,-1],[p.x+p.width+12,p.y+p.height+12,-1,-1]]){line(ctx,x,y,x+sx*52,y,(input.accent||'#BEFFD9'),3);line(ctx,x,y,x,y+sy*52,(input.accent||'#BEFFD9'),3)}
-   break;}
-  case 'track':
-   ctx.save();ctx.beginPath();ctx.rect(0,0,1080,height);for(const b of [l.header,l.title,l.metrics,l.footer])ctx.rect(b.x-6,b.y-4,b.width+12,b.height+8);ctx.clip('evenodd');ctx.strokeStyle='#101216';ctx.lineWidth=4;
-   for(const inset of [14,30,46]){sharePhotoPath(ctx,{x:p.x-inset,y:p.y-inset,width:p.width+2*inset,height:p.height+2*inset},'track',input.photoFit??'cover');ctx.stroke()}ctx.restore();break;
   case 'ticket':
    rounded(ctx,{x:24,y:top-12,width:1032,height:height-top-(input.format==='9:16'?150:22)},'#F6F1E7',24);
    ctx.save();ctx.setLineDash([7,9]);line(ctx,24,t.y-12,1056,t.y-12,'#827D72',2);ctx.restore();
@@ -124,6 +111,56 @@ function photoGraphic(ctx:CanvasRenderingContext2D,input:ShareGraphic,brand:HTML
  }));
  clipped(ctx,l.footer,()=>{const w=160,h=w*420/1530;ctx.drawImage(brand,l.footer.x+l.footer.width-w,l.footer.y+(l.footer.height-h)/2,w,h);text(ctx,input.template==='editorial'?'SPOLU V POHYBU':'TRÉNINKOVÝ DENÍK',l.footer.x,l.footer.y+l.footer.height*.72,l.footer.width-w-28,16,l.light?'#65615C':l.muted)});
 }
+function signaturePhotoGraphic(ctx:CanvasRenderingContext2D,input:ShareGraphic,brand:HTMLImageElement,photo:HTMLImageElement|null,clubLogo:HTMLImageElement|null){
+ if(!isSignatureTemplate(input.template))return;
+ const l=photoShareLayout(input.template,input.format),p=l.photo,m=l.metrics,top=l.header.y,height=shareFormats[input.format].height,bottom=l.footer.y+l.footer.height,accent=input.accent||(input.template==='neon'?'#46C6E8':'#FFB317');
+ const metrics=input.metrics.filter(v=>v.label.trim()&&v.value.trim()),metric=(label:string)=>metrics.find(v=>v.label===label),fast=metrics.find(v=>v.label.toLocaleLowerCase('cs-CZ').startsWith('nejrychlejší '));
+ const present=metric('přítomných'),distance=metric('vzdálenost'),effort=metric('zátěž'),duration=metric('délka');
+ const caption=(v:ShareGraphic['metrics'][number])=>v.label==='přítomných'?'NA STARTU':v.label.toLocaleUpperCase('cs-CZ');
+ const number=(v:string,x:number,y:number,w:number,size:number,ink:string)=>{
+  const parts=v.match(/^(.+?)\s*(km|\/\s*\d+)$/i);
+  if(!parts){text(ctx,v,x,y,w,size,ink,true);return}
+  const unit=parts[2].toLocaleUpperCase('cs-CZ'),unitSize=Math.max(28,size*.33);ctx.font=`800 ${unitSize}px "Trenomi Display"`;const uw=ctx.measureText(unit).width;
+  text(ctx,parts[1],x,y,w-uw-12,size,ink,true);const nw=ctx.measureText(parts[1]).width;text(ctx,unit,x+Math.min(w-uw,nw+10),y,uw,unitSize,ink,true);
+ };
+ ctx.fillStyle=input.template==='split'?accent:'#080E19';ctx.fillRect(0,0,1080,height);
+ if(input.template==='neon'){
+  const glow=ctx.createLinearGradient(0,0,1080,height);glow.addColorStop(0,'#070D17');glow.addColorStop(.6,'#102B3A');glow.addColorStop(1,'#30254B');ctx.fillStyle=glow;ctx.fillRect(0,0,1080,height);
+  ctx.save();ctx.shadowBlur=38;ctx.shadowColor=accent;sharePhotoPath(ctx,p,input.template,input.photoFit??'cover');ctx.strokeStyle=accent;ctx.lineWidth=3;ctx.stroke();ctx.restore();
+ }
+ photoBox(ctx,photo,p,input);
+ if(input.template==='split'){
+  const angle=Math.atan2(-p.height*.25,p.width),cy=p.y+p.height*.875-60;
+  ctx.save();ctx.translate(540,cy);ctx.rotate(angle);ctx.fillStyle='#101216';ctx.fillRect(-650,-80,1300,160);
+  let size=112,lines:string[]=[];for(;size>26;size--){ctx.font=`800 ${size}px "Trenomi Display"`;lines=shareTitleLines(ctx,input.title.toLocaleUpperCase('cs-CZ'),960,2);if(lines.length*size<=135)break}
+  lines.forEach((value,i)=>{const y=-lines.length*size/2+size*.83+i*size,split=value.search(/\d/);ctx.font=`800 ${size}px "Trenomi Display"`;const first=split<0?value:value.slice(0,split),rest=split<0?'':value.slice(split);ctx.fillStyle=white;ctx.fillText(first,-480,y,960);const used=ctx.measureText(first).width;ctx.fillStyle=accent;if(rest)ctx.fillText(rest,-480+used,y,Math.max(1,960-used))});ctx.restore();
+  const values=[present,distance,fast||effort||duration].filter((v):v is NonNullable<typeof v>=>!!v),cw=m.width/Math.max(1,values.length);
+  values.forEach((v,i)=>{const x=m.x+i*cw;number(v.value,x,m.y+m.height*.72,cw-26,m.height*.88,background);rule(ctx,x,m.y+m.height*.8,cw-26,background);text(ctx,caption(v),x,m.y+m.height*.98,cw-26,17,background)});
+  const details=[duration?.value,effort?.value,input.place].filter(Boolean).join(' · ');text(ctx,details,56,bottom-12,730,20,background);
+ }else if(input.template==='neon'){
+  const shade=ctx.createLinearGradient(0,p.y+p.height*.56,0,p.y+p.height);shade.addColorStop(0,'#080E1900');shade.addColorStop(1,'#050A12F0');ctx.save();sharePhotoPath(ctx,p,input.template,input.photoFit??'cover');ctx.clip();ctx.fillStyle=shade;ctx.fillRect(p.x,p.y,p.width,p.height);
+  const words=input.title.trim().toLocaleUpperCase('cs-CZ').split(/\s+/).filter(Boolean),cut=Math.max(1,Math.floor(words.length/2)),lines=words.length>1?[words.slice(0,cut).join(' '),words.slice(cut).join(' ')]:words;
+  let size=Math.min(190,p.height*.2);ctx.font=`800 ${size}px "Trenomi Display"`;while(lines.some(value=>ctx.measureText(value).width>p.width-96)&&size>28)ctx.font=`800 ${--size}px "Trenomi Display"`;ctx.shadowColor=accent+'60';ctx.shadowBlur=18;lines.forEach((value,i)=>text(ctx,value,p.x+48,p.y+p.height-44-(lines.length-1-i)*size*.96,p.width-96,size,white,true));ctx.shadowBlur=0;
+  if(fast){const x=p.x+p.width-420,y=p.y+66;ctx.shadowColor='#050A12';ctx.shadowBlur=12;text(ctx,caption(fast),x,y,370,23,white);ctx.shadowColor=accent;ctx.shadowBlur=30;text(ctx,fast.value,x,y+176,370,210,accent,true)}ctx.restore();
+  ctx.save();sharePhotoPath(ctx,p,input.template,input.photoFit??'cover');ctx.strokeStyle=accent;ctx.lineWidth=3;ctx.stroke();ctx.restore();
+  const values=[present,distance,effort||duration].filter((v):v is NonNullable<typeof v>=>!!v),cw=m.width/Math.max(1,values.length);
+  values.forEach((v,i)=>{const x=m.x+i*cw,c=[accent,'#A88AF8','#FFB317'][i];rounded(ctx,{x,y:m.y,width:cw-20,height:m.height},'#101A2AE8',28);ctx.strokeStyle=c;ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(x,m.y,cw-20,m.height,28);ctx.stroke();number(v.value,x+22,m.y+78,cw-58,83,white);text(ctx,caption(v)+(v===effort&&duration?' · '+duration.value:''),x+22,m.y+116,cw-58,16,c)});
+  text(ctx,['TRÉNINKOVÝ DENÍK',input.place].filter(Boolean).join(' · '),40,bottom-6,760,18,'#A9C0DC');
+ }else{
+  const shade=ctx.createLinearGradient(0,0,1080,0);shade.addColorStop(0,'#070A0EC9');shade.addColorStop(.75,'#070A0E00');ctx.fillStyle=shade;ctx.fillRect(0,p.y,1080,p.height);
+  ctx.save();ctx.globalCompositeOperation='multiply';polygon(ctx,[[650,p.y],[1010,p.y],[390,p.y+p.height],[0,p.y+p.height]],accent);ctx.restore();
+  const low=ctx.createLinearGradient(0,bottom-320,0,bottom);low.addColorStop(0,'#10121600');low.addColorStop(.8,'#101216ED');ctx.fillStyle=low;ctx.fillRect(0,bottom-320,1080,320);
+  const box={...l,ink:white,titleSize:240,titleLines:3};ctx.save();ctx.transform(1,-.13,0,1,0,80);ctx.shadowColor='#101216';ctx.shadowBlur=14;regionTitle(ctx,input,box);ctx.restore();
+  const values=metrics.filter(v=>v!==fast).slice(0,4),cw=m.width/Math.max(1,values.length);rule(ctx,m.x,m.y-14,m.width,accent);
+  values.forEach((v,i)=>{const x=m.x+i*cw;number(v.value,x,m.y+58,cw-20,69,white);text(ctx,caption(v),x,m.y+88,cw-20,16,muted)});
+  text(ctx,input.place||'TRÉNINKOVÝ DENÍK',56,bottom-10,750,18,muted);
+ }
+ // Club identity is opt-in; the editor's movable original logo/name remain independent.
+ if(input.showClubIdentity!==false){text(ctx,input.team,56,top+35,650,26,input.template==='split'?white:accent);if(clubLogo){const factor=Math.min(46/clubLogo.naturalWidth,46/clubLogo.naturalHeight);ctx.drawImage(clubLogo,56,top+48,clubLogo.naturalWidth*factor,clubLogo.naturalHeight*factor)}}
+ const dateX=input.template==='neon'?550:710;ctx.save();ctx.shadowColor='#05080A';ctx.shadowBlur=12;text(ctx,input.date||'',dateX,top+35,1080-dateX-56,22,white);ctx.restore();
+ ctx.drawImage(brand,862,bottom-38,162,162*420/1530);
+}
+
 function editorPhotoGraphic(ctx:CanvasRenderingContext2D,input:ShareGraphic,brand:HTMLImageElement,photo:HTMLImageElement|null,clubLogo:HTMLImageElement|null){
  const {height}=shareFormats[input.format],accent=input.accent||'#FFB317',story=input.format==='9:16',top=story?155:52,bottom=height-(story?175:56),left=56;
  photoBox(ctx,photo,{x:0,y:0,width:1080,height},input);
@@ -149,6 +186,7 @@ export async function renderShareGraphic(input:ShareGraphic){
  const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Grafiku nelze připravit.');ctx.fillStyle=background;ctx.fillRect(0,0,width,height);
  const orange=input.accent||'#FFB317';
  if(['distance','column','headline'].includes(input.template)){editorPhotoGraphic(ctx,input,brand,photo,clubLogo);drawShareStickers(ctx,input.stickers,width,height,orange,clubLogo);return canvas}
+ if(isSignatureTemplate(input.template)){signaturePhotoGraphic(ctx,input,brand,photo,clubLogo);drawShareStickers(ctx,input.stickers,width,height,orange,clubLogo);return canvas}
  if(usesSharePhoto(input.template)){photoGraphic(ctx,input,brand,photo,clubLogo);drawShareStickers(ctx,input.stickers,width,height,orange,clubLogo);return canvas}
  const story=input.format==='9:16',top=story?160:64,bottom=height-(story?170:64),left=72,right=1008,contentWidth=936;
  // Club identity and application brand stay inside Story safe areas.

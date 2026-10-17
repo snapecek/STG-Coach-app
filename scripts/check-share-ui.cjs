@@ -20,9 +20,9 @@ const fs=require('node:fs');
   const long=await renderShareGraphic({...input,title:'Velmi dlouhý název tréninku s českými znaky žluťoučký kůň a dalším dlouhým textem pro ověření ořezu',team:'Dlouhý název klubu '.repeat(5),template:'stats',format:'1:1'});
   let failed=false;try{await renderShareGraphic({...input,photo:'data:image/png;base64,bad',template:'photo',format:'1:1'})}catch{failed=true}
   const lines=shareTitleLines({measureText:s=>({width:s.length*10})},'jedna dva tři čtyři pět šest sedm osm devět deset',100);
-  const {photoShareLayout,sharePhotoPath}=await import('/src/journalShareLayouts.ts');
+  const {photoShareLayout,sharePhotoPath,isSignatureTemplate}=await import('/src/journalShareLayouts.ts');
   const solid=document.createElement('canvas');solid.width=1600;solid.height=900;solid.getContext('2d').fillStyle='#4AAB88';solid.getContext('2d').fillRect(0,0,1600,900);
-  let photoChecks=0;for(const {id:template} of shareTemplates.filter(t=>usesSharePhoto(t.id)))for(const format of ['1:1','4:5','9:16']){
+  let photoChecks=0;for(const {id:template} of shareTemplates.filter(t=>usesSharePhoto(t.id)&&!isSignatureTemplate(t.id)))for(const format of ['1:1','4:5','9:16']){
    const output=await renderShareGraphic({...input,title:'Žluťoučký kůň a velmi dlouhý název společného tréninku pro celou skupinu '.repeat(2),team:'Velmi dlouhý název sportovního klubu '.repeat(3),photo:solid.toDataURL(),photoFit:'cover',template,format,metrics:[...input.metrics,{value:'123,456 km',label:'vzdálenost'}]});
    const rect=photoShareLayout(template,format).photo,pixels=output.getContext('2d').getImageData(rect.x,rect.y,rect.width,rect.height).data;
    const mask=document.createElement('canvas');mask.width=output.width;mask.height=output.height;const mc=mask.getContext('2d');sharePhotoPath(mc,rect,template);mc.fillStyle='#FFF';mc.fill();const alpha=mc.getImageData(rect.x,rect.y,rect.width,rect.height).data;
@@ -33,10 +33,15 @@ const fs=require('node:fs');
    // Every new photo layout must also work without photo, metrics, place or a club logo.
    await renderShareGraphic({...input,template,format,photo:null,metrics:[],clubLogo:undefined,place:undefined});
   }
+  for(const template of ['split','neon','track'])for(const format of ['1:1','4:5','9:16']){
+   const output=await renderShareGraphic({...input,template,format,showClubIdentity:false,photo:solid.toDataURL(),metrics:[{value:'14 / 20',label:'přítomných'},{value:'11,2 km',label:'vzdálenost'},{value:'3:12',label:'nejrychlejší 800 m'}]});const p=photoShareLayout(template,format).photo,x=Math.round(p.x+p.width*(template==='track'?.88:.25)),y=Math.round(p.y+p.height*.4),pixel=output.getContext('2d').getImageData(x,y,1,1).data;
+   if(pixel[0]!==74||pixel[1]!==171||pixel[2]!==136)throw new Error(template+' '+format+': protected photograph area obscured');
+   await renderShareGraphic({...input,template,format,photo:null,metrics:[],title:'Velmi dlouhý český název tréninku '.repeat(5),date:undefined,place:undefined,clubLogo:undefined});
+  }
   return {exports,photoChecks,cropDiff:base.toDataURL()!==moved.toDataURL(),fallback:fallback.width,long:long.width,failed,lines};
  });
  for(const file of result.exports){assert.equal(file.width,1080);assert.equal(file.height,{'1:1':1080,'4:5':1350,'9:16':1920}[file.format]);assert(file.size>20000);fs.writeFileSync('/tmp/trenomi-share-'+file.template+'-'+file.format.replace(':','x')+'.png',Buffer.from(file.data.split(',')[1],'base64'))}
- assert.equal(result.photoChecks,30);assert.equal(result.exports.length,36);assert(result.cropDiff);assert.equal(result.fallback,1080);assert.equal(result.long,1080);assert(result.failed);assert(result.lines.length<=3&&result.lines.at(-1).endsWith('…'));
+ assert.equal(result.photoChecks,21);assert.equal(result.exports.length,36);assert(result.cropDiff);assert.equal(result.fallback,1080);assert.equal(result.long,1080);assert(result.failed);assert(result.lines.length<=3&&result.lines.at(-1).endsWith('…'));
  await page.evaluate(async()=>{const {default:React}=await import('/node_modules/.vite/deps/react.js');const {default:{createRoot}}=await import('/node_modules/.vite/deps/react-dom_client.js');const {JournalSharePanel}=await import('/src/JournalSharePanel.tsx');createRoot(document.getElementById('test')).render(React.createElement(JournalSharePanel,{...window.shareFixture,eventName:window.shareFixture.title,defaultCaption:'Fiktivní trénink'}))});
  const download=page.getByRole('button',{name:'Stáhnout grafiku',exact:true});await download.waitFor();
  await page.waitForFunction(()=>!Array.from(document.querySelectorAll('button')).find(b=>b.textContent==='Stáhnout grafiku').disabled);
@@ -67,6 +72,6 @@ const fs=require('node:fs');
  await choose('Nejlepší výkony');await page.getByRole('tab',{name:'Data',exact:true}).click();assert.equal(await page.getByLabel('Zahrnout jména členů do grafiky',{exact:true}).isChecked(),false);
  await choose('Fotografický plakát');await page.getByRole('button',{name:'Příspěvek 4:5',exact:true}).click();
  for(const width of [320,390,1440]){await page.setViewportSize({width,height:1000});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'/tmp/trenomi-share-panel-'+width+'.png',fullPage:true});await page.getByLabel('Vybrat šablonu grafiky',{exact:true}).click();await page.getByRole('group',{name:'Šablona grafiky',exact:true}).waitFor();assert.equal(await page.getByRole('group',{name:'Šablona grafiky',exact:true}).getByRole('button').count(),15);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'/tmp/trenomi-share-picker-'+width+'.png',fullPage:true});await page.getByLabel('Vybrat šablonu grafiky',{exact:true}).click()}
- console.log('PASS share UI: 12 designs in all formats, 36 exports, 30 pixel checks proving no text covers photos, exact preview/download match, crop/zoom/reset and whole-photo mode, missing photo/logo, long Czech titles, private names and 320/390/1440 layouts');
+ console.log('PASS share UI: 12 designs in all formats, 36 exports, 21 pixel checks for separated layouts plus 9 protected photo checks for new posters, exact preview/download match, crop/zoom/reset and whole-photo mode, missing photo/logo, long Czech titles, private names and 320/390/1440 layouts');
  }finally{await browser.close()}
 })().catch(error=>{console.error(error);process.exit(1)});

@@ -14,17 +14,21 @@ Přehled výše vzniká přímo stejným Canvas rendererem jako stažené PNG. P
 | 04 Sportovní poster | Žlutá kampaňová grafika, velký název, diagonální fotografický výřez a černé datové štítky. |
 | 05 Galerijní rám | Nakloněná papírová karta se stínem, fotografií a serifovým popiskem. |
 | 06 Filmový pás | Filmové perforace po stranách, titulková sazba a tmavá kompozice. |
-| 07 Boční panel | Portrétní karta s fotografií vpravo, žlutým názvem a datovými štítky vlevo; ve Story rozvržení nad sebou. |
+| 07 Šikmý start | Dominantní fotografie, šikmý černý pás s bílým názvem a barevnou disciplínou, velké černé hodnoty v akcentové spodní části. |
 | 08 Černobílý dokument | Velká monochromatická fotografie a drobná čistá sazba. Černobílá úprava platí jen pro export, ne pro originál. |
 | 09 Nejlepší výkony | Tři výsledkové karty s velkým pořadím, skutečnými hodnotami a jmény standardně skrytými. Bez fotografie. |
-| 10 Noční trénink | Tmavý zelený přechod, jemná bodová síť, obloukový fotografický rám a mátové datové bloky. |
-| 11 Atletická dráha | Žluté pozadí a soustředné atletické ovály kolem asymetricky zaoblené fotografie. |
+| 10 Noční intervaly | Modrý světelný rám, velký dvouřádkový bílý nadpis uvnitř fotografie, skutečný nejrychlejší úsek a tři samostatné datové karty. |
+| 11 Sportovní manifest | Celoplošná fotografie, obří bílá sportovní typografie ve sklonu, diagonální akcentový pás a kompaktní údaje u spodního okraje. |
 | 12 Klubová vstupenka | Krémová perforovaná vstupenka, fotografie a samostatný žlutý datový útržek. Nejde o vstupní oprávnění ani QR kód. |
 
-Volbu otevřete kliknutím na aktuální šablonu (**Změnit · 12 šablon**). Nabídka obsahuje číslované miniatury a po volbě se zavře. Náhledy nabídky se vykreslují jen při jejím otevření.
+Volbu otevřete kliknutím na aktuální šablonu (**Vybrat vzhled · 15**). Nabídka obsahuje číslované miniatury a po volbě se zavře. Náhledy nabídky se vykreslují jen při jejím otevření.
 
-U všech deseti fotografických šablon mají klubová hlavička, název, metriky i značka oddělené plochy mimo fotografii. Snímek se nepřekrývá textem. Dlouhé názvy se zalomí, případně zmenší či zkrátí výpustkou. Sportovní, noční a atletický styl mají ve vyplněném režimu vlastní tvar fotografického rámečku; volba Celá fotografie zachová obdélníkový snímek celý.
-Náhledové kartičky používají aktuální údaje. Grafika zahrnuje název a dostupné logo klubu, datum v časové zóně Europe/Prague, místo a oficiální logo Trenomi. Chybějící délka, vzdálenost či RPE se nevymýšlí. Výstup používá barvy #FFB317 a #101216 nezávisle na režimu aplikace.
+Sedm původních fotografických šablon drží typografii mimo snímek. Nové návrhy **07, 10 a 11** podle předloh záměrně kombinují fotografii s velkými nadpisy či šikmým pásem. Výřez lze upravit tak, aby hlavní osoby zůstaly viditelné. Noční rám a diagonální výřez mají odpovídající tvar dotykové plochy. Volba Celá fotografie zachová celý obdélníkový snímek.
+Náhledové kartičky používají aktuální údaje. Logo a název klubu se vkládají volitelně jako posuvný prvek, datum používá časové pásmo Europe/Prague. Chybějící délka, vzdálenost, RPE ani nejrychlejší úsek se nevymýšlí. Nejrychlejší úsek v 07/10 se přebírá ze skutečně změřeného nejrychlejšího úseku vybrané délky v deníku, nikoli z průměru žebříčku. Lze ho skrýt i obnovit jako ostatní údaje.
+
+![Nové skutečné exporty 07, 10 a 11](designs/trenomi-share-07-10-11.png)
+
+Šablona 10 má výchozí modrý akcent, 07 a 11 původní oranžovou #FFB317. Ručně vybraná barva ze 16 odstínů se při změně šablony zachovává. Pozadí a barevné proměnné aplikace se nemění.
 
 ## Fotografie a výřez
 
@@ -81,7 +85,7 @@ Na PC je okno sdílení explicitně vystředěné a široké až 960 px. V dení
 **Sdílet trénink → Upravit obrázek** nyní otevírá fotografické studio. Mobil má náhled nad záložkami **Šablony / Data / Samolepky**, na PC jsou nástroje vedle náhledu. **Další** přesune fokus k textu příspěvku a exportu.
 
 - **Šablony:** nové celoplošné fotografické kompozice **Kilometry, Sloupec dat, Jen titulek**. Všechny kompozice jsou v jednom výběru 15 šablon, který ukazuje aktivní název. Dosavadních 12 návrhů zůstává očíslovaných 01–12. Nové kompozice používají záměrný překryv typografie přes fotografii podle návrhu editoru; původní šablony zachovávají oddělené oblasti fotografie a textu.
-- **Barva grafiky:** 16 odstínů včetně původní oranžové `#FFB317`; akcent se promítá také do starších šablon včetně Nočního tréninku. Volba mění tento export, nikoli barvy aplikace či klubová data.
+- **Barva grafiky:** 16 odstínů včetně původní oranžové `#FFB317`; akcent se promítá také do starších šablon včetně Nočních intervalů. Volba mění tento export, nikoli barvy aplikace či klubová data.
 - **Data:** titulek, přepínače skutečných údajů z deníku, výřez, celá fotografie / vyplnění rámečku a přesné posuvníky. Na mobilu funguje i přímý posun a pinch fotografie.
 - **Samolepky:** odznak, páska, kruh docházky, kilometry, razítko, blesk, série, RPE, lístek, obrysový nápis, tým na startu a rekord. Dostupné údaje se vyplňují z tréninku; série a rekord vyžadují vlastní text před exportem. Výpočet docházky vychází ze skutečné přítomnosti a soupisky tréninku, nikoli z odpovědí na pozvánku.
 - Lze vložit až 16 samolepek, posouvat je myší/prstem/šipkami, otáčet a měnit velikost tažením za roh nebo dvěma prsty, použít posuvníky, upravit text, duplikovat, odstranit a změnit pořadí vrstev. Vložené vrstvy mají samostatný seznam pro výběr překrytých samolepek.

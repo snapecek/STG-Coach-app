@@ -27,4 +27,4 @@ Rozšířit stávající renderování v src/journalShare.ts o samostatné kompo
 
 ## Realizované varianty
 
-Varianty 1 a 2 jsou zapojené do panelu Sdílet trénink. Ovládání výřezu a exportu popisuje [SHARE_GRAPHICS.md](SHARE_GRAPHICS.md). Varianty 3 a 4 zůstávají návrhem pro další etapu.
+Všechny čtyři směry jsou zapojené do panelu Sdílet trénink. Přibyly další čtyři styly: Galerijní rám, Filmový pás, Boční panel a Čistá fotografie. Finální fotografické kompozice včetně původního plakátu oddělují text od fotografie a neztmavují ji. Návrhový obrázek výše zachycuje původní koncepty; aktuální chování a všech devět voleb včetně Nejlepších výkonů popisuje [SHARE_GRAPHICS.md](SHARE_GRAPHICS.md).

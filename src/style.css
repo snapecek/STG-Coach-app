@@ -336,7 +336,7 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .member-row .member-info{min-width:0}.member-row>.row-actions{margin-left:0;justify-content:flex-end;align-items:center;flex-wrap:wrap}
 .member-row>.row-actions>button:last-child{min-width:78px}.member-row .member-info>b{display:block}
 .invitation-row>div:first-child{min-width:0}.invitation-row>.row-actions{flex-shrink:0;flex-wrap:wrap}
-.journal-delete{margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.journal-header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}.journal-header-actions>button{display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}.journal-header-actions .journal-delete{margin:0}.journal-detail-status{flex-wrap:wrap}
 @media(max-width:760px){.member-row{grid-template-columns:34px minmax(0,1fr) 78px;gap:9px;align-items:start}.member-row>.avatar{width:34px;height:34px}.member-row>.row-actions{display:flex;flex-direction:column;align-items:stretch;gap:8px;width:78px;margin-left:0}.member-row>.row-actions>button{width:100%;min-width:0;padding:9px 5px;font-size:10px;overflow-wrap:anywhere}.member-row>.row-actions>button:last-child{order:-1;min-width:0}.invitation-row>.row-actions{width:100%;justify-content:flex-end}}
 
 .member-row>.row-actions>button{display:flex;align-items:center;justify-content:center;gap:4px}.member-row>.row-actions>button svg{flex-shrink:0}
@@ -359,3 +359,5 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .simplified-overview .spotlight>p{margin:6px 0;font-size:12px;line-height:1.5}
 .simplified-overview .attendance-shortcut{margin-top:6px;padding:8px 12px;min-height:36px;font-size:12px}
 @media(max-width:760px){.simplified-overview .spotlight{padding:14px}.simplified-overview .spotlight-title h3{font-size:20px}.simplified-overview .attendance-shortcut{min-height:44px}}
+
+.event-edit-delete-actions{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.event-edit-delete-actions>button{white-space:nowrap}

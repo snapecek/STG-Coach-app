@@ -286,3 +286,6 @@ html[data-theme="light"] .cloud-dashboard .club-sidebar button.active{background
 html[data-theme="light"] :is(button,a,input,select,textarea,summary):focus-visible{outline-color:#8a5200}
 
 html[data-theme="light"] .detail-tabs button.has-unread{color:#765000}
+html[data-theme="light"] .fee-status.overdue{color:#922231;background:#fff0f2;border-color:#ba7880}html[data-theme="light"] .fee-status.paid{color:#216539;background:#edf8ef;border-color:#7aac87}html[data-theme="light"] .fee-status.partial{color:#775114;background:#fff5d9;border-color:#b9a15b}html[data-theme="light"] .fee-people h4{color:#765000}
+
+html[data-theme="light"] .fees-dialog :is(input,select){color-scheme:light}

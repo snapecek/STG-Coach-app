@@ -7,7 +7,7 @@ export type ShareFormat=keyof typeof shareFormats;
 export type ShareTemplate='stats'|'photo'|'best'|'editorial'|'sport'|'frame'|'cinema'|'split'|'clean'|'neon'|'track'|'ticket'|'distance'|'column'|'headline';
 export const shareTemplates=[{id:'photo',name:'Fotografický plakát'},{id:'stats',name:'Přehled výkonu'},{id:'editorial',name:'Klubový deník'},{id:'sport',name:'Sportovní poster'},{id:'frame',name:'Galerijní rám'},{id:'cinema',name:'Filmový pás'},{id:'split',name:'Boční panel'},{id:'clean',name:'Černobílý dokument'},{id:'best',name:'Nejlepší výkony'},{id:'neon',name:'Noční trénink'},{id:'track',name:'Atletická dráha'},{id:'ticket',name:'Klubová vstupenka'}] as const;
 export const editorTemplates=[{id:'distance',name:'Kilometry'},{id:'column',name:'Sloupec dat'},{id:'headline',name:'Jen titulek'}] as const;
-export type ShareGraphic={accent?:string;stickers?:ShareSticker[];team:string;title:string;photo:string|null;photoFit?:'contain'|'cover';clubLogo?:string;date?:string;place?:string;crop?:{x:number;y:number;zoom:number};format:ShareFormat;template:ShareTemplate;metrics:{value:string;label:string}[];best:{name:string;value:string}[]};
+export type ShareGraphic={showClubIdentity?:boolean;accent?:string;stickers?:ShareSticker[];team:string;title:string;photo:string|null;photoFit?:'contain'|'cover';clubLogo?:string;date?:string;place?:string;crop?:{x:number;y:number;zoom:number};format:ShareFormat;template:ShareTemplate;metrics:{value:string;label:string}[];best:{name:string;value:string}[]};
 const orange='#FFB317',background='#101216',white='#F5F6F7',muted='#A9AFB8';
 let fonts:Promise<void>|undefined;
 function loadFonts(){return fonts??=Promise.all([
@@ -56,7 +56,7 @@ function line(ctx:CanvasRenderingContext2D,x:number,y:number,x2:number,y2:number
 function photoGraphic(ctx:CanvasRenderingContext2D,input:ShareGraphic,brand:HTMLImageElement,photo:HTMLImageElement|null,clubLogo:HTMLImageElement|null){
  if(!usesSharePhoto(input.template))return;
  const orange=input.accent||'#FFB317';
- const l=photoShareLayout(input.template,input.format);if(l.background==='#FFB317')l.background=orange;const height=shareFormats[input.format].height,p=l.photo,t=l.title,m=l.metrics,top=l.header.y;
+ const l=photoShareLayout(input.template,input.format);if(l.background==='#FFB317')l.background=orange;if(input.template==='neon'&&input.accent)l.ink=input.accent;const height=shareFormats[input.format].height,p=l.photo,t=l.title,m=l.metrics,top=l.header.y;
  ctx.fillStyle=l.background;ctx.fillRect(0,0,1080,height);
  // Artwork is drawn before the unfiltered photograph; ornaments never cover people.
  switch(input.template){
@@ -88,9 +88,9 @@ function photoGraphic(ctx:CanvasRenderingContext2D,input:ShareGraphic,brand:HTML
    ctx.fillStyle=orange;ctx.fillRect(0,t.y,12,t.height);break;
   case 'neon':{
    const glow=ctx.createRadialGradient(1030,100,10,1030,100,height);glow.addColorStop(0,'#2F5B4D');glow.addColorStop(.8,'#101A1B');ctx.fillStyle=glow;ctx.fillRect(0,0,1080,height);
-   sharePhotoPath(ctx,{x:p.x-8,y:p.y-8,width:p.width+16,height:p.height+16},'neon',input.photoFit??'cover');ctx.strokeStyle='#BEFFD9';ctx.lineWidth=2;ctx.stroke();
+   sharePhotoPath(ctx,{x:p.x-8,y:p.y-8,width:p.width+16,height:p.height+16},'neon',input.photoFit??'cover');ctx.strokeStyle=(input.accent||'#BEFFD9');ctx.lineWidth=2;ctx.stroke();
    for(let x=0;x<1080;x+=36)for(let y=top;y<height;y+=36){ctx.fillStyle='#C9FFE516';ctx.fillRect(x,y,2,2)}
-   for(const [x,y,sx,sy] of [[p.x-12,p.y-12,1,1],[p.x+p.width+12,p.y-12,-1,1],[p.x-12,p.y+p.height+12,1,-1],[p.x+p.width+12,p.y+p.height+12,-1,-1]]){line(ctx,x,y,x+sx*52,y,'#BEFFD9',3);line(ctx,x,y,x,y+sy*52,'#BEFFD9',3)}
+   for(const [x,y,sx,sy] of [[p.x-12,p.y-12,1,1],[p.x+p.width+12,p.y-12,-1,1],[p.x-12,p.y+p.height+12,1,-1],[p.x+p.width+12,p.y+p.height+12,-1,-1]]){line(ctx,x,y,x+sx*52,y,(input.accent||'#BEFFD9'),3);line(ctx,x,y,x,y+sy*52,(input.accent||'#BEFFD9'),3)}
    break;}
   case 'track':
    ctx.save();ctx.beginPath();ctx.rect(0,0,1080,height);for(const b of [l.header,l.title,l.metrics,l.footer])ctx.rect(b.x-6,b.y-4,b.width+12,b.height+8);ctx.clip('evenodd');ctx.strokeStyle='#101216';ctx.lineWidth=4;
@@ -106,8 +106,8 @@ function photoGraphic(ctx:CanvasRenderingContext2D,input:ShareGraphic,brand:HTML
  photoBox(ctx,photo,p,input);
  const headInk=l.light?background:white,headMuted=l.light?'#554D3F':l.muted;
  clipped(ctx,l.header,()=>{const x=l.header.x,y=l.header.y,logoSize=38;
-  if(clubLogo){const scale=Math.min(logoSize/clubLogo.naturalWidth,logoSize/clubLogo.naturalHeight);ctx.drawImage(clubLogo,x+(logoSize-clubLogo.naturalWidth*scale)/2,y+(logoSize-clubLogo.naturalHeight*scale)/2,clubLogo.naturalWidth*scale,clubLogo.naturalHeight*scale)}
-  text(ctx,input.team.toLocaleUpperCase('cs-CZ'),x+(clubLogo?52:0),y+25,l.header.width-(clubLogo?52:0),25,headInk);
+  if(clubLogo&&input.showClubIdentity!==false){const scale=Math.min(logoSize/clubLogo.naturalWidth,logoSize/clubLogo.naturalHeight);ctx.drawImage(clubLogo,x+(logoSize-clubLogo.naturalWidth*scale)/2,y+(logoSize-clubLogo.naturalHeight*scale)/2,clubLogo.naturalWidth*scale,clubLogo.naturalHeight*scale)}
+  text(ctx,(input.showClubIdentity===false?'':input.team).toLocaleUpperCase('cs-CZ'),x+(clubLogo?52:0),y+25,l.header.width-(clubLogo?52:0),25,headInk);
   const details=[input.date,input.place].filter(Boolean).join(' · ');if(details)text(ctx,details,x,y+61,l.header.width,20,headMuted);
  });
  regionTitle(ctx,input,l);
@@ -115,7 +115,7 @@ function photoGraphic(ctx:CanvasRenderingContext2D,input:ShareGraphic,brand:HTML
  clipped(ctx,m,()=>metrics.forEach((v,i)=>{const x=m.x+(i%cols)*cw,y=m.y+Math.floor(i/cols)*ch,large=ch>=78,compact=ch<55;
   let number=l.light?background:orange,label=l.muted;
   if(input.template==='sport'||input.template==='neon'||input.template==='split'){
-   const fill=input.template==='neon'?'#C4FBE5':input.template==='split'?'#242B34':background;
+   const fill=input.template==='neon'?(input.accent||'#C4FBE5'):input.template==='split'?'#242B34':background;
    rounded(ctx,{x,y,width:cw-10,height:ch-3},fill,input.template==='neon'?0:10);number=input.template==='neon'?background:input.template==='split'?white:orange;label=input.template==='neon'?'#365247':input.template==='split'?muted:'#D6C8A5';
   }
   const padding=['sport','neon','split'].includes(input.template)?12:0;
@@ -128,8 +128,8 @@ function editorPhotoGraphic(ctx:CanvasRenderingContext2D,input:ShareGraphic,bran
  const {height}=shareFormats[input.format],accent=input.accent||'#FFB317',story=input.format==='9:16',top=story?155:52,bottom=height-(story?175:56),left=56;
  photoBox(ctx,photo,{x:0,y:0,width:1080,height},input);
  const shade=ctx.createLinearGradient(0,0,0,height);shade.addColorStop(0,'#080B10A6');shade.addColorStop(.3,'#080B1008');shade.addColorStop(.55,'#080B1070');shade.addColorStop(1,'#080B10FA');ctx.fillStyle=shade;ctx.fillRect(0,0,1080,height);
- text(ctx,input.date||'',left,top+28,420,26,white);text(ctx,input.team.toLocaleUpperCase('cs-CZ'),580,top+28,clubLogo?355:444,25,accent);
- if(clubLogo){const scale=Math.min(54/clubLogo.naturalWidth,54/clubLogo.naturalHeight);ctx.drawImage(clubLogo,970,top-8,clubLogo.naturalWidth*scale,clubLogo.naturalHeight*scale)}
+ text(ctx,input.date||'',left,top+28,420,26,white);text(ctx,(input.showClubIdentity===false?'':input.team).toLocaleUpperCase('cs-CZ'),580,top+28,clubLogo?355:444,25,accent);
+ if(clubLogo&&input.showClubIdentity!==false){const scale=Math.min(54/clubLogo.naturalWidth,54/clubLogo.naturalHeight);ctx.drawImage(clubLogo,970,top-8,clubLogo.naturalWidth*scale,clubLogo.naturalHeight*scale)}
  const metrics=input.metrics.filter(m=>m.value.trim()&&m.label.trim()),distance=metrics.find(m=>m.label==='vzdálenost'),other=metrics.filter(m=>m!==distance);
  let titleY=bottom-240;
  if(input.template==='distance'){
@@ -148,13 +148,13 @@ export async function renderShareGraphic(input:ShareGraphic){
  await loadFonts();const [{width,height},brand,photo,clubLogo]=await Promise.all([Promise.resolve(shareFormats[input.format]),image(usesSharePhoto(input.template)&&photoShareLayout(input.template,input.format).light?'/brand/trenomi-logo.svg':'/brand/trenomi-logo-dark.svg'),usesSharePhoto(input.template)&&input.photo?image(input.photo):null,input.clubLogo?image(input.clubLogo).catch(()=>null):null]);
  const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Grafiku nelze připravit.');ctx.fillStyle=background;ctx.fillRect(0,0,width,height);
  const orange=input.accent||'#FFB317';
- if(['distance','column','headline'].includes(input.template)){editorPhotoGraphic(ctx,input,brand,photo,clubLogo);drawShareStickers(ctx,input.stickers,width,height,orange);return canvas}
- if(usesSharePhoto(input.template)){photoGraphic(ctx,input,brand,photo,clubLogo);drawShareStickers(ctx,input.stickers,width,height,orange);return canvas}
+ if(['distance','column','headline'].includes(input.template)){editorPhotoGraphic(ctx,input,brand,photo,clubLogo);drawShareStickers(ctx,input.stickers,width,height,orange,clubLogo);return canvas}
+ if(usesSharePhoto(input.template)){photoGraphic(ctx,input,brand,photo,clubLogo);drawShareStickers(ctx,input.stickers,width,height,orange,clubLogo);return canvas}
  const story=input.format==='9:16',top=story?160:64,bottom=height-(story?170:64),left=72,right=1008,contentWidth=936;
  // Club identity and application brand stay inside Story safe areas.
  const clubX=clubLogo?left+74:left;
- if(clubLogo){ctx.save();ctx.beginPath();ctx.roundRect(left,top-8,54,54,12);ctx.clip();ctx.fillStyle='#FFFFFF';ctx.fillRect(left,top-8,54,54);const scale=Math.min(46/clubLogo.naturalWidth,46/clubLogo.naturalHeight);ctx.drawImage(clubLogo,left+(54-clubLogo.naturalWidth*scale)/2,top-8+(54-clubLogo.naturalHeight*scale)/2,clubLogo.naturalWidth*scale,clubLogo.naturalHeight*scale);ctx.restore()}
- text(ctx,input.team.toLocaleUpperCase('cs-CZ'),clubX,top+26,contentWidth-(clubX-left),28);
+ if(clubLogo&&input.showClubIdentity!==false){ctx.save();ctx.beginPath();ctx.roundRect(left,top-8,54,54,12);ctx.clip();ctx.fillStyle='#FFFFFF';ctx.fillRect(left,top-8,54,54);const scale=Math.min(46/clubLogo.naturalWidth,46/clubLogo.naturalHeight);ctx.drawImage(clubLogo,left+(54-clubLogo.naturalWidth*scale)/2,top-8+(54-clubLogo.naturalHeight*scale)/2,clubLogo.naturalWidth*scale,clubLogo.naturalHeight*scale);ctx.restore()}
+ text(ctx,(input.showClubIdentity===false?'':input.team).toLocaleUpperCase('cs-CZ'),clubX,top+26,contentWidth-(clubX-left),28);
  const details=[input.date,input.place].filter(Boolean).join(' · ');if(details)text(ctx,details,left,top+91,contentWidth,24,muted);
  const metrics=input.metrics.filter(m=>m.value.trim()&&m.label.trim()).slice(0,4);
  const footer=()=>{rule(ctx,left,bottom-55,contentWidth,'#FFFFFF30');ctx.drawImage(brand,right-196,bottom-25,196,196*420/1530);text(ctx,'TRÉNINKOVÝ DENÍK',left,bottom+12,640,20,muted)};
@@ -173,6 +173,6 @@ export async function renderShareGraphic(input:ShareGraphic){
   rows.forEach((row,i)=>{const y=start+i*rowH;rounded(ctx,{x:72,y,width:936,height:rowH-14},i===0?'#293022':'#1B2027',12);text(ctx,String(i+1).padStart(2,'0'),96,y+rowH*.73,152,rowH*.9,i===0?orange:'#87919F',true);text(ctx,row.name,274,y+rowH*.38,700,28);text(ctx,row.value,274,y+rowH*.73,700,46,i===0?orange:white,true)});
   if(!rows.length){text(ctx,'VÝKONY',72,top+540,936,180,orange,true);text(ctx,'Měřené výkony zatím nejsou zadané.',72,top+605,936,26,muted)}
  }
- footer();drawShareStickers(ctx,input.stickers,width,height,orange);return canvas;
+ footer();drawShareStickers(ctx,input.stickers,width,height,orange,clubLogo);return canvas;
 }
 export function canvasPng(canvas:HTMLCanvasElement){return new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Grafiku nelze exportovat.')),'image/png'));}

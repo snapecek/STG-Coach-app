@@ -472,3 +472,10 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .share-sticker-layers{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
 .share-sticker-layers button{font-size:10px;padding:7px 9px;border:1px solid var(--border);background:var(--surface,#171c23)}
 .share-sticker-layers button[aria-pressed=true]{border-color:var(--orange);color:var(--orange)}
+.share-sticker-remove{position:absolute;right:-10px;top:-10px;width:26px;height:26px;min-height:0;padding:0;border:2px solid #101216;border-radius:50%;display:grid;place-items:center;background:#fff;color:#101216;font:700 20px/1 sans-serif;touch-action:manipulation;cursor:pointer}
+.share-data-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.share-data-chips button{display:inline-flex;align-items:center;gap:7px;padding:6px 8px;font-size:10px;background:var(--surface,#171c23);border:1px solid var(--border);border-radius:16px}
+.share-add-club{width:100%;border:1px solid var(--orange);padding:12px;margin-bottom:6px}
+.share-accent-picker{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:12px 7px}
+.share-accent-picker button{width:32px;height:32px;justify-self:center}
+@media(max-width:380px){.share-accent-picker{grid-template-columns:repeat(4,minmax(0,1fr))}}

@@ -4,7 +4,11 @@ import {Camera,Trash2,RefreshCw} from 'lucide-react';
 import {listEventPhotos,uploadEventPhoto,removeEventPhoto,photoBucket,type PhotoRef} from './photos';
 type Preview=PhotoRef&{url:string};
 export function EventPhotos({client,clubId,eventId,disabled,onChange,onBusyChange,variant='gallery',summary,onSelectPhoto,revision}:{client:SupabaseClient;clubId:string;eventId:string;disabled:boolean;onChange:()=>void;onBusyChange:(busy:boolean)=>void;variant?:'gallery'|'journal';summary?:ReactNode;onSelectPhoto?:(url:string|null)=>void;revision?:unknown}){
- const [photos,setPhotos]=useState<Preview[]>([]),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[version,setVersion]=useState(0),[remove,setRemove]=useState<Preview|null>(null);const [selected,setSelected]=useState('');const uploadRef=useRef<HTMLInputElement>(null);const lock=useRef(false);const mounted=useRef(true);
+ const [photos,setPhotos]=useState<Preview[]>([]),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[version,setVersion]=useState(0),[remove,setRemove]=useState<Preview|null>(null);const selectionKey=`trenomi-journal-photo:${clubId}:${eventId}`;const [selection,setSelection]=useState<{key:string;path:string}|null>(null);
+ let remembered='';try{remembered=sessionStorage.getItem(selectionKey)||''}catch{/* Storage may be unavailable in private browsers. */}
+ const selected=selection?.key===selectionKey?selection.path:remembered;
+ function setSelected(path:string){setSelection({key:selectionKey,path});try{sessionStorage.setItem(selectionKey,path)}catch{/* Selection still works for this view. */}}
+ const uploadRef=useRef<HTMLInputElement>(null);const lock=useRef(false);const mounted=useRef(true);
  useEffect(()=>{mounted.current=true;return ()=>{mounted.current=false;};},[]);
  useEffect(()=>{let alive=true,failed=false;const urls:string[]=[];setPhotos([]);setLoading(true);setError('');
   listEventPhotos(client,clubId,eventId).then(refs=>Promise.all(refs.map(async photo=>{const {data,error}=await client.storage.from(photoBucket).download(photo.path);if(error||!data)throw new Error('Fotografii nelze načíst.');if(!alive||failed)return null;const url=URL.createObjectURL(data);urls.push(url);return {...photo,url};}))).then(result=>{if(alive)setPhotos(result.filter((p):p is Preview=>p!==null));}).catch(err=>{failed=true;urls.forEach(URL.revokeObjectURL);if(alive)setError(err instanceof Error?err.message:'Fotografie nelze načíst.');}).finally(()=>{if(alive)setLoading(false)});

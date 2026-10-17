@@ -62,3 +62,7 @@ Kontroly: `npm run build`, `npm test`, `npm run test:share-ui`, `npm run test:sh
 - Skutečné dvouprsté dotykové události v mobilním Chromiu: zoom, posun, ukotvení, limit přiblížení, zrušení, reset, přesnou shodu staženého PNG, rolování mimo fotografii a neaktivní odříznuté rohy rámečků.
 
 Přehled lze znovu vytvořit: `npm run preview:share-gallery -- /cesta/k/ilustracni-fotografii.jpg /tmp/prehled.png`. Používá přímo produkční renderer; ilustrační fotografii je potřeba dodat lokálně. Licence přehledové fotografie: https://unsplash.com/license; zdroj: https://images.unsplash.com/photo-1518611012118-696072aa579a .
+
+Sdílení se otevírá tlačítkem **Sdílet trénink** vedle **Upravit** v samostatném okně. Zavření tlačítkem či Escape vrátí fokus na původní tlačítko. Galerie pamatuje vybranou fotografii pro každý klub a trénink v rámci otevřené relace prohlížeče (sessionStorage); ukládá cestu, nikoli dočasnou blob URL. Při smazání fotografie použije dostupnou první fotografii.
+
+Regresní ověření okna a výběru: `CHROMIUM_PATH=/usr/bin/chromium npm run test:journal-share-ui`.

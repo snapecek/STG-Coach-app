@@ -150,7 +150,7 @@ function signaturePhotoGraphic(ctx:CanvasRenderingContext2D,input:ShareGraphic,b
   const shade=ctx.createLinearGradient(0,0,1080,0);shade.addColorStop(0,'#070A0EC9');shade.addColorStop(.75,'#070A0E00');ctx.fillStyle=shade;ctx.fillRect(0,p.y,1080,p.height);
   ctx.save();ctx.globalCompositeOperation='multiply';polygon(ctx,[[650,p.y],[1010,p.y],[390,p.y+p.height],[0,p.y+p.height]],accent);ctx.restore();
   const low=ctx.createLinearGradient(0,bottom-320,0,bottom);low.addColorStop(0,'#10121600');low.addColorStop(.8,'#101216ED');ctx.fillStyle=low;ctx.fillRect(0,bottom-320,1080,320);
-  const box={...l,ink:white,titleSize:240,titleLines:3};ctx.save();ctx.transform(1,-.13,0,1,0,80);ctx.shadowColor='#101216';ctx.shadowBlur=14;regionTitle(ctx,input,box);ctx.restore();
+  const box={...l,ink:white,titleSize:160,titleLines:3};ctx.save();ctx.transform(1,-.23,-.2,1,110,120);ctx.shadowColor='#101216';ctx.shadowBlur=14;regionTitle(ctx,input,box);ctx.restore();
   const values=metrics.filter(v=>v!==fast).slice(0,4),cw=m.width/Math.max(1,values.length);rule(ctx,m.x,m.y-14,m.width,accent);
   values.forEach((v,i)=>{const x=m.x+i*cw;number(v.value,x,m.y+58,cw-20,69,white);text(ctx,caption(v),x,m.y+88,cw-20,16,muted)});
   text(ctx,input.place||'TRÉNINKOVÝ DENÍK',56,bottom-10,750,18,muted);

@@ -2,7 +2,7 @@
 
 V trenérském Deníku otevřete záznam tréninku a panel **Sdílet trénink**.
 
-![Skutečné exporty všech 12 kompozic](designs/trenomi-share-12-implemented.png)
+![Skutečné exporty původních 12 očíslovaných šablon](designs/trenomi-share-12-implemented.png)
 
 Přehled výše vzniká přímo stejným Canvas rendererem jako stažené PNG. Používá ilustrační fotografii z Unsplash (photo-1518611012118-696072aa579a) a smyšlené údaje, nikoli data členů. Fotografie se do aplikace nepřidává; každý klub používá vlastní galerii.
 
@@ -18,8 +18,11 @@ Přehled výše vzniká přímo stejným Canvas rendererem jako stažené PNG. P
 | 08 Černobílý dokument | Velká monochromatická fotografie a drobná čistá sazba. Černobílá úprava platí jen pro export, ne pro originál. |
 | 09 Nejlepší výkony | Tři výsledkové karty s velkým pořadím, skutečnými hodnotami a jmény standardně skrytými. Bez fotografie. |
 | 10 Noční intervaly | Modrý světelný rám, velký dvouřádkový bílý nadpis uvnitř fotografie, skutečný nejrychlejší úsek a tři samostatné datové karty. |
-| 11 Sportovní manifest | Celoplošná fotografie, obří bílá sportovní typografie ve sklonu, diagonální akcentový pás a kompaktní údaje u spodního okraje. |
+| 11 Sportovní manifest | Celoplošná fotografie, menší bílá sportovní typografie s výraznějším sklonem i zešikmením, diagonální akcentový pás a kompaktní údaje u spodního okraje. |
 | 12 Klubová vstupenka | Krémová perforovaná vstupenka, fotografie a samostatný žlutý datový útržek. Nejde o vstupní oprávnění ani QR kód. |
+| 13 Kilometry | Velká hodnota vzdálenosti a název nad fotografií. |
+| 14 Sloupec dat | Svisle uspořádané skutečné metriky vedle dominantní fotografie. |
+| 15 Jen titulek | Fotografie s výrazným názvem a kompaktním souhrnem. |
 
 Volbu otevřete kliknutím na aktuální šablonu (**Vybrat vzhled · 15**). Nabídka obsahuje číslované miniatury a po volbě se zavře. Náhledy nabídky se vykreslují jen při jejím otevření.
 
@@ -101,3 +104,8 @@ Logo a název klubu se do grafiky nevkládají automaticky. V záložce **Samole
 Vybraný prvek má na náhledu malé **×** pro okamžité odstranění. Pod náhledem jsou obdobné křížky pro jednotlivé metriky, datum, místo a titulek. Skrytá data lze znovu zapnout v záložce **Data**. Ovládací křížky se neexportují. Regrese editoru navíc ověřuje 16 odlišných exportovaných barev, přepínání a editaci starší šablony, volitelné vložení identity s původním zněním a poměrem stran loga a odstranění křížky.
 
 Pod náhledem je **Vrátit odstranění**. Vrací poslední odstraněný údaj, datum, místo, titulek, samolepku nebo logo klubu; opakovaným použitím vrací další odstranění. V **Odstraněné prvky** lze obnovit i konkrétní starší položku. Samolepka si zachová text, polohu, velikost, otočení a uloženou pozici vrstvy, ostatní mezitím provedené úpravy zůstanou. Ruční obnovení údaje v záložce Data odstraní jeho starý záznam z historie. Historie uchovává nejvýše 50 odstranění v otevřeném editoru; po jeho zavření se návrh i historie zahodí. Limit 16 vložených samolepek platí také při obnově.
+
+
+Všech 15 šablon má číslo na miniatuře i u vybraného názvu; původní čísla 01–12 zůstávají, nové fotografické kompozice jsou **13 Kilometry, 14 Sloupec dat, 15 Jen titulek**. Čísla jsou pouze v ovládání editoru, ne v exportu.
+
+Po vložení loga a názvu klubu lze v záložce **Samolepky** zapnout **Ohraničení loga** a vybrat jeho barvu. Nezávisle lze zapnout **Pozadí loga**, zvolit barvu a posuvníkem nastavit **Průhlednost pozadí** (0 % plné, 100 % průhledné). Ve výchozím stavu jsou pozadí i rámeček vypnuté. Průhlednost platí jen pro pozadí; původní logo a název zůstávají plně viditelné a samotný soubor se nemění. Odstranění a následné vrácení prvku obnovuje také tyto volby.

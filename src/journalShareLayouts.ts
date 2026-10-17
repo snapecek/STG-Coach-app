@@ -18,7 +18,7 @@ export function photoShareLayout(template:PhotoShareTemplate,format:ShareFormat)
   case 'split':return {...layout,background:'#FFB317',ink:'#101216',light:true,photo:box(0,story?top:0,1080,h*.72+(story?0:top)),title:box(40,top+h*.5,1000,h*.2),metrics:box(56,top+h*.76,968,h*.14),footer:box(56,bottom-55,968,50)};
   case 'clean':return {...layout,background:'#F4F4EF',ink:'#101216',muted:'#62666C',light:true,photo:box(0,top+76,1080,h-256),header:box(44,top,992,66),title:box(44,bottom-164,992,62),metrics:box(44,bottom-94,992,46),footer:box(44,bottom-44,992,44),titleSize:48,titleFace:'text'};
   case 'neon':return {...layout,background:'#080E19',photo:box(36,top+100,1008,h-340),title:box(82,bottom-490,900,230),metrics:box(40,bottom-200,1000,142),footer:box(40,bottom-42,1000,42),titleSize:140};
-  case 'track':return {...layout,background:'#101216',photo:box(0,top,1080,h),title:box(45,top+130,850,h-340),metrics:box(56,bottom-195,968,110),footer:box(56,bottom-48,968,48),titleSize:220};
+  case 'track':return {...layout,background:'#101216',photo:box(0,top,1080,h),title:box(70,top+120,740,Math.min(510,h*.42)),metrics:box(56,bottom-195,968,110),footer:box(56,bottom-48,968,48),titleSize:160};
   case 'ticket':return {...layout,background:'#202631',ink:'#191B1E',muted:'#65615C',light:true,header:box(56,top+8,968,70),photo:box(56,top+118,968,h-408),title:box(56,bottom-264,636,188),metrics:box(756,bottom-250,260,160),metricColumns:2,footer:box(56,bottom-44,968,44),titleSize:118};
   default:return layout;
  }

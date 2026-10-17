@@ -83,3 +83,8 @@ Přehled se obnovuje po 10 sekundách a při návratu do viditelné karty. Běhe
 Rozšířené ověření: `fee_deletion_recurring.sql` kontroluje měsíční generování, chybějící období, únor/duben, duplicity, role a soukromí, ochranu zaplacených předpisů, audit smazání, pauzu, deaktivaci evidence a archivaci/obnovu. `STG_FEE_RECURRING_ONLY=1 npm run test:member-ui` ověřuje potvrzování smazání, zachování úhrad, nastavení a vypnutí automatiky i mobil/desktop a oba vzhledy.
 
 Kontrola upozornění: `STG_FEE_ALERTS_ONLY=1 npm run test:member-ui` pokrývá platbu před otevřením zvonečku i před kliknutím na zprávu, částečné doplacení, zmizení otevřeného upozornění, storno úhrady, otevření konkrétního předpisu, vypnutí evidence, návrat po odpojení a oba vzhledy na 320/390/1440 px. Jednotkové testy `memberFeeAlerts.test.ts` kontrolují splatnost, zbývající částky a volání jen serverově omezeného přehledu.
+
+### Hromadné mazání (migrace 043)
+Trenér může označit jednotlivé předpisy nebo vybrat všechny zobrazené předpisy bez platných úhrad. Výběr se při změně filtru nebo záložky vyprázdní. Potvrzení ukáže osoby, předpisy, počet a celkovou částku. Členům se výběr nezobrazuje.
+
+`delete_club_fee_charges` provede celou dávku atomicky pod stejným klubovým zámkem jako zápis úhrady. Pokud je některý předpis již smazaný, patří jinému klubu nebo má nově zapsanou úhradu, nesmaže se žádný. Vraťte se do evidence a načtěte aktuální stav. Auditní historie a ochrana před opětovným vytvořením automatických předpisů zůstávají zachované.

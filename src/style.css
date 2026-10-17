@@ -342,3 +342,15 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .member-row>.row-actions>button{display:flex;align-items:center;justify-content:center;gap:4px}.member-row>.row-actions>button svg{flex-shrink:0}
 
 .recorded-training-guests{padding:16px;border:1px solid var(--border);border-radius:12px;margin:18px 0;background:var(--surface)}.recorded-training-guests h3{margin-top:0}.recorded-training-guests .preset-tabs{margin:12px 0;flex-wrap:wrap}.recorded-training-guests form{margin-top:12px}.recorded-training-guests button.primary{margin-top:12px}
+
+/* Keep the overview introduction short so events start near the top. */
+.cloud-dashboard:not(.member-dashboard)>.club-content>.overview-page-title{margin-bottom:6px;gap:10px;align-items:center}
+.overview-page-title .eyebrow{display:none}
+.overview-page-title h1{font-size:22px;line-height:1.2;letter-spacing:-.3px}
+.overview-page-title>.primary{min-height:38px;padding:8px 12px;font-size:12px;gap:6px;margin-top:0}
+.overview-page-title .member-bell{width:38px;height:38px}.overview-page-title .member-bell>svg{width:20px;height:20px}
+.simplified-overview .coach-day{margin:0 0 14px}
+.simplified-overview .coach-day>div{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 14px}
+.simplified-overview .coach-day h2{font-size:20px;line-height:1.3;letter-spacing:-.3px;margin:0}
+.simplified-overview .coach-day p{font-size:12px;line-height:1.4}
+@media(max-width:760px){.overview-page-title h1{font-size:20px}.overview-page-title .member-bell{width:44px;height:44px}.simplified-overview .coach-day{gap:8px;margin-bottom:12px;align-items:center}.simplified-overview .coach-day>div{display:block}.simplified-overview .coach-day h2{font-size:18px;margin:0 0 3px}.simplified-overview .coach-day p{font-size:11px}.simplified-overview .coach-day .mobile-create-event{padding:8px 10px;min-height:44px}}

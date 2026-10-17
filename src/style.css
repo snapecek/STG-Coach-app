@@ -485,3 +485,7 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .share-removed-fields{margin:8px 0;font-size:11px}
 .share-removed-fields summary{cursor:pointer;color:var(--muted);padding:5px 0}
 .share-removed-fields button{padding:6px 8px;font-size:10px;margin:4px 5px 4px 0}
+.share-sticker-properties .share-club-appearance{display:grid;gap:6px;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:12px}
+.share-club-appearance label.share-names{display:flex;align-items:center;gap:9px}
+.share-club-appearance input[type=checkbox]{width:18px;height:18px;accent-color:var(--orange)}
+.share-club-appearance input[type=color]{max-width:90px;height:36px;padding:3px;cursor:pointer}

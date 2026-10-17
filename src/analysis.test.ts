@@ -21,3 +21,9 @@ describe('Závody v analýze',()=>{
 });
 
 it('v analýze zachová skutečnou vzdálenost a rozliší zaznamenanou nulu od chybějící hodnoty',()=>{const s=analysisSummary(data,[{...event,actual_distance_km:0},{...event,id:'second',actual_distance_km:11.2},{...event,id:'unknown',actual_distance_km:null},{...event,id:'race-distance',event_kind:'race',actual_distance_km:42}]);expect(s.distance).toBe(11.2);expect(s.recordedDistances).toBe(2)});
+
+it('ve statistice zachová hosty i jejich potvrzenou účast za abecedně seřazenými členy',()=>{
+ const members=[{...data.members[0],id:'z',name:'Adam Žák'},{...data.members[1],id:'g',name:'Host Adam',event_guest:true},{...data.members[0],id:'c',name:'Zdeněk Černý'}];
+ const participation=members.map(m=>({club_id:'club',event_id:'done',member_id:m.id,response:'yes' as const,attended:true,confirmed_by:'coach'}));
+ const s=analysisSummary({...data,members,participation},[event]);expect(s.members.map(m=>[m.name,m.kind,m.present])).toEqual([['Zdeněk Černý','member',1],['Adam Žák','member',1],['Host Adam','guest',1]]);expect(s.present).toBe(3);expect(analysisSummary({...data,members,participation},[event],'g').members.map(m=>m.id)).toEqual(['g']);
+});

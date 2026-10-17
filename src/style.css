@@ -523,3 +523,5 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .map-links a{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:9px 12px;border-radius:9px;text-decoration:none;font-size:12px}.map-links .map-navigation{background:var(--orange);color:#101216;font-weight:700}.map-links .map-secondary-link{color:inherit;border:1px solid var(--border)}.map-links a:hover{filter:brightness(1.08)}
 
 .settings-panel[aria-label="Mobilní oznámení"]>small{display:block;margin-top:10px;font-size:11px;line-height:1.5}
+
+.attendance-matrix .attendance-section th{position:static;padding:9px 10px;text-align:left;font-size:12px;letter-spacing:.05em;color:var(--orange);border-bottom:1px solid #586373;background:transparent}

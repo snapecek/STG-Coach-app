@@ -3,6 +3,7 @@ export type GraphicBox={x:number;y:number;width:number;height:number};
 export type PhotoShareTemplate=Exclude<ShareTemplate,'stats'|'best'>;
 export const usesSharePhoto=(template:ShareTemplate):template is PhotoShareTemplate=>template!=='stats'&&template!=='best';
 export type PhotoShareLayout={photo:GraphicBox;header:GraphicBox;title:GraphicBox;metrics:GraphicBox;footer:GraphicBox;metricColumns:number;background:string;ink:string;muted:string;light:boolean;titleSize:number;titleFace?:'serif'|'text';titleLines?:number};
+export const isSignatureTemplate=(template:ShareTemplate):template is 'split'|'neon'|'track'=>['split','neon','track'].includes(template);
 /** Art direction is per composition; shared rectangles keep typography out of the photograph. */
 export function photoShareLayout(template:PhotoShareTemplate,format:ShareFormat):PhotoShareLayout{
  const height={'1:1':1080,'4:5':1350,'9:16':1920}[format],story=format==='9:16',top=story?150:40,bottom=height-(story?170:40),h=bottom-top;
@@ -14,10 +15,10 @@ export function photoShareLayout(template:PhotoShareTemplate,format:ShareFormat)
   case 'sport':return {...layout,background:'#FFB317',ink:'#101216',muted:'#423613',light:true,title:box(44,top+82,980,140),header:box(44,top,980,70),photo:box(0,top+248,980,h-404),metrics:box(44,bottom-140,992,90),footer:box(44,bottom-44,992,44),titleSize:148};
   case 'frame':return {...layout,background:'#D9D3C7',ink:'#191B1E',muted:'#65615C',light:true,photo:box(90,top+112,900,h-386),header:box(64,top,836,70),title:box(90,bottom-246,900,122),metrics:box(90,bottom-110,900,60),footer:box(64,bottom-44,952,44),titleSize:100,titleFace:'serif'};
   case 'cinema':return {...layout,background:'#090B0D',photo:box(58,top+224,964,h-400),header:box(58,top+8,964,70),title:box(58,top+100,964,106),metrics:box(58,bottom-142,964,90),footer:box(58,bottom-44,964,44),titleSize:112};
-  case 'split':return story?{...layout,background:'#161C23',photo:box(0,top+90,1080,h-390),title:box(48,bottom-276,492,170),metrics:box(604,bottom-266,428,158),metricColumns:2,titleSize:84}:{...layout,header:box(40,top,1000,70),photo:box(374,top+92,706,h-152),title:box(40,top+116,296,230),metrics:box(40,top+390,296,Math.min(400,h-470)),metricColumns:1,footer:box(40,bottom-44,1000,44),titleSize:94,titleLines:4};
+  case 'split':return {...layout,background:'#FFB317',ink:'#101216',light:true,photo:box(0,story?top:0,1080,h*.72+(story?0:top)),title:box(40,top+h*.5,1000,h*.2),metrics:box(56,top+h*.76,968,h*.14),footer:box(56,bottom-55,968,50)};
   case 'clean':return {...layout,background:'#F4F4EF',ink:'#101216',muted:'#62666C',light:true,photo:box(0,top+76,1080,h-256),header:box(44,top,992,66),title:box(44,bottom-164,992,62),metrics:box(44,bottom-94,992,46),footer:box(44,bottom-44,992,44),titleSize:48,titleFace:'text'};
-  case 'neon':return {...layout,background:'#101A1B',ink:'#D4FFF0',muted:'#A4C9BC',title:box(56,top+94,968,114),titleSize:124,photo:box(56,top+232,968,h-412),metrics:box(56,bottom-146,968,98),footer:box(56,bottom-44,968,44)};
-  case 'track':return {...layout,background:'#FFB317',ink:'#101216',muted:'#423613',light:true,header:box(130,top,900,70),photo:box(130,top+120,900,h-390),title:box(100,bottom-250,930,120),metrics:box(100,bottom-110,930,60),footer:box(100,bottom-44,930,44),titleSize:126};
+  case 'neon':return {...layout,background:'#080E19',photo:box(36,top+100,1008,h-340),title:box(82,bottom-490,900,230),metrics:box(40,bottom-200,1000,142),footer:box(40,bottom-42,1000,42),titleSize:140};
+  case 'track':return {...layout,background:'#101216',photo:box(0,top,1080,h),title:box(45,top+130,850,h-340),metrics:box(56,bottom-195,968,110),footer:box(56,bottom-48,968,48),titleSize:220};
   case 'ticket':return {...layout,background:'#202631',ink:'#191B1E',muted:'#65615C',light:true,header:box(56,top+8,968,70),photo:box(56,top+118,968,h-408),title:box(56,bottom-264,636,188),metrics:box(756,bottom-250,260,160),metricColumns:2,footer:box(56,bottom-44,968,44),titleSize:118};
   default:return layout;
  }
@@ -26,14 +27,14 @@ export function photoShareLayout(template:PhotoShareTemplate,format:ShareFormat)
 export function sharePhotoPath(ctx:CanvasRenderingContext2D,b:GraphicBox,template:ShareTemplate,fit:'contain'|'cover'='cover'){
  ctx.beginPath();
  if(fit==='cover'&&template==='sport'){ctx.moveTo(b.x,b.y);ctx.lineTo(b.x+b.width,b.y+b.height*.12);ctx.lineTo(b.x+b.width*.88,b.y+b.height);ctx.lineTo(b.x,b.y+b.height*.94);ctx.closePath()}
- else if(fit==='cover'&&template==='neon')ctx.roundRect(b.x,b.y,b.width,b.height,[{x:b.width*.4,y:b.height*.2},{x:b.width*.4,y:b.height*.2},0,0]);
- else if(fit==='cover'&&template==='track')ctx.roundRect(b.x,b.y,b.width,b.height,[0,{x:b.width*.24,y:b.height*.24},0,{x:b.width*.24,y:b.height*.24}]);
+ else if(fit==='cover'&&template==='neon')ctx.roundRect(b.x,b.y,b.width,b.height,{x:b.width*.08,y:b.height*.08});
+ else if(fit==='cover'&&template==='split'){ctx.moveTo(b.x,b.y);ctx.lineTo(b.x+b.width,b.y);ctx.lineTo(b.x+b.width,b.y+b.height*.75);ctx.lineTo(b.x,b.y+b.height);ctx.closePath()}
  else ctx.rect(b.x,b.y,b.width,b.height);
 }
 export function sharePhotoClipStyle(template:ShareTemplate,fit:'contain'|'cover'){
  if(fit==='contain')return {};
  if(template==='sport')return {clipPath:'polygon(0 0, 100% 12%, 88% 100%, 0 94%)'};
- if(template==='neon')return {borderRadius:'40% 40% 0 0 / 20% 20% 0 0',overflow:'hidden' as const};
- if(template==='track')return {borderRadius:'0 24% 0 24%',overflow:'hidden' as const};
+ if(template==='neon')return {borderRadius:'8%',overflow:'hidden' as const};
+ if(template==='split')return {clipPath:'polygon(0 0,100% 0,100% 75%,0 100%)'};
  return {};
 }

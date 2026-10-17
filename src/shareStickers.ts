@@ -10,7 +10,7 @@ export const stickerKinds:{id:StickerKind;name:string;hint:string}[]=[
  {id:'stamp',name:'Razítko',hint:'Odmakáno'},{id:'bolt',name:'Blesk',hint:'Tempo týmu'},{id:'streak',name:'Série',hint:'Vlastní text'},{id:'effort',name:'Ukazatel zátěže',hint:'RPE z deníku'},
  {id:'ticket',name:'Lístek',hint:'Název tréninku'},{id:'outline',name:'Obrysový nápis',hint:'Dnes jsme to dali'},{id:'team',name:'Tým na startu',hint:'Počet přítomných'},{id:'record',name:'Rekord',hint:'Doplňte vlastní výkon'}
 ];
-export type ShareSticker={id:string;kind:StickerKind|'club';x:number;y:number;scale:number;rotation:number;text:string;value:string;clubBorder?:boolean;clubBorderColor?:string;clubBackground?:boolean;clubBackgroundColor?:string;clubBackgroundOpacity?:number};
+export type ShareSticker={id:string;kind:StickerKind|'club';x:number;y:number;scale:number;rotation:number;text:string;value:string;clubBorderWidth?:number;clubCornerRadius?:number;clubPadding?:number;clubBorder?:boolean;clubBorderColor?:string;clubBackground?:boolean;clubBackgroundColor?:string;clubBackgroundOpacity?:number};
 export type StickerData={title:string;date?:string;metrics:{label:string;value:string}[];attendance?:{present:number;total:number}};
 export function newShareSticker(kind:StickerKind,data:StickerData,id?:string):ShareSticker{
  const metric=(label:string)=>data.metrics.find(m=>m.label===label)?.value||'—';
@@ -19,7 +19,8 @@ export function newShareSticker(kind:StickerKind,data:StickerData,id?:string):Sh
 }
 export const stickerName=(kind:ShareSticker['kind'])=>kind==='club'?'Logo a název klubu':stickerKinds.find(k=>k.id===kind)!.name;
 export function stickerSize(kind:ShareSticker['kind']){return ['tape','distance','bolt','stamp','ticket','team','outline','club'].includes(kind)?{width:440,height:160}:{width:290,height:260}}
-export function safeSticker(s:ShareSticker):ShareSticker{const finite=(n:number,fallback:number)=>Number.isFinite(n)?n:fallback;return {...s,x:Math.max(0,Math.min(1,finite(s.x,.5))),y:Math.max(0,Math.min(1,finite(s.y,.5))),scale:Math.max(.35,Math.min(2.4,finite(s.scale,1))),rotation:((finite(s.rotation,0)+180)%360+360)%360-180,text:s.text.slice(0,60),value:s.value.slice(0,80),clubBackgroundOpacity:Math.max(0,Math.min(1,finite(s.clubBackgroundOpacity??.85,.85))),clubBackgroundColor:/^#[0-9a-f]{6}$/i.test(s.clubBackgroundColor||'')?s.clubBackgroundColor:'#101216',clubBorderColor:/^#[0-9a-f]{6}$/i.test(s.clubBorderColor||'')?s.clubBorderColor:'#FFFFFF'}}
+export function stickerBounds(sticker:ShareSticker){const size=stickerSize(sticker.kind);if(sticker.kind!=='club')return size;const s=safeSticker(sticker),extra=2*s.clubPadding!+(s.clubBorder?s.clubBorderWidth!:0);return {width:size.width+extra,height:size.height+extra}}
+export function safeSticker(s:ShareSticker):ShareSticker{const finite=(n:number,fallback:number)=>Number.isFinite(n)?n:fallback,padding=Math.max(0,Math.min(100,finite(s.clubPadding??0,0)));return {...s,x:Math.max(0,Math.min(1,finite(s.x,.5))),y:Math.max(0,Math.min(1,finite(s.y,.5))),scale:Math.max(.35,Math.min(2.4,finite(s.scale,1))),rotation:((finite(s.rotation,0)+180)%360+360)%360-180,text:s.text.slice(0,60),value:s.value.slice(0,80),clubBorderWidth:Math.max(1,Math.min(24,finite(s.clubBorderWidth??3,3))),clubCornerRadius:Math.max(0,Math.min(80+padding,finite(s.clubCornerRadius??14,14))),clubPadding:padding,clubBackgroundOpacity:Math.max(0,Math.min(1,finite(s.clubBackgroundOpacity??.85,.85))),clubBackgroundColor:/^#[0-9a-f]{6}$/i.test(s.clubBackgroundColor||'')?s.clubBackgroundColor:'#101216',clubBorderColor:/^#[0-9a-f]{6}$/i.test(s.clubBorderColor||'')?s.clubBorderColor:'#FFFFFF'}}
 function label(ctx:CanvasRenderingContext2D,value:string,y:number,size:number,color:string,max:number,outline=false){ctx.font=`800 ${size}px "Trenomi Display", sans-serif`;while(ctx.measureText(value).width>max&&size>12){ctx.font=`800 ${--size}px "Trenomi Display", sans-serif`}ctx.textAlign='center';ctx.textBaseline='middle';if(outline){ctx.strokeStyle=color;ctx.lineWidth=2;ctx.strokeText(value,0,y,max)}else{ctx.fillStyle=color;ctx.fillText(value,0,y,max)}}
 export function drawShareSticker(ctx:CanvasRenderingContext2D,raw:ShareSticker,width:number,height:number,accent:string,clubLogo?:HTMLImageElement|null){
  const s=safeSticker(raw),b=stickerSize(s.kind),w=b.width,h=b.height,white='#F5F6F7',dark='#101216';ctx.save();ctx.translate(s.x*width,s.y*height);ctx.rotate(s.rotation*Math.PI/180);ctx.scale(s.scale,s.scale);
@@ -27,8 +28,10 @@ export function drawShareSticker(ctx:CanvasRenderingContext2D,raw:ShareSticker,w
  const ring=(radius:number)=>{ctx.beginPath();ctx.arc(0,0,radius,0,Math.PI*2);ctx.fillStyle=dark;ctx.fill();ctx.lineWidth=12;ctx.strokeStyle=accent;ctx.stroke()};
  switch(s.kind){
  case 'club':{
-  if(s.clubBackground){ctx.save();ctx.globalAlpha*=s.clubBackgroundOpacity!;rect(s.clubBackgroundColor!,14);ctx.restore()}
-  if(s.clubBorder){ctx.strokeStyle=s.clubBorderColor!;ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,14);ctx.stroke()}
+  const padding=s.clubPadding!,fw=w+padding*2,fh=h+padding*2,radius=Math.min(s.clubCornerRadius!,fw/2,fh/2);
+  const frame=()=>{ctx.beginPath();ctx.roundRect(-fw/2,-fh/2,fw,fh,radius)};
+  if(s.clubBackground){ctx.save();ctx.globalAlpha*=s.clubBackgroundOpacity!;ctx.fillStyle=s.clubBackgroundColor!;frame();ctx.fill();ctx.restore()}
+  if(s.clubBorder){ctx.strokeStyle=s.clubBorderColor!;ctx.lineWidth=s.clubBorderWidth!;frame();ctx.stroke()}
   const logoWidth=clubLogo?105:0;
   if(clubLogo){const factor=Math.min(90/clubLogo.naturalWidth,110/clubLogo.naturalHeight);ctx.drawImage(clubLogo,-w/2+18,-clubLogo.naturalHeight*factor/2,clubLogo.naturalWidth*factor,clubLogo.naturalHeight*factor)}
   ctx.fillStyle=white;ctx.textAlign='left';ctx.textBaseline='middle';let size=34;ctx.font=`700 ${size}px "Trenomi Text",sans-serif`;while(ctx.measureText(s.value).width>w-logoWidth-42&&size>12)ctx.font=`700 ${--size}px "Trenomi Text",sans-serif`;ctx.fillText(s.value,-w/2+20+logoWidth,0,w-logoWidth-40);break;}

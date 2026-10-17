@@ -1,0 +1,24 @@
+begin;
+insert into auth.users(id,email) values('10000000-0000-4000-8000-000000000001','owner@example.invalid'),('10000000-0000-4000-8000-000000000002','member@example.invalid');
+insert into clubs(id,name) values('20000000-0000-4000-8000-000000000001','Fiktivní klub');
+insert into club_roles values('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001','owner'),('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000002','member');
+insert into members(id,club_id,user_id,name,kind) values('30000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000002','Člen','member');
+do $$begin if not exists(select 1 from members where joined_at>=now()-interval '1 minute' and joined_at<=clock_timestamp()) then raise exception 'FAIL joined date default';end if;end $$;
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
+do $$declare original timestamptz;archived members;restored members;begin
+ select joined_at into original from members where id='30000000-0000-4000-8000-000000000001';
+ archived:=archive_club_member('20000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000001');
+ restored:=archive_club_member(archived.club_id,archived.id,true);
+ if restored.joined_at is distinct from original then raise exception 'FAIL restore changes join date';end if;
+end $$;
+insert into events(id,club_id,name,starts_at,place,type,actual_notes,actual_duration_minutes) values('50000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','Historický test',now()-interval '2 days','Park','Běh','Test',60);
+insert into participation(club_id,event_id,member_id,attended) values('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000001',true);
+update events set completed_at=now() where id='50000000-0000-4000-8000-000000000001';
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002"}',true);
+delete from events where id='50000000-0000-4000-8000-000000000001';
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
+do $$begin if not exists(select 1 from events where id='50000000-0000-4000-8000-000000000001') then raise exception 'FAIL member deleted event';end if;end $$;
+delete from events where id='50000000-0000-4000-8000-000000000001';
+do $$begin if exists(select 1 from events where id='50000000-0000-4000-8000-000000000001') or exists(select 1 from participation where event_id='50000000-0000-4000-8000-000000000001') then raise exception 'FAIL past completed event cascade';end if;end $$;
+rollback;

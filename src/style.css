@@ -343,3 +343,5 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 @media(max-width:760px){.member-row{grid-template-columns:34px minmax(0,1fr) 78px;gap:9px;align-items:start}.member-row>.avatar{width:34px;height:34px}.member-row>.row-actions{display:flex;flex-direction:column;align-items:stretch;gap:8px;width:78px;margin-left:0}.member-row>.row-actions>button{width:100%;min-width:0;padding:9px 5px;font-size:10px;overflow-wrap:anywhere}.member-row>.row-actions>button:last-child{order:-1;min-width:0}.invitation-row>.row-actions{width:100%;justify-content:flex-end}}
 
 .member-row>.row-actions>button{display:flex;align-items:center;justify-content:center;gap:4px}.member-row>.row-actions>button svg{flex-shrink:0}
+
+.recorded-training-guests{padding:16px;border:1px solid var(--border);border-radius:12px;margin:18px 0;background:var(--surface)}.recorded-training-guests h3{margin-top:0}.recorded-training-guests .preset-tabs{margin:12px 0;flex-wrap:wrap}.recorded-training-guests form{margin-top:12px}.recorded-training-guests button.primary{margin-top:12px}

@@ -24,6 +24,6 @@ Archivace a obnova se ověřují pouze na fiktivních datech; produkční kontro
 
 Nastavení primárního klubu je dostupné trenérům i členům. Ikona dresu nahrazuje původní výběrové pole; v hlavičce je název a logo právě otevřeného klubu. Seznam klubů zůstává funkční i před nahráním migrace 031, ale počty aktivity vyžadují její RPC.
 
-Číslo u dresu sčítá nepřečtené zprávy a nové či změněné události v ostatních dostupných klubech. Seznam zobrazuje počty po klubech, včetně aktuálního. Jedna událost se počítá jednou bez ohledu na počet úprav. Zprávy používají stávající oprávnění ke konverzacím; skryté skupinové události, cizí soukromé zprávy a archivované kluby se nezapočítají. Počty se obnovují každých 15 sekund, po návratu na stránku a změně chatu.
+Číslo u dresu sčítá nepřečtené zprávy a nové či změněné události v ostatních dostupných klubech. Seznam zobrazuje počty po klubech, včetně aktuálního. Jedna událost se počítá jednou bez ohledu na počet úprav. Zprávy používají stávající oprávnění ke konverzacím; skryté skupinové události, cizí soukromé zprávy a archivované kluby se nezapočítají. Počty se obnovují každých 10 sekund, po návratu na stránku a změně chatu.
 
 Otevření klubu potvrdí poslední viditelné změny událostí pomocí serverové časové značky. Nepotvrdí přečtení zpráv: ty zůstávají nepřečtené do otevření konverzace. Migrace zavede výchozí stav pro existující členství, takže staré události nezpůsobí hromadná upozornění. Preference ani značky nepřečtených aktivit neovlivňují klubová oprávnění.

@@ -1,3 +1,4 @@
+import {AUTO_REFRESH_MS} from './useAutoRefresh';
 import {useEffect,useState} from 'react';
 import type {SupabaseClient} from '@supabase/supabase-js';
 export type ClubProfile={id:string;name:string;logo_path:string|null};
@@ -9,10 +10,10 @@ export async function prepareLogo(file:File){validateLogo(file);let bitmap:Image
 export async function updateClubLogo(client:SupabaseClient,clubId:string,file:File|null){let path:string|null=null;if(file){const blob=await prepareLogo(file);path=clubId+'/'+crypto.randomUUID()+'.'+(blob.type==='image/webp'?'webp':'png');const upload=await client.storage.from('club-logos').upload(path,blob,{contentType:blob.type,upsert:false,cacheControl:'0'});if(upload.error)throw new Error('Logo nelze nahrát. Ověřte připojení a oprávnění.');}let previous:string|null;try{previous=await settingsRpc(client,'set_club_logo',{target_club:clubId,new_path:path});}catch(e){if(path)try{await client.storage.from('club-logos').remove([path])}catch{/* Preserve the failed metadata update error. */}throw e;}if(previous&&previous!==path)try{await client.storage.from('club-logos').remove([previous])}catch{/* Branding is saved; cleanup can be retried separately. */}}
 export function useClubProfile(client:SupabaseClient,clubId:string,version:number){
  const [state,setState]=useState<{clubId:string;profile:ClubProfile|null;logoUrl:string}>({clubId:'',profile:null,logoUrl:''}),[error,setError]=useState('');
- useEffect(()=>{let alive=true;setError('');async function load(){if(!clubId)return;try{
+ useEffect(()=>{let alive=true,pending=false,cachedPath='',cachedUrl='',signedAt=0;setError('');async function load(){if(!clubId||pending||document.visibilityState==='hidden')return;pending=true;try{
   const rows=await settingsRpc<ClubProfile[]>(client,'get_club_profile',{target_club:clubId});const value=rows[0];if(!value)throw new Error('Nastavení klubu nelze načíst.');
-  let logoUrl='';if(value.logo_path){const {data,error}=await client.storage.from('club-logos').createSignedUrl(value.logo_path,7200);if(error)throw new Error('Logo klubu nelze načíst.');logoUrl=data.signedUrl;}
+  let logoUrl='';if(value.logo_path){if(value.logo_path!==cachedPath||Date.now()-signedAt>3600000){const {data,error}=await client.storage.from('club-logos').createSignedUrl(value.logo_path,7200);if(error)throw new Error('Logo klubu nelze načíst.');cachedPath=value.logo_path;cachedUrl=data.signedUrl;signedAt=Date.now()}logoUrl=cachedUrl}
   if(alive){setState({clubId,profile:value,logoUrl});setError('');}
- }catch(e){if(alive)setError((e as Error).message)}}if(clubId)void load();window.addEventListener('trenomi-club-profile-changed',load);const timer=setInterval(()=>void load(),60*60*1000);return()=>{alive=false;clearInterval(timer);window.removeEventListener('trenomi-club-profile-changed',load)}},[client,clubId,version]);
+ }catch(e){if(alive)setError((e as Error).message)}finally{pending=false}}if(clubId)void load();window.addEventListener('trenomi-club-profile-changed',load);document.addEventListener('visibilitychange',load);const timer=setInterval(()=>void load(),AUTO_REFRESH_MS);return()=>{alive=false;clearInterval(timer);window.removeEventListener('trenomi-club-profile-changed',load);document.removeEventListener('visibilitychange',load)}},[client,clubId,version]);
  return {profile:state.clubId===clubId?state.profile:null,logoUrl:state.clubId===clubId?state.logoUrl:'',error};
 }

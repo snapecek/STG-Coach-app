@@ -8,7 +8,7 @@ U každé události lze nepovinně uložit jeden bod srazu, nejvýše osm směro
 2. Vyhledejte adresu/název místa nebo vložte GPS ve formátu `49.854, 18.542`. Vyberte nalezené místo. Případně tlačítkem **Označit místo** umístěte bod přímo v mapě.
 3. Vyberte **Přidat šipku** a klepněte nejdříve na její začátek, potom na konec. Šipky jsou uložené geograficky, takže zůstávají na stejném místě při posunu i přiblížení mapy. Jednotlivé šipky můžete odebrat.
 4. Volitelně doplňte **Jak se dostat na místo** a uložte celou událost. **Odstranit mapu a šipky** odstraní mapu až po uložení formuláře; zrušení úprav původní mapu zachová.
-5. Člen i trenér uvidí uloženou mapu přímo pod zprávami v detailu události. Zde najdou i odkazy **Spustit navigaci** (Google Maps) a **Otevřít Mapy.com**. Navigace používá bod srazu; nakreslené šipky a poznámka upřesňují místní přístup.
+5. Člen i trenér uvidí uloženou mapu v záložce **Informace** v detailu události. Zde najdou i odkazy **Spustit navigaci** (Google Maps) a **Otevřít Mapy.com**. Navigace používá bod srazu; nakreslené šipky a poznámka upřesňují místní přístup.
 
 Mapa je také dostupná v detailu tréninkového deníku. Kopie události a všechny termíny nové série/skupiny převezmou její mapu. Volba jiné tréninkové/závodní šablony převezme její mapu, případně mapu vyčistí, pokud ji šablona neobsahuje. Změna textového názvu místa sama geografický bod neposouvá.
 
@@ -46,4 +46,4 @@ Po migraci 038 spusťte [039 – uložená místa](../supabase/migrations/202610
 - **Odebrat uložené místo** vyžaduje potvrzení; smaže pouze nabídku v knihovně. Aktuální mapa ve formuláři i existující události/šablony zůstávají. **Odstranit mapu a šipky** naopak vymaže pouze mapu upravované události/šablony po uložení formuláře.
 - Členové vidí mapu a navigaci v událostech podle dosavadních oprávnění. Knihovnu spravují pouze trenéři a správce; RLS izoluje kluby. Uložená místa jsou zahrnutá v automatické záloze klubu a po archivaci jsou uzamčená.
 
-Ověření 039: SQL regrese validace, rolí, oddělení klubů, samostatných kopií a archivní zálohy; prohlížečový scénář uloží místo, znovu načte aplikaci, použije ho v obou druzích šablon, vytvoří události, prověří členskou mapu pod zprávami a odebere místo beze změny kopií. Mock respektuje výběr databázových sloupců, aby odhalil ztrátu mapy při opakovaném načtení.
+Ověření 039: SQL regrese validace, rolí, oddělení klubů, samostatných kopií a archivní zálohy; prohlížečový scénář uloží místo, znovu načte aplikaci, použije ho v obou druzích šablon, vytvoří události, prověří členskou mapu v Informacích a odebere místo beze změny kopií. Mock respektuje výběr databázových sloupců, aby odhalil ztrátu mapy při opakovaném načtení.

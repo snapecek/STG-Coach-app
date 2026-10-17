@@ -30,3 +30,7 @@ Nové pozvánky jsou vázané na konkrétní ověřený e-mail, platí 7 dní a 
 Automatické ověření: `npm test`, `npm run build`, `npm run test:database`, Deno check Edge Function a `STG_APPLICATIONS_ONLY=1 npm run test:member-ui` proti běžícímu testovacímu Vite. Prohlížečové testy používají fiktivní API a neposílají skutečné e-maily. Snímky návodu vznikají v `/tmp/trenomi-join-guide`; běžný test nepřepisuje publikované obrázky. Publikované podklady, PNG a PDF obnoví `node scripts/render-member-guide.cjs` při spuštěném Vite. Pro systémový Chromium lze přidat `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium`.
 
 Po aktivaci ověřte doručení na vlastním zvoleném testovacím e-mailu, nastavení hesla/ověření e-mailu, čekání bez přístupu, schválení trenérem a vstup do správného klubu. Testy proti živým účtům samy o sobě doručení nepotvrzují.
+
+## Pozvánka bez znalosti e-mailu
+
+Migrace 035 doplňuje sdílené registrační odkazy pro SMS a sociální sítě. Funkce `invite-member` se kvůli nim znovu nenasazuje. Postup a platnost odkazů popisuje [SHAREABLE_CLUB_INVITATIONS.md](SHAREABLE_CLUB_INVITATIONS.md).

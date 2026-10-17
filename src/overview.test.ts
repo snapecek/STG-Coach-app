@@ -14,3 +14,13 @@ it('upozorní na delší absenci pouze s doloženou dřívější účastí a ne
 
 it('sloučí nedokončenou událost a úkol do jednoho řádku se zachovanými cíli',()=>{const d=data();d.events=[event('e'),event('cancelled',{status:'cancelled'})];const tasks=[{id:'t',event_id:'e',title:'Pomůcky',assignee_id:null,due_at:null,completed_at:null},{id:'ignored',event_id:'cancelled',title:'Zrušený úkol',assignee_id:null,due_at:null,completed_at:null}];const work=coachWorkQueue(d,tasks,now);expect(work).toHaveLength(1);expect(work[0].event.id).toBe('e');expect(work[0].tabs).toEqual(['attendance','record','tasks']);expect(work[0].labels.some(l=>l.includes('organizačních'))).toBe(true)});
 it('otevřený závod bez přihlášených nevytváří povinnost odpovědět všem členům',()=>{const d=data();d.events=[event('race',{event_kind:'race',starts_at:'2026-10-15T16:00:00Z'})];expect(coachWorkQueue(d,[],now)).toEqual([])});
+
+it('pravidelnost obsahuje všechny členy i hosty s ověřenými záznamy, bez limitu pěti',()=>{
+ const d=data();d.events=[event('e'),event('cancel',{status:'cancelled'}),event('race',{event_kind:'race'})];
+ d.members=Array.from({length:7},(_,i)=>({...d.members[0],id:'m'+i,name:'Člen '+String(7-i)}));
+ d.members.push({...d.members[0],id:'guest',name:'Host Adam',kind:'guest',event_guest:true,removed_at:'2026-10-14T10:00:00Z'});
+ d.members.push({...d.members[0],id:'unknown',name:'Bez záznamů'}, {...d.members[0],id:'excused',name:'Omluvený'}, {...d.members[0],id:'cancelled',name:'Zrušený'});
+ d.participation=d.members.slice(0,8).map(m=>({club_id:'club',event_id:'e',member_id:m.id,response:'yes',attended:true,confirmed_by:'coach'}));
+ d.participation.push({club_id:'club',event_id:'e',member_id:'unknown',response:'yes',attended:null,confirmed_by:null},{club_id:'club',event_id:'e',member_id:'excused',response:'no',attended:false,attendance_excused:true,confirmed_by:'coach'},{club_id:'club',event_id:'cancel',member_id:'cancelled',response:'yes',attended:true,confirmed_by:'coach'});
+ const s=overviewStats(d,now);expect(s.regularity.map(r=>r.member.id)).toEqual(['m6','m5','m4','m3','m2','m1','m0','guest']);expect(s.regularity.at(-1)).toMatchObject({known:1,yes:1,rate:100});expect(s.rate).toBe(100);expect(s.known).toBe(8);expect(s.leaders).toHaveLength(5);expect(s.leaders.every(r=>r.member.kind==='member')).toBe(true);
+});

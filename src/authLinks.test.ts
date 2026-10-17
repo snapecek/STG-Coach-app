@@ -7,5 +7,12 @@ describe('Bezpečné Auth odkazy',()=>{
  it('vyčistí tokeny i kód před načítáním dalších stránek',()=>{const clean=cleanAuthUrl('https://example.invalid/?club-invite='+token+'&code=fake&auth=recovery&workspace=cloud#access_token=fake');expect(clean).toBe('/?workspace=cloud');expect(clean).not.toContain(token)});
  it('rozpozná chybu a neplatný klubový token',()=>{expect(parseAuthLink('https://example.invalid/?club-invite=bad').error).toBe(true);expect(parseAuthLink('https://example.invalid/#error=expired&error_description=secret').error).toBe(true)});
  it('handles verified signup links and removes applicant invitation tokens',()=>{expect(parseAuthLink('https://example.invalid/?join-invite='+token+'#type=signup&access_token=fake&refresh_token=fake-refresh')).toMatchObject({accessToken:'fake',passwordSetup:false,error:false});expect(cleanAuthUrl('https://example.invalid/?join-invite='+token+'&auth=signup')).toBe('/')});
+ it('accepts only supported email token types and cleans secrets',()=>{
+  for(const type of ['invite','magiclink','recovery','signup'])expect(parseAuthLink('https://example.invalid/?club-invite='+token+'&token_hash=fictional-hash&type='+type)).toMatchObject({tokenHash:'fictional-hash',verificationType:type,passwordSetup:type==='invite'||type==='recovery',error:false});
+  expect(parseAuthLink('https://example.invalid/?club-invite='+token+'#token_hash=fictional-hash&type=invite')).toMatchObject({invite:token,tokenHash:'fictional-hash',verificationType:'invite',passwordSetup:true,error:false});
+  expect(parseAuthLink('https://example.invalid/?token_hash=secret&type=unknown').error).toBe(true);
+  expect(parseAuthLink('https://example.invalid/?token_hash=secret&type=invite&code=other').error).toBe(true);
+  expect(cleanAuthUrl('https://example.invalid/?token_hash=secret&type=invite&workspace=cloud')).toBe('/?workspace=cloud');
+ });
  it('kontroluje délku a shodu hesel',()=>{expect(()=>validateNewPassword('short','short')).toThrow();expect(()=>validateNewPassword('fictional-password','different')).toThrow();expect(()=>validateNewPassword('fictional-password','fictional-password')).not.toThrow()});
 });

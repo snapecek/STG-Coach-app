@@ -29,3 +29,13 @@ Nejprve spusťte `supabase/migrations/202610150022_event_type_colors.sql`, potom
 ### Rozšíření na 16 barev (migrace 023)
 
 Po migraci 022 spusťte `supabase/migrations/202610150023_calendar_palette_16.sql`. Poté nasaďte frontend s 16 barvami. Původních osm barev i nastavené klubové barvy zůstávají zachované; přibývá limetková, azurová, indigová, purpurová, korálová, měděná, mátová a stříbrná.
+
+## E-mailový odkaz vypršel nebo už byl použit
+
+Auth odkaz v e-mailu je jednorázový a má vlastní dobu platnosti podle nastavení Supabase; nejde o stejnou platnost jako sedmidenní klubová pozvánka. Opakované otevření starého e-mailu proto nemusí přihlásit uživatele. Pro běžné návraty používejte hlavní adresu aplikace nebo ikonu na ploše a přihlášení e-mailem a heslem.
+
+Pokud člen heslo ještě nenastavil, při chybě zvolí **Získat nový odkaz pro nastavení hesla**, zadá e-mail z pozvánky a otevře nejnovější zprávu. Existující klubový token se zachová; skutečně vypršelou či odvolanou klubovou pozvánku musí obnovit trenér. Potvrzení o odeslání neprozrazuje existenci účtu. Nejde o vytvoření dalšího člena.
+
+Pokud selže i první otevření čerstvého e-mailu, ověřte čas odeslání/otevření a příslušný záznam v Supabase Authentication Logs. Odkaz mohl být předem otevřen bezpečnostním skenerem e-mailu nebo zneplatněn novějším e-mailem. Prověřte také Auth dobu platnosti e-mailových odkazů a vypnutí přepisování/sledování odkazů u SMTP poskytovatele. Neposílejte do podpory celý přihlašovací odkaz ani jeho tokeny; samotná obecná hláška příčinu neurčí.
+
+Postup úpravy e-mailových šablon pro potvrzení odkazu až kliknutím v aplikaci je v [AUTH_EMAIL_LINKS_SETUP.md](AUTH_EMAIL_LINKS_SETUP.md).

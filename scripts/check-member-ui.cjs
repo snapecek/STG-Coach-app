@@ -121,6 +121,42 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
  async function openMemberEvent(p,event){const close=p.getByRole('button',{name:'Zavřít',exact:true});if(await close.count())await close.click();await p.getByRole('navigation').getByRole('button',{name:'Kalendář',exact:true}).filter({visible:true}).first().click();await p.locator('.calendar-event').filter({hasText:event.name}).first().click();await p.getByRole('dialog',{name:event.name,exact:true}).waitFor();}
  async function themeFromMenu(p,role,label){if(role==='coach'||role==='member'){await p.getByRole('button',{name:'Nastavení',exact:true}).click();await p.getByRole('heading',{name:'Nastavení',exact:true}).waitFor();await p.getByRole('button',{name:label,exact:true}).click();await p.getByRole('navigation').getByRole('button',{name:'Přehled',exact:true}).filter({visible:true}).first().click();await p.getByLabel('Uživatelské menu',{exact:true}).click();}else await p.getByRole('button',{name:label,exact:true}).click();}
  try{
+  if(process.env.STG_AUTH_LINKS_ONLY==='1'){
+   const v=await context(),p=v.page;
+   await p.goto('http://127.0.0.1:5173/?club-invite='+token+'#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired');
+   await p.getByRole('alert').filter({hasText:'už byl použit'}).waitFor();
+   assert.equal(new URL(p.url()).hash,'');
+   assert(!v.calls.some(c=>c.path.includes('/rest/v1/')));
+   await p.getByRole('button',{name:'Získat nový odkaz pro nastavení hesla',exact:true}).click();
+   await p.getByLabel('E-mail',{exact:true}).fill(user.email);
+   await p.getByRole('button',{name:'Poslat odkaz na obnovu',exact:true}).click();
+   await p.getByRole('status').filter({hasText:'Pokud má tento e-mail účet'}).waitFor();
+   assert(v.calls.some(c=>c.path==='/auth/v1/recover'));
+   await p.getByRole('button',{name:'Zpět k přihlášení',exact:true}).click();
+   await p.getByLabel('E-mail',{exact:true}).fill(user.email);await p.getByLabel('Heslo',{exact:true}).fill('fictional-password');
+   await p.getByRole('button',{name:'Přihlásit se',exact:true}).click();
+   await p.getByRole('heading',{name:'Pozvánka do klubu',exact:true}).waitFor();await v.c.close();
+   for(const type of ['invite','recovery','magiclink','signup']){
+    const deferred=await context(),q=deferred.page;let verifications=0;
+    await deferred.c.route('**/auth/v1/verify',async route=>{verifications++;assert.equal(route.request().postDataJSON().type,type);assert.equal(route.request().postDataJSON().token_hash,'fictional-hash');await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(session)})});
+    await q.goto('http://127.0.0.1:5173/?club-invite='+token+'#token_hash=fictional-hash&type='+type);
+    await q.getByRole('heading',{name:'Potvrďte otevření odkazu',exact:true}).waitFor();
+    assert.equal(verifications,0);assert(!deferred.calls.some(c=>c.path.includes('/rest/v1/')));assert.equal(new URL(q.url()).hash,'');
+    await q.getByRole('button',{name:'Pokračovat do Trenomi',exact:true}).click();
+    await q.getByRole('heading',{name:type==='invite'||type==='recovery'?'Nastavit heslo':'Pozvánka do klubu',exact:true}).waitFor();assert.equal(verifications,1);await deferred.c.close();
+   }
+   const rejected=await context();await rejected.c.route('**/auth/v1/verify',route=>route.fulfill({status:403,contentType:'application/json',body:JSON.stringify({code:'otp_expired',msg:'Expired'})}));
+   await rejected.page.goto('http://127.0.0.1:5173/#token_hash=fictional-hash&type=invite');await rejected.page.getByRole('button',{name:'Pokračovat do Trenomi',exact:true}).click();await rejected.page.getByRole('alert').waitFor();assert(!rejected.calls.some(c=>c.path.includes('/rest/v1/')));await rejected.c.close();
+   const coach=await context('coach');await login(coach.page);await coach.page.locator('.cloud-dashboard').waitFor();
+   for(const width of [320,390,760,1440]){
+    await coach.page.setViewportSize({width,height:1000});
+    const visible=await coach.page.locator('.club-identity').evaluateAll(nodes=>nodes.filter(n=>n.getBoundingClientRect().width>0&&n.getBoundingClientRect().height>0).length);
+    assert.equal(visible,width<=760?1:2);
+    assert(await coach.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+   }
+   await coach.page.setViewportSize({width:390,height:844});await coach.page.screenshot({path:'/tmp/trenomi-coach-club-once.png',fullPage:true});await coach.c.close();
+   console.log('PASS expired email link: safe rejection, clean URL, recovery preserves invitation, password login still works; mobile coach club identity appears once');return;
+  }
   if(process.env.STG_APPLICATIONS_ONLY==='1'){
    require('node:fs').mkdirSync('/tmp/trenomi-join-guide',{recursive:true});
    const applicant=await context('member',false,false,false,false,true),p=applicant.page;await p.goto('http://127.0.0.1:5173');await p.getByRole('button',{name:'Vytvořit účet a přihlásit se do klubu',exact:true}).click();await p.getByRole('heading',{name:'Vytvořit účet',exact:true}).waitFor();await p.getByLabel('Jméno',{exact:true}).fill('Jana');await p.getByLabel('Příjmení',{exact:true}).fill('Novotná');await p.getByLabel('E-mail',{exact:true}).fill('jana@example.invalid');await p.getByLabel('Heslo',{exact:true}).fill('fictional-password');await p.getByLabel('Potvrdit heslo',{exact:true}).fill('fictional-password');await p.screenshot({path:'/tmp/trenomi-join-guide/01-registrace.png',fullPage:true});await p.getByRole('button',{name:'Vytvořit účet a potvrdit e-mail',exact:true}).click();await p.getByRole('status').filter({hasText:'Zkontrolujte svou e-mailovou schránku'}).waitFor();assert.equal(admissions.signups.length,1);assert.equal(admissions.signups[0].data.full_name,'Jana Novotná');await p.screenshot({path:'/tmp/trenomi-join-guide/02-email.png',fullPage:true});await p.getByRole('button',{name:'Zpět k přihlášení',exact:true}).click();

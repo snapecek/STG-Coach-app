@@ -527,3 +527,5 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .attendance-matrix .attendance-section th{position:static;padding:9px 10px;text-align:left;font-size:12px;letter-spacing:.05em;color:var(--orange);border-bottom:1px solid #586373;background:transparent}
 
 .detail-tabs button.has-unread{color:var(--orange);font-weight:700}.detail-tabs .event-chat-unread{flex-shrink:0;min-width:18px;min-height:18px;padding:2px 4px;font-weight:700}
+
+.attendance-people-pagination{justify-content:flex-start;max-width:min(500px,80vw);margin:8px 0 16px}.attendance-matrix .attendance-people-pagination span{white-space:nowrap}

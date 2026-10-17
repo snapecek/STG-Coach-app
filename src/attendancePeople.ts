@@ -10,3 +10,9 @@ export function sortAttendancePeople<T extends {name:string;kind:'member'|'guest
 export function attendanceSections<T extends {kind:'member'|'guest'}>(people:T[]){
  return (['member','guest'] as const).map(kind=>({kind,label:kind==='member'?'Členové':'Hosté',people:people.filter(p=>p.kind===kind)})).filter(section=>section.people.length>0);
 }
+export function attendancePages<T extends {kind:'member'|'guest'}>(people:T[],pages:Record<'member'|'guest',number>){
+ return attendanceSections(people).map(section=>{
+  const total=section.people.length,page=Math.max(0,Math.min(pages[section.kind],Math.ceil(total/10)-1));
+  return {...section,page,total,people:section.people.slice(page*10,page*10+10)};
+ });
+}

@@ -383,3 +383,7 @@ Uložená místa pro opakované použití a mapy v tréninkových/závodních š
 Mobilní oznámení trenérům o odpovědích členů: [aktivace Web Push](docs/COACH_PUSH.md). Vyžaduje [migraci 040](supabase/migrations/202610170040_coach_rsvp_push.sql), funkci `push-rsvp`, VAPID klíče a [Cron](supabase/setup/coach_push_cron.sql).
 
 Detail události rozděluje informace, účast a chat do samostatných záložek. Hlavní klubová data, zprávy a upozornění se automaticky obnovují po 10 sekundách bez ztráty rozepsaných úprav. [Chování a ověření](docs/AUTO_REFRESH.md). Bez nové migrace.
+
+## Klubové příspěvky (041)
+
+Volitelná ruční evidence členských příspěvků měsíčně/ročně a plateb za tréninky. Správce ji zapne v Nastavení, trenéři vytvářejí předpisy a zapisují úhrady, členové vidí vlastní přehled přes peněženku mezi ikonami klubů a chatu. Vyžaduje [migraci 041](supabase/migrations/202610170041_club_fees.sql). Postup, práva a kontroly jsou v [dokumentaci příspěvků](docs/CLUB_FEES.md).

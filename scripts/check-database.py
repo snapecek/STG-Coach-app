@@ -17,7 +17,7 @@ try:
   try:docker('exec',name,'pg_isready','-h','127.0.0.1','-U','postgres',capture_output=True);break
   except subprocess.CalledProcessError:sleep(1)
  else:raise RuntimeError('PostgreSQL did not start')
- tests=['tenant_access','club_management','journal_photos','race_results','distinct_races','member_access','training_capacity','training_groups','event_tasks','training_series','weekly_goals','journal_distance','attendance_matrix','training_performances','race_teams','training_games','member_event_roster','race_companion','preset_library_team_games','open_races','event_type_colors','communication','private_chat','member_guests','chat_mentions','club_settings','owner_controls_archive','club_activity','membership_applications','member_join_dates','recorded_training_guests','shareable_club_invitations','training_cover_photo','member_training_photos','event_location_map','saved_event_locations','coach_rsvp_push']
+ tests=['tenant_access','club_management','journal_photos','race_results','distinct_races','member_access','training_capacity','training_groups','event_tasks','training_series','weekly_goals','journal_distance','attendance_matrix','training_performances','race_teams','training_games','member_event_roster','race_companion','preset_library_team_games','open_races','event_type_colors','communication','private_chat','member_guests','chat_mentions','club_settings','owner_controls_archive','club_activity','membership_applications','member_join_dates','recorded_training_guests','shareable_club_invitations','training_cover_photo','member_training_photos','event_location_map','saved_event_locations','coach_rsvp_push','club_fees']
  files=[root/'supabase/tests/local-bootstrap.sql',*sorted((root/'supabase/migrations').glob('*.sql')),*[root/f'supabase/tests/{test}.sql' for test in tests]]
  for file in files:
   try:sql(file.read_text())
@@ -53,6 +53,25 @@ try:
  count=sql(f"select jsonb_array_length(snapshot->'tables'->'participation') from club_archives where club_id='{archive_club}';").strip()
  if count!='1':raise RuntimeError('Archive snapshot omitted committed participation')
  print('PASS archive vs competing writer: snapshot includes completed write before freezing club',flush=True)
+
+ # Competing receipts cannot overpay a charge. Both RPCs serialize on the club lock.
+ fee_owner='10000000-0000-4000-8000-000000000090'
+ fee_member='30000000-0000-4000-8000-000000000099'
+ sql(f"insert into auth.users(id) values('{fee_owner}');insert into club_roles values('{club}','{fee_owner}','owner');")
+ def fee_auth(statement):return f"begin;set local role authenticated;select set_config('request.jwt.claims','{{\"sub\":\"{fee_owner}\"}}',true);{statement};commit;"
+ sql(fee_auth(f"select set_club_fees_enabled('{club}',true);select create_club_fee_charges('{club}',array['{fee_member}']::uuid[],'training','Hala',8000,current_date,null,null,'{event}')"))
+ charge=sql(f"select id from club_fee_charges where club_id='{club}' and member_id='{fee_member}';").strip()
+ receipt_a='60000000-0000-4000-8000-000000000090';receipt_b='60000000-0000-4000-8000-000000000091'
+ writer=subprocess.Popen(['docker','--host=unix:///var/run/docker.sock','exec','-i',name,'psql','-U','postgres','-v','ON_ERROR_STOP=1','-At'],env=env,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+ writer.stdin.write(fee_auth(f"select record_club_fee_payment('{club}','{charge}','{receipt_a}',6000,current_date,'cash');select 'FEE_LOCK_HELD';select pg_sleep(2)")+"\n");writer.stdin.close()
+ for line in writer.stdout:
+  if line.strip()=='FEE_LOCK_HELD':break
+ else:raise RuntimeError('First receipt failed')
+ sql(fee_auth(f"do $$begin begin perform record_club_fee_payment('{club}','{charge}','{receipt_b}',6000,current_date,'bank');raise exception 'FAIL competing overpayment';exception when raise_exception then if sqlerrm<>'Fee payment exceeds balance' then raise;end if;end;end $$"))
+ if writer.wait(timeout=10)!=0:raise RuntimeError(writer.stderr.read())
+ paid=sql(f"select count(*),sum(amount_cents) from club_fee_payments where charge_id='{charge}' and voided_at is null;").strip()
+ if paid!='1|6000':raise RuntimeError('Competing receipts overpaid: '+paid)
+ print('PASS competing receipts: balance checked after prior committed payment',flush=True)
 
 finally:
  docker('rm','-f',name,capture_output=True)

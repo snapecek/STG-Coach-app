@@ -377,3 +377,5 @@ V sekci Členové lze pozvat zájemce pouze e-mailem bez zakládání člena. Vy
 Ověření zapamatování přihlášení: `CHROMIUM_PATH=/usr/bin/chromium npm run test:auth-ui` používá fiktivní Auth/API odpovědi a izolovaný profil prohlížeče. Ukončí a znovu spustí Chromium, ověří obnovení prošlé relace, vypnuté zapamatování, odhlášení a shodu potvrzení hesla při registraci. Žádné skutečné e-maily ani uživatelské změny.
 
 Mapa místa události: trenér může označit sraz, přidat přístupové šipky a pokyny; členové mapu zobrazí v detailu a otevřou navigaci. Vyžaduje [migraci 038](supabase/migrations/202610170038_event_location_map.sql). [Použití, nasazení a ověření](docs/EVENT_LOCATION_MAP.md).
+
+Uložená místa pro opakované použití a mapy v tréninkových/závodních šablonách: [migrace 039](supabase/migrations/202610170039_saved_event_locations.sql). Mapa události se zobrazuje přímo pod zprávami s odkazy pro navigaci. [Návod](docs/EVENT_LOCATION_MAP.md#uložená-místa-a-mapy-šablon-039).

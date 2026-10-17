@@ -5,6 +5,7 @@ import {eventMapLinks,parseMapCoordinates,validMapPoint,type EventLocation,type 
 type Props={value:EventLocation|null;onChange?:(value:EventLocation|null)=>void;place?:string;disabled?:boolean};
 type Mode='pan'|'point'|'arrow';
 const searchCache=new Map<string,{point:MapPoint;name:string}[]>();let lastSearch=0;
+function fitLocation(map:L.Map,value:EventLocation){map.fitBounds(L.latLngBounds([value.point,...value.arrows.flatMap(a=>[a.from,a.to])]),{padding:[35,35],maxZoom:17,animate:false})}
 export function EventLocationMap({value,onChange,place='',disabled=false}:Props){
  const host=useRef<HTMLDivElement>(null),map=useRef<L.Map|null>(null),layer=useRef<L.LayerGroup|null>(null),state=useRef({value,onChange,disabled,mode:'point' as Mode,start:null as MapPoint|null});
  const [mode,setMode]=useState<Mode>('point'),[start,setStart]=useState<MapPoint|null>(null),[query,setQuery]=useState(place),[results,setResults]=useState<{point:MapPoint;name:string}[]>([]),[searching,setSearching]=useState(false),[error,setError]=useState(''),[tileError,setTileError]=useState(false);
@@ -16,7 +17,7 @@ export function EventLocationMap({value,onChange,place='',disabled=false}:Props)
   const placePoint=(p:MapPoint)=>{const s=state.current;if(!s.onChange||s.disabled||s.mode==='pan'||!validMapPoint(p))return;if(s.mode==='point'){s.onChange({point:p,arrows:s.value?.arrows||[],note:s.value?.note||''});return}if(!s.value||s.value.arrows.length>=8)return;if(!s.start){setStart(p);return}if(s.start.lat===p.lat&&s.start.lng===p.lng)return;s.onChange({...s.value,arrows:[...s.value.arrows,{from:s.start,to:p}]});setStart(null)};
   m.on('click',(e:L.LeafletMouseEvent)=>placePoint({lat:e.latlng.lat,lng:e.latlng.lng}));
   const key=(e:KeyboardEvent)=>{if(e.key==='Enter'&&e.target===host.current){e.preventDefault();e.stopPropagation();const p=m.getCenter();placePoint({lat:p.lat,lng:p.lng})}};host.current.addEventListener('keydown',key);
-  const resize=new ResizeObserver(()=>m.invalidateSize({pan:false}));resize.observe(host.current);
+  const resize=new ResizeObserver(()=>{m.invalidateSize();const s=state.current;if(!s.onChange&&s.value)fitLocation(m,s.value)});resize.observe(host.current);
   return()=>{request.current?.abort();resize.disconnect();host.current?.removeEventListener('keydown',key);m.remove();map.current=null;layer.current=null};
  },[]);
  useEffect(()=>{const m=map.current;if(!m)return;if(onChange&&mode!=='pan')m.doubleClickZoom.disable();else m.doubleClickZoom.enable()},[mode,onChange]);
@@ -26,7 +27,7 @@ export function EventLocationMap({value,onChange,place='',disabled=false}:Props)
   const icon=L.divIcon({className:'event-map-marker',html:'<svg viewBox="0 0 32 42" width="32" height="42"><path d="M16 40S2 23 2 16a14 14 0 0 1 28 0c0 7-14 24-14 24Z" fill="#FFB317" stroke="#101216" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="#101216"/></svg>',iconSize:[32,42],iconAnchor:[16,40]});
   L.marker(value.point,{icon,alt:'Místo srazu',title:'Místo srazu',keyboard:true,bubblingMouseEvents:!!onChange}).bindTooltip('Místo srazu').addTo(g);
   for(const a of value.arrows){L.polyline([a.from,a.to],{color:'#101216',weight:8,interactive:false}).addTo(g);L.polyline([a.from,a.to],{color:'#FFB317',weight:4,interactive:false}).addTo(g);const p=m.project(a.from),q=m.project(a.to),angle=Math.atan2(q.y-p.y,q.x-p.x)*180/Math.PI;L.marker(a.to,{interactive:false,keyboard:false,icon:L.divIcon({className:'event-map-arrow',html:`<svg viewBox="0 0 24 24" width="24" height="24" style="transform:rotate(${angle}deg)"><path d="M4 3 21 12 4 21l5-9Z" fill="#FFB317" stroke="#101216" stroke-width="2"/></svg>`,iconSize:[24,24],iconAnchor:[12,12]})}).addTo(g)}
-  if(!onChange){const points=[value.point,...value.arrows.flatMap(a=>[a.from,a.to])];m.fitBounds(L.latLngBounds(points),{padding:[35,35],maxZoom:17,animate:false})}
+  if(!onChange)fitLocation(m,value)
  },[geometry,onChange]);
  useEffect(()=>{if(!start||!layer.current)return;const circle=L.circleMarker(start,{interactive:false,radius:6,color:'#FFB317',fillOpacity:1}).addTo(layer.current);return()=>{circle.remove()}},[start]);
  async function search(){if(searching||disabled)return;setError('');setResults([]);const text=query.trim(),gps=parseMapCoordinates(text);if(gps){choose(gps);return}if(text.length<2){setError('Zadejte místo nebo souřadnice, např. 49.854, 18.542.');return}const cached=searchCache.get(text.toLocaleLowerCase('cs'));if(cached){setResults(cached);if(!cached.length)setError('Místo se nenašlo. Zkuste přesnější název nebo souřadnice.');return}if(Date.now()-lastSearch<1100){setError('Před dalším hledáním chvíli počkejte.');return}lastSearch=Date.now();setSearching(true);request.current?.abort();const controller=new AbortController();request.current=controller;

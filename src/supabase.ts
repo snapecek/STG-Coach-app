@@ -1,3 +1,4 @@
+import {createAuthStorage} from './authStorage';
 import {createClient,type SupabaseClient} from '@supabase/supabase-js';
 
 export function validatePublicConfig(url:string|undefined,key:string|undefined){
@@ -12,10 +13,14 @@ export function validatePublicConfig(url:string|undefined,key:string|undefined){
   return {url:parsed.origin,key};
 }
 let client:SupabaseClient|undefined;
+let loginStorage:ReturnType<typeof createAuthStorage>|undefined;
+export const rememberLoginEnabled=()=>loginStorage?.getRemember()??true;
+export function setRememberLogin(value:boolean){if(!loginStorage)throw new Error('Přihlašování není připravené. Obnovte stránku.');try{loginStorage.setRemember(value)}catch{throw new Error('Prohlížeč nepovoluje uložit volbu přihlášení. Povolte úložiště webu a zkuste to znovu.')}}
 export function configuredClient(){
   if(client)return client;
   const config=validatePublicConfig(import.meta.env.VITE_SUPABASE_URL,import.meta.env.VITE_SUPABASE_ANON_KEY);
-  client=createClient(config.url,config.key,{auth:{storage:window.sessionStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+  loginStorage=createAuthStorage(window.localStorage,window.sessionStorage);
+  client=createClient(config.url,config.key,{auth:{storage:loginStorage.storage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
   return client;
 }
 export type ClubAccess={id:string;name:string;role:'owner'|'coach'|'member'};

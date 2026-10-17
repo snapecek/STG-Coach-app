@@ -506,3 +506,5 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
  .cloud-card:has(.account-actions)>.account-actions{grid-column:2}
  .cloud-card:has(.account-actions)>.current-club-identity{grid-column:1/-1;grid-row:2}
 }
+
+.auth-card .remember-login{display:flex;align-items:center;gap:10px;min-height:44px;margin:10px 0 0;cursor:pointer}.auth-card .remember-login input{flex-shrink:0;width:18px;height:18px;margin:0;padding:0;accent-color:var(--orange)}.auth-card .remember-login-hint{margin:0 0 16px;font-size:11px}

@@ -75,3 +75,18 @@ V deníku otevřete trénink → **Upravit** → pod galerií zvolte **Zvolit ti
 Nejdříve spusťte `supabase/migrations/202610170036_training_cover_photo.sql` v Supabase SQL Editoru. Přidává pouze volitelný sloupec `events.cover_photo_path` s kontrolou souboru ze stejného klubu a události. Dosavadní fotografie se nepřesouvají a volba titulní fotografie nemění dokončení tréninku. Nastavení chrání stávající oprávnění trenérů a archivace klubu. Edge funkce se nemění.
 
 Na PC je okno sdílení explicitně vystředěné a široké až 960 px. V deníku se hlavní fotografie vykresluje v původním poměru stran bez ořezu a souhrn docházky, délky, vzdálenosti a RPE je napravo. Mobilní rozložení zůstává pod sebou.
+
+### Fotografický editor (říjen 2026)
+
+**Sdílet trénink → Upravit obrázek** nyní otevírá fotografické studio. Mobil má náhled nad záložkami **Šablony / Data / Samolepky**, na PC jsou nástroje vedle náhledu. **Další** přesune fokus k textu příspěvku a exportu.
+
+- **Šablony:** nové celoplošné fotografické kompozice **Kilometry, Sloupec dat, Jen titulek**. Dosavadních 12 návrhů je stále očíslovaných 01–12 v rozbalovacím výběru. Nové kompozice používají záměrný překryv typografie přes fotografii podle návrhu editoru; původní šablony zachovávají oddělené oblasti fotografie a textu.
+- **Barva grafiky:** oranžová `#FFB317`, modrá, zelená a fialová. Volba mění tento export, nikoli barvy aplikace či klubová data.
+- **Data:** titulek, přepínače skutečných údajů z deníku, výřez, celá fotografie / vyplnění rámečku a přesné posuvníky. Na mobilu funguje i přímý posun a pinch fotografie.
+- **Samolepky:** odznak, páska, kruh docházky, kilometry, razítko, blesk, série, RPE, lístek, obrysový nápis, tým na startu a rekord. Dostupné údaje se vyplňují z tréninku; série a rekord vyžadují vlastní text před exportem. Výpočet docházky vychází ze skutečné přítomnosti a soupisky tréninku, nikoli z odpovědí na pozvánku.
+- Lze vložit až 16 samolepek, posouvat je myší/prstem/šipkami, otáčet a měnit velikost tažením za roh nebo dvěma prsty, použít posuvníky, upravit text, duplikovat, odstranit a změnit pořadí vrstev. Vložené vrstvy mají samostatný seznam pro výběr překrytých samolepek.
+- Náhled a PNG používají totožný canvas v plném rozlišení; rámečky ovládání a úchyty se neexportují. Jména ve starší šabloně Nejlepší výkony jsou nadále vypnutá, dokud je uživatel výslovně nezapne.
+
+Editor nemění původní fotografii, deník ani klubová nastavení. Úpravy jsou návrhem v otevřeném editoru. Není potřeba SQL migrace ani nasazení Edge funkce.
+
+Ověření: `npm run build`, `npm test`, `test:share-ui`, `test:share-editor`, `test:share-touch-ui`, `test:journal-share-ui` (u prohlížečových kontrol `CHROMIUM_PATH=/usr/bin/chromium`). Nový test pokrývá 3 nové kompozice × 3 formáty, všech 12 druhů samolepek, jejich transformace, přesné shody náhledu a PNG, editaci a skrývání dat i šířky 320/390/1440 px. Dotyková kontrola používá skutečné dvouprsté vstupy přes Chromium CDP.

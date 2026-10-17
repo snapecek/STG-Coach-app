@@ -9,6 +9,7 @@ export function photoShareLayout(template:PhotoShareTemplate,format:ShareFormat)
  const box=(x:number,y:number,width:number,height:number):GraphicBox=>({x,y,width,height});
  const layout:PhotoShareLayout={photo:box(0,top+92,1080,h-378),header:box(56,top,968,70),title:box(56,bottom-264,968,142),metrics:box(56,bottom-110,968,60),footer:box(56,bottom-42,968,42),metricColumns:4,background:'#101216',ink:'#F5F6F7',muted:'#A9AFB8',light:false,titleSize:132};
  switch(template){
+  case 'distance':case 'column':case 'headline':return {...layout,photo:box(0,0,1080,height)};
   case 'editorial':return {...layout,background:'#F4F0E6',ink:'#191B1E',muted:'#65615C',light:true,header:box(64,top,952,70),title:box(64,top+90,952,152),photo:box(64,top+268,952,h-432),metrics:box(64,bottom-142,952,82),footer:box(64,bottom-44,952,44),titleSize:122,titleFace:'serif'};
   case 'sport':return {...layout,background:'#FFB317',ink:'#101216',muted:'#423613',light:true,title:box(44,top+82,980,140),header:box(44,top,980,70),photo:box(0,top+248,980,h-404),metrics:box(44,bottom-140,992,90),footer:box(44,bottom-44,992,44),titleSize:148};
   case 'frame':return {...layout,background:'#D9D3C7',ink:'#191B1E',muted:'#65615C',light:true,photo:box(90,top+112,900,h-386),header:box(64,top,836,70),title:box(90,bottom-246,900,122),metrics:box(90,bottom-110,900,60),footer:box(64,bottom-44,952,44),titleSize:100,titleFace:'serif'};

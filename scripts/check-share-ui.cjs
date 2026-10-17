@@ -41,10 +41,10 @@ const fs=require('node:fs');
  const download=page.getByRole('button',{name:'Stáhnout grafiku',exact:true});await download.waitFor();
  await page.waitForFunction(()=>!Array.from(document.querySelectorAll('button')).find(b=>b.textContent==='Stáhnout grafiku').disabled);
  const templateNames=await page.evaluate(async()=>{const {shareTemplates}=await import('/src/journalShare.ts');return shareTemplates.map(t=>t.name)});
- const choose=async name=>{await page.getByLabel('Vybrat šablonu grafiky',{exact:true}).click();await page.getByRole('button',{name,exact:true}).click();};
+ const choose=async name=>{await page.getByRole('tab',{name:'Šablony',exact:true}).click();await page.getByLabel('Vybrat šablonu grafiky',{exact:true}).click();await page.getByRole('button',{name,exact:true}).click();};
  for(const template of templateNames){
   await choose(template);
-  if(template==='Fotografický plakát'){
+  if(template==='Fotografický plakát'){await page.getByRole('tab',{name:'Data',exact:true}).click();
    await page.waitForFunction(()=>document.querySelector('.journal-share-preview').getAttribute('aria-busy')==='false');
    await page.getByLabel('Zobrazení fotografie',{exact:true}).selectOption('cover');
    await page.waitForFunction(()=>document.querySelector('.journal-share-preview').getAttribute('aria-busy')==='false');
@@ -64,7 +64,7 @@ const fs=require('node:fs');
    const visible=await page.locator('.journal-share-preview').evaluate(c=>c.toDataURL().split(',')[1]);assert.equal(png.toString('base64'),visible,'Downloaded PNG must match the current preview exactly');
   }
  }
- await choose('Nejlepší výkony');assert.equal(await page.getByLabel('Zahrnout jména členů do grafiky',{exact:true}).isChecked(),false);
+ await choose('Nejlepší výkony');await page.getByRole('tab',{name:'Data',exact:true}).click();assert.equal(await page.getByLabel('Zahrnout jména členů do grafiky',{exact:true}).isChecked(),false);
  await choose('Fotografický plakát');await page.getByRole('button',{name:'Příspěvek 4:5',exact:true}).click();
  for(const width of [320,390,1440]){await page.setViewportSize({width,height:1000});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'/tmp/trenomi-share-panel-'+width+'.png',fullPage:true});await page.getByLabel('Vybrat šablonu grafiky',{exact:true}).click();await page.getByRole('group',{name:'Šablona grafiky',exact:true}).waitFor();assert.equal(await page.getByRole('group',{name:'Šablona grafiky',exact:true}).getByRole('button').count(),12);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'/tmp/trenomi-share-picker-'+width+'.png',fullPage:true});await page.getByLabel('Vybrat šablonu grafiky',{exact:true}).click()}
  console.log('PASS share UI: 12 designs in all formats, 36 exports, 30 pixel checks proving no text covers photos, exact preview/download match, crop/zoom/reset and whole-photo mode, missing photo/logo, long Czech titles, private names and 320/390/1440 layouts');

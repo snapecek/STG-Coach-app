@@ -24,6 +24,8 @@ Události bez mapy lze nadále vytvářet i před migrací. Při pokusu uložit 
 
 Používá se Leaflet (lokálně sestavený balíček), podklady OpenStreetMap s viditelnou atribucí a hledání Nominatim. API klíč není potřeba. Mapové podklady se stahují až při otevření mapy; hledání se spouští výslovným tlačítkem, bez automatického našeptávání. Dotazy jsou omezené na jeden za nejméně 1,1 sekundy a výsledky se opakovaně používají v paměti prohlížeče. Klient neukládá a nestahuje mapové dlaždice pro offline použití; používá běžnou HTTP cache služby.
 
+Podklad i hledání mají výslovně nastavené `referrerPolicy: strict-origin-when-cross-origin`: služba dostane pouze doménu aplikace (HTTP Referer), kterou OSM vyžaduje, bez cesty, parametrů či fragmentu přihlašovacího odkazu. Globální `no-referrer` zůstává zachované pro ostatní požadavky. Jeho zdědění mapovými dlaždicemi dříve způsobovalo blokaci 403 podle [pravidel OSM](https://operations.osmfoundation.org/policies/tiles/).
+
 Pro podklad a hledání je potřeba internet. Výpadek služby nepřepíše uloženou geometrii: GPS a navigační odkazy zůstávají dostupné, bod lze zadat souřadnicemi. Veřejný Nominatim je určen pro střídmé interaktivní použití; při větším provozu lze poskytovatele hledání nahradit bez změny uložených map.
 
 ## Ověření

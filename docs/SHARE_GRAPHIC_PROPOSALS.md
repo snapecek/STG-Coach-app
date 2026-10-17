@@ -24,3 +24,7 @@ Doporučení: jako základ zpracovat 01 a 02. První využije kvalitní fotograf
 ## Technický postup po výběru
 
 Rozšířit stávající renderování v src/journalShare.ts o samostatné kompozice, aktualizovat volbu stylu v src/JournalSharePanel.tsx a doplnit datum/místo/klubové logo z detailu tréninku. Použít lokálně přibalené licenčně vhodné fonty, aby vzhled PNG nezávisel na zařízení. Ověřit dlouhé české názvy, chybějící foto/údaje, načtení loga, tři exportní poměry a mobilní sdílení. Pro tyto vzhledy není nutná změna databázových záznamů ani přímé propojení účtu Instagram/Facebook.
+
+## Realizované varianty
+
+Varianty 1 a 2 jsou zapojené do panelu Sdílet trénink. Ovládání výřezu a exportu popisuje [SHARE_GRAPHICS.md](SHARE_GRAPHICS.md). Varianty 3 a 4 zůstávají návrhem pro další etapu.

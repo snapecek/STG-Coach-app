@@ -14,7 +14,8 @@
     "test:database": "python3 scripts/check-database.py",
     "test:capacity-cloud": "python3 scripts/check-capacity-cloud.py",
     "test:groups-ui": "node scripts/check-groups-ui.cjs",
-    "test:race-teams-ui": "node scripts/check-race-teams-ui.cjs"
+    "test:race-teams-ui": "node scripts/check-race-teams-ui.cjs",
+    "test:share-ui": "node scripts/check-share-ui.cjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",

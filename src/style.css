@@ -479,3 +479,9 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .share-accent-picker{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:12px 7px}
 .share-accent-picker button{width:32px;height:32px;justify-self:center}
 @media(max-width:380px){.share-accent-picker{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.share-undo{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:12px 0 6px}
+.share-undo button{display:inline-flex;align-items:center;gap:7px;font-size:11px;padding:8px 10px;border:1px solid var(--border);background:var(--surface,#171c23)}
+.share-undo small{font-size:10px;color:var(--muted)}
+.share-removed-fields{margin:8px 0;font-size:11px}
+.share-removed-fields summary{cursor:pointer;color:var(--muted);padding:5px 0}
+.share-removed-fields button{padding:6px 8px;font-size:10px;margin:4px 5px 4px 0}

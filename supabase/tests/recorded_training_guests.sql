@@ -1,0 +1,40 @@
+begin;
+insert into auth.users(id,email) select ('10000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,'recorded'||n||'@example.invalid' from generate_series(1,4)n;
+insert into clubs(id,name) values('20000000-0000-4000-8000-000000000001','Klub A'),('20000000-0000-4000-8000-000000000002','Klub B');
+insert into club_roles values('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001','coach'),('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000002','member'),('20000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000003','coach');
+insert into members(id,club_id,name,kind,user_id) values('30000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','Člen s účtem','member','10000000-0000-4000-8000-000000000002');
+insert into events(id,club_id,name,starts_at,place,type,event_kind,roster_only,group_name,actual_notes,actual_duration_minutes) select ('50000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,'20000000-0000-4000-8000-000000000001','Trénink '||n,now()-interval '2 days','Park','Běh',case when n=4 then 'race' else 'training' end,n<>4,'Skupina','Test',60 from generate_series(1,5)n;
+update events set starts_at=now()+interval '1 day' where name='Trénink 3';
+update events set status='cancelled' where name='Trénink 5';
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002"}',true);
+do $$begin begin perform add_recorded_training_guest('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001',null,'Host');raise exception 'FAIL member allowed';exception when insufficient_privilege then null;end;end $$;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000003"}',true);
+do $$begin begin perform add_recorded_training_guest('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001',null,'Host');raise exception 'FAIL foreign coach allowed';exception when insufficient_privilege then null;end;end $$;
+select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
+do $$declare g uuid;again uuid;invalid_event uuid;begin
+ g:=add_recorded_training_guest('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001',null,'  Jana   Hostová ');
+ perform set_config('test.recorded_guest',g::text,true);
+ if not exists(select 1 from members where id=g and name='Jana Hostová' and kind='guest' and user_id is null and event_guest and joined_at is not null) then raise exception 'FAIL persistent guest';end if;
+ if not exists(select 1 from participation where member_id=g and attended is true and response is null and seat_status is null and confirmed_by=auth.uid()) then raise exception 'FAIL actual attendance';end if;
+ again:=add_recorded_training_guest('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001',g,null);
+ if again<>g or (select count(*) from participation where member_id=g)<>1 then raise exception 'FAIL retry duplicates';end if;
+ update events set completed_at=now() where id='50000000-0000-4000-8000-000000000001';
+ perform add_recorded_training_guest('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002',g,null);
+ if (select count(*) from members where kind='guest')<>1 or (select count(*) from participation where member_id=g)<>2 then raise exception 'FAIL reuse';end if;
+ if not exists(select 1 from events where id='50000000-0000-4000-8000-000000000001' and completed_at is not null) then raise exception 'FAIL unrelated event reopened';end if;
+ perform add_recorded_training_guest('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000001',null,'Druhý host');
+ if exists(select 1 from events where id='50000000-0000-4000-8000-000000000001' and completed_at is not null) then raise exception 'FAIL changed event not reopened';end if;
+ begin perform add_recorded_training_guest('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002',null,'jana hostová');raise exception 'FAIL duplicate name';exception when raise_exception then if sqlerrm<>'Guest already exists' then raise;end if;end;
+ foreach invalid_event in array array['50000000-0000-4000-8000-000000000003'::uuid,'50000000-0000-4000-8000-000000000004'::uuid,'50000000-0000-4000-8000-000000000005'::uuid] loop
+  begin perform add_recorded_training_guest('20000000-0000-4000-8000-000000000001',invalid_event,null,'Nesmí vzniknout');raise exception 'FAIL invalid event';exception when raise_exception then if sqlerrm<>'Training not finished' then raise;end if;end;
+ end loop;
+ begin perform add_recorded_training_guest('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002','30000000-0000-4000-8000-000000000001',null);raise exception 'FAIL account member accepted as guest';exception when raise_exception then if sqlerrm<>'Guest unavailable' then raise;end if;end;
+ update participation set attended=false where member_id=g and event_id='50000000-0000-4000-8000-000000000002';
+ begin perform add_recorded_training_guest('20000000-0000-4000-8000-000000000001','50000000-0000-4000-8000-000000000002',g,null);raise exception 'FAIL overwrote absence';exception when raise_exception then if sqlerrm<>'Guest already participating' then raise;end if;end;
+ if exists(select 1 from participation where member_id=g and event_id='50000000-0000-4000-8000-000000000002' and attended is true) then raise exception 'FAIL attendance changed';end if;
+ -- Explicit account invitations can promote the same guest record later.
+ update members set user_id='10000000-0000-4000-8000-000000000004' where id=g;
+ if not exists(select 1 from members where id=g and user_id is not null and not event_guest) then raise exception 'FAIL guest account promotion';end if;
+end $$;
+rollback;

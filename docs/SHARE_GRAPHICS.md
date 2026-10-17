@@ -113,3 +113,14 @@ Po vložení loga a názvu klubu lze v záložce **Samolepky** zapnout **Ohrani�
 U vloženého loga jsou také **Šířka čáry** (při zapnutém ohraničení), **Zaoblení rohů** a **Odsazení rámečku** (při zapnutém pozadí nebo ohraničení). Odsazení zvětšuje prostor kolem původního loga a názvu bez jejich změny velikosti. Ovládací plocha a úchyty odpovídají novému rozměru včetně tloušťky čáry. Zaoblení se omezuje podle výšky rámečku, aby posuvník odpovídal skutečnému tvaru. Parametry platí pro náhled i PNG a obnovují se spolu s odstraněným prvkem.
 
 U klubového prvku lze vypnout **Zobrazit název klubu** a ponechat pouze původní logo v kompaktním rámečku. Je-li název zapnutý, volba **Tučnější název klubu** použije sílu písma 800. Bez nahraného loga zůstává název zapnutý, aby prvek nebyl prázdný.
+
+
+### Samostatná fotografie pro sdílení a členové (037)
+
+**Hlavní fotografie** je společná prezentace tréninku v deníku. V okně **Sdílet trénink** je samostatný výběr **Fotografie pro sdílení**. Ukládá se v relaci prohlížeče odděleně podle účtu, klubu a události; změna hlavní fotografie tento výběr nepřepisuje. Chybějící nebo odstraněný soubor bezpečně nahradí dostupná hlavní/první fotografie. Výběr ani úpravy pro sdílení nic nezapisují do klubových dat.
+
+Pod náhledem je přímé tlačítko **Upravit fotografii · ořez a otočení**. Otevře nastavení přiblížení, vodorovného/svislého posunu, celé fotografie nebo vyplnění rámečku a natočení od −180° do 180°. Tlačítka otáčejí po 90°. Na telefonu zůstává posun jedním prstem a zoom dvěma prsty. **Obnovit výřez** vrací také otočení. Náhled a PNG používají stejnou transformaci; originál a hlavní fotografie se nemění.
+
+Člen otevře proběhlý trénink v **Deníku**, kde vidí galerii s klubovou hlavní fotografií a vlastní **Sdílet trénink**. Nemá ovládání nahrávání, mazání ani změny hlavní fotografie. Přístup k souborům vyžaduje jednorázově spustit celý soubor [037 – fotografie pro členy](../supabase/migrations/202610170037_member_training_photos.sql) v Supabase SQL Editoru po migraci 036. Edge funkce se nemění. Bucket zůstává soukromý. Samostatná SELECT politika dovolí čtení pouze aktivním propojeným členům u dostupných tréninků jejich klubu, včetně kontroly skupinové soupisky; původní trenérské kontroly pro upload a mazání se nerozšiřují.
+
+Kontroly zahrnují oddělení dvou účtů, zachování soukromé volby po změně hlavní fotky a návratu, členský editor bez ovládání změn galerie, dotyky a otočený PNG. SQL regrese ověřuje cizí klub, skrytou/pozvanou skupinu, odebraného člena, anonymní účet a zákaz členského uploadu, mazání a změny hlavní fotografie.

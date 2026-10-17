@@ -8,3 +8,7 @@ verify_jwt = false
 [functions.remind-event]
 # Handler verifies Auth.getUser and staff role before resolving any recipients.
 verify_jwt = false
+
+[functions.push-rsvp]
+# GET exposes only the public VAPID key. POST requires the independent cron secret.
+verify_jwt = false

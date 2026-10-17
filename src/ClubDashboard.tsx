@@ -1,3 +1,4 @@
+import type {PushTarget} from './coachPush';
 import {EventLocationSection} from './EventLocationSection';
 import type {EventLocation} from './eventLocation';
 import {RecordedTrainingGuests} from './RecordedTrainingGuests';
@@ -44,8 +45,9 @@ const ClubAnalysis=lazy(()=>import('./ClubAnalysis').then(m=>({default:m.ClubAna
 const dateLabel=(timestamp:string)=>new Date(timestamp).toLocaleString('cs-CZ',{timeZone:'Europe/Prague',weekday:'short',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
 type Modal='member'|'template'|'event'|'edit-event'|'group'|'series'|'copy-event'|'journal-entry'|null;
 type Confirmation={title:string;message:string;label:string;action:()=>Promise<void>;success:string};
-export function ClubDashboard({client,club,chatRequest,onChatStateChange,settingsRequest,onClubCreated,onClubUpdated,onClubArchived,personalSettings}:{personalSettings?:ReactNode;client:SupabaseClient;club:ClubAccess;chatRequest?:{clubId:string;serial:number}|null;settingsRequest?:{clubId:string;serial:number}|null;onClubCreated?:(club:ClubAccess)=>void;onClubUpdated?:(club:ClubAccess)=>void;onClubArchived?:()=>void;onChatStateChange?:(state:{unread:number;active:boolean})=>void}){
+export function ClubDashboard({pushTarget,onPushOpened,client,club,chatRequest,onChatStateChange,settingsRequest,onClubCreated,onClubUpdated,onClubArchived,personalSettings}:{pushTarget?:PushTarget|null;onPushOpened?:()=>void;personalSettings?:ReactNode;client:SupabaseClient;club:ClubAccess;chatRequest?:{clubId:string;serial:number}|null;settingsRequest?:{clubId:string;serial:number}|null;onClubCreated?:(club:ClubAccess)=>void;onClubUpdated?:(club:ClubAccess)=>void;onClubArchived?:()=>void;onChatStateChange?:(state:{unread:number;active:boolean})=>void}){
  const [data,setData]=useState<ClubData>(emptyClubData),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[retry,setRetry]=useState(0),[page,setPage]=useState('Přehled'),[modal,setModal]=useState<Modal>(null),[editingTemplate,setEditingTemplate]=useState(''),[eventId,setEventId]=useState(''),[search,setSearch]=useState(''),[archived,setArchived]=useState(false),[formDate,setFormDate]=useState(()=>pragueDate(new Date().toISOString())),[confirm,setConfirm]=useState<Confirmation|null>(null),[sidebarOpen,setSidebarOpen]=useState(false);
+ useEffect(()=>{if(!pushTarget||pushTarget.clubId!==club.id||loading)return;const event=data.events.find(e=>e.id===pushTarget.eventId);if(event){setPage('Kalendář');setModal(null);setDetailTab('attendance');setEventId(event.id)}else setError('Událost z oznámení již není dostupná.');onPushOpened?.()},[pushTarget,club.id,loading,data.events]);
  const chat=useChatThreads(client,club.id);
  const [profileVersion,setProfileVersion]=useState(0);const branding=useClubProfile(client,club.id,profileVersion);
  useEffect(()=>{if(settingsRequest?.clubId===club.id)navigate('Nastavení')},[settingsRequest,club.id]);

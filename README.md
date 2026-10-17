@@ -379,3 +379,5 @@ Ověření zapamatování přihlášení: `CHROMIUM_PATH=/usr/bin/chromium npm r
 Mapa místa události: trenér může označit sraz, přidat přístupové šipky a pokyny; členové mapu zobrazí v detailu a otevřou navigaci. Vyžaduje [migraci 038](supabase/migrations/202610170038_event_location_map.sql). [Použití, nasazení a ověření](docs/EVENT_LOCATION_MAP.md).
 
 Uložená místa pro opakované použití a mapy v tréninkových/závodních šablonách: [migrace 039](supabase/migrations/202610170039_saved_event_locations.sql). Mapa události se zobrazuje přímo pod zprávami s odkazy pro navigaci. [Návod](docs/EVENT_LOCATION_MAP.md#uložená-místa-a-mapy-šablon-039).
+
+Mobilní oznámení trenérům o odpovědích členů: [aktivace Web Push](docs/COACH_PUSH.md). Vyžaduje [migraci 040](supabase/migrations/202610170040_coach_rsvp_push.sql), funkci `push-rsvp`, VAPID klíče a [Cron](supabase/setup/coach_push_cron.sql).

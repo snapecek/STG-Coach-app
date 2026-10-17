@@ -387,3 +387,5 @@ Detail události rozděluje informace, účast a chat do samostatných záložek
 ## Klubové příspěvky (041)
 
 Volitelná ruční evidence členských příspěvků měsíčně/ročně a plateb za tréninky. Správce ji zapne v Nastavení, trenéři vytvářejí předpisy a zapisují úhrady, členové vidí vlastní přehled přes peněženku mezi ikonami klubů a chatu. Vyžaduje [migraci 041](supabase/migrations/202610170041_club_fees.sql). Postup, práva a kontroly jsou v [dokumentaci příspěvků](docs/CLUB_FEES.md).
+
+Rozšíření [042](supabase/migrations/202610170042_fee_deletion_recurring.sql) přidává potvrzované smazání sazby/příspěvku a volitelné automatické měsíční předpisy pro vybrané členy, včetně hodinové úlohy Supabase Cron. Postup je v [dokumentaci příspěvků](docs/CLUB_FEES.md).

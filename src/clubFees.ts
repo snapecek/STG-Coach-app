@@ -1,10 +1,10 @@
 import {useEffect,useState} from 'react';
 import type {SupabaseClient} from '@supabase/supabase-js';
 import {AUTO_REFRESH_MS,useAutoRefresh} from './useAutoRefresh';
-export type FeePlan={id:string;name:string;frequency:'monthly'|'yearly';amount_cents:number;archived_at:string|null};
-export type FeeCharge={id:string;member_id:string|null;member_name:string;kind:'membership'|'training';title:string;amount_cents:number;due_date:string;plan_id:string|null;period_start:string|null;event_id:string|null;event_name:string|null;event_starts_at:string|null;created_at:string;cancelled_at:string|null;cancel_reason:string};
+export type FeePlan={id:string;name:string;frequency:'monthly'|'yearly';amount_cents:number;archived_at:string|null;auto_monthly?:boolean;auto_next_month?:string|null;auto_due_day?:number;auto_member_ids?:string[]};
+export type FeeCharge={id:string;member_id:string|null;member_name:string;kind:'membership'|'training';title:string;amount_cents:number;due_date:string;plan_id:string|null;period_start:string|null;event_id:string|null;event_name:string|null;event_starts_at:string|null;created_at:string;cancelled_at:string|null;cancel_reason:string;is_automatic?:boolean};
 export type FeePayment={id:string;charge_id:string;amount_cents:number;paid_on:string;method:'cash'|'bank'|'other';note:string;created_at:string;voided_at:string|null;void_reason:string};
-export type FeeLedger={plans:FeePlan[];charges:FeeCharge[];payments:FeePayment[]};
+export type FeeLedger={recurring_ready?:boolean|null;plans:FeePlan[];charges:FeeCharge[];payments:FeePayment[]};
 export const feeMethods={cash:'Hotově',bank:'Převodem',other:'Jinak'};
 export const emptyFeeLedger:FeeLedger={plans:[],charges:[],payments:[]};
 export const feesChanged=(clubId:string,enabled:boolean)=>window.dispatchEvent(new CustomEvent('trenomi-fees-changed',{detail:{clubId,enabled}}));
@@ -20,9 +20,9 @@ export const feeStatusLabels={cancelled:'Stornováno',paid:'Zaplaceno',overdue:'
 export function feeTotals(charges:FeeCharge[],payments:FeePayment[],today:string){return charges.filter(c=>!c.cancelled_at).reduce((total,c)=>{const b=feeBalance(c,payments);return {charged:total.charged+c.amount_cents,paid:total.paid+b.paid,due:total.due+b.due,overdue:total.overdue+(c.due_date<today?b.due:0)}},{charged:0,paid:0,due:0,overdue:0})}
 export async function feeRpc<T>(client:SupabaseClient,name:string,args:Record<string,unknown>):Promise<T>{
  const {data,error}=await client.rpc(name,args);if(error){
-  if(['PGRST202','42883','42P01'].includes(error.code))throw new Error('Klubové příspěvky vyžadují migraci 041. Po jejím nahrání obnovte stránku.');
+  if(['PGRST202','42883','42P01'].includes(error.code))throw new Error(['delete_club_fee_plan','delete_club_fee_charge','set_club_fee_recurrence'].includes(name)?'Tato změna příspěvků vyžaduje migraci 042. Po jejím nahrání obnovte stránku.':'Klubové příspěvky vyžadují migraci 041. Po jejím nahrání obnovte stránku.');
   if(error.code==='42501')throw new Error('K této evidenci nemáte oprávnění.');
-  const messages:Record<string,string>={'Fees disabled':'Klubové příspěvky jsou vypnuté. Zapnout je může hlavní správce v Nastavení.','Invalid fee input':'Zkontrolujte částku, datum a povinná pole.','Fee record unavailable':'Záznam již není dostupný. Obnovte přehled.','Fee member unavailable':'Některá vybraná osoba již není dostupná nebo není na soupisce tohoto tréninku.','Fee payment exceeds balance':'Částka převyšuje zbývající dluh. Obnovte přehled úhrad.','Fee payment already exists':'Tato úhrada už byla použitá. Obnovte přehled před dalším zápisem.','Fee charge has payments':'Předpis má zapsané úhrady. Stornovat lze pouze předpis bez platných úhrad.'};
+  const messages:Record<string,string>={'Fees disabled':'Klubové příspěvky jsou vypnuté. Zapnout je může hlavní správce v Nastavení.','Invalid fee input':'Zkontrolujte částku, datum a povinná pole.','Fee record unavailable':'Záznam již není dostupný. Obnovte přehled.','Fee member unavailable':'Některá vybraná osoba již není dostupná nebo není na soupisce tohoto tréninku.','Fee payment exceeds balance':'Částka převyšuje zbývající dluh. Obnovte přehled úhrad.','Fee payment already exists':'Tato úhrada už byla použitá. Obnovte přehled před dalším zápisem.','Fee charge has payments':'Předpis má zapsané úhrady. Smazat nebo stornovat lze pouze předpis bez platných úhrad.'};
   throw new Error(messages[error.message]||'Evidenci příspěvků nelze načíst nebo uložit. Zkontrolujte připojení a zkuste to znovu.');
  }return data as T;
 }

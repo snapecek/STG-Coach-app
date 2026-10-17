@@ -331,9 +331,6 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 @media(max-width:760px){.admission-email-form{display:block}.admission-email-form button{width:100%;margin-top:10px}.admission-request{align-items:start;flex-direction:column}.admission-request .row-actions{width:100%}.admission-requests .panel-title{flex-wrap:wrap}.membership-admissions{padding:12px}.cloud-card:has(.account-actions)>.applicant-panel{padding-top:16px}}
 .user-menu-panel>a.text-button{display:block;margin-top:14px}
 
-/* The overview already displays the club identity in its main heading. */
-@media(max-width:760px){.cloud-card:has(.cloud-dashboard .page-title h1 .club-identity)>.current-club-identity{display:none}}
-@media(max-width:760px){.cloud-dashboard .page-club-context{display:none}}
 
 .member-row{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center}
 .member-row .member-info{min-width:0}.member-row>.row-actions{margin-left:0;justify-content:flex-end;align-items:center;flex-wrap:wrap}

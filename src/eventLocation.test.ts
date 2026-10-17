@@ -1,0 +1,10 @@
+import {describe,it,expect,vi} from 'vitest';
+import type {SupabaseClient} from '@supabase/supabase-js';
+import {eventMapLinks,locationFields,parseMapCoordinates,requireLocationMigration,validateEventLocation} from './eventLocation';
+const point={lat:49.854,lng:18.542},arrow={from:{lat:49.853,lng:18.541},to:point},value={point,arrows:[arrow],note:' Zadní brankou '};
+describe('event map',()=>{
+ it('normalizes geographic data without mutating the original',()=>{expect(validateEventLocation(value)).toEqual({...value,note:'Zadní brankou'});expect(value.note).toBe(' Zadní brankou ');expect(locationFields(undefined)).toEqual({});expect(locationFields(null)).toEqual({event_location:null})});
+ it('rejects malformed coordinates, empty arrows and unbounded input',()=>{for(const invalid of [{...value,point:{lat:NaN,lng:1}},{...value,point:{lat:86,lng:0}},{...value,point:{lat:49,lng:181}},{...value,arrows:[{from:point,to:point}]},{...value,arrows:Array(9).fill(arrow)},{...value,note:'a'.repeat(501)},{...value,point:null}])expect(()=>validateEventLocation(invalid)).toThrow()});
+ it('parses GPS and generates navigation links without accepting arbitrary URLs',()=>{expect(parseMapCoordinates('49.854, 18.542')).toEqual(point);expect(parseMapCoordinates('49.854 18.542')).toEqual(point);expect(parseMapCoordinates('https://evil.invalid')).toBeNull();expect(parseMapCoordinates('99, 181')).toBeNull();for(const link of Object.values(eventMapLinks(point)))expect(new URL(link).protocol).toBe('https:');expect(new URL(eventMapLinks(point).google).searchParams.get('destination')).toBe('49.854,18.542')});
+ it('reports a missing migration before a creation RPC can silently discard map data',async()=>{const limit=vi.fn().mockResolvedValue({error:{code:'42703'}}),client={from:()=>({select:()=>({eq:()=>({limit})})})} as unknown as SupabaseClient;await expect(requireLocationMigration(client,'club')).rejects.toThrow('038')});
+});

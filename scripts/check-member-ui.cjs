@@ -132,6 +132,23 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
  async function openMemberEvent(p,event,tab='Účast'){const close=p.getByRole('button',{name:'Zavřít',exact:true});if(await close.count())await close.click();await p.getByRole('navigation').getByRole('button',{name:'Kalendář',exact:true}).filter({visible:true}).first().click();await p.locator('.calendar-event').filter({hasText:event.name}).first().click();await p.getByRole('dialog',{name:event.name,exact:true}).waitFor();await p.getByRole('tab',{name:tab,exact:true}).click();}
  async function themeFromMenu(p,role,label){if(role==='coach'||role==='member'){await p.getByRole('button',{name:'Nastavení',exact:true}).click();await p.getByRole('heading',{name:'Nastavení',exact:true}).waitFor();await p.getByRole('button',{name:label,exact:true}).click();await p.getByRole('navigation').getByRole('button',{name:'Přehled',exact:true}).filter({visible:true}).first().click();await p.getByLabel('Uživatelské menu',{exact:true}).click();}else await p.getByRole('button',{name:label,exact:true}).click();}
  try{
+  if(process.env.STG_EVENT_CHAT_BADGE_ONLY==='1'){
+   for(const role of ['coach','member']){
+    communication.messages=[];communication.reads={};const v=await context(role),p=v.page;p.setDefaultTimeout(10000);await p.clock.install();
+    const add=(event_id,sender,body)=>communication.messages.push({id:communication.next++,event_id,conversation_id:event_id?null:'91000000-0000-4000-8000-000000000001',sender,body,author_name:'Další účastník',created_at:new Date().toISOString()});
+    add(events[0].id,'other','První nepřečtená zpráva');add(events[0].id,'other','Druhá nepřečtená zpráva');add(events[0].id,role,'Vlastní zpráva');add(events[1].id,'other','Zpráva jiného závodu');add(null,'other','Soukromá zpráva');
+    await login(p);await p.locator('.cloud-dashboard').waitFor();
+    if(role==='member')await openMemberEvent(p,events[0],'Informace');else{await p.getByRole('navigation').getByRole('button',{name:'Kalendář',exact:true}).filter({visible:true}).first().click();await p.locator('.calendar-event').filter({hasText:events[0].name}).click();}
+    const dialog=p.getByRole('dialog',{name:events[0].name,exact:true}),tab=dialog.getByRole('tab',{name:'Chat',exact:true}),badge=tab.locator('.event-chat-unread');await badge.waitFor();assert.equal(await badge.textContent(),'2');assert.equal(await tab.getAttribute('aria-selected'),'false');assert.equal(await dialog.getByRole('region',{name:'Chat události',exact:true}).count(),0);
+    await dialog.getByRole('tab',{name:'Účast',exact:true}).click();assert.equal(await badge.textContent(),'2');assert.equal(communication.reads[role+':'+events[0].id],undefined);
+    add(events[0].id,'other','Nová zpráva za běhu');await p.clock.fastForward(10000);await p.waitForFunction(()=>document.querySelector('#tab-chat .event-chat-unread')?.textContent==='3');
+    for(const width of [320,390,1440]){await p.setViewportSize({width,height:1000});assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));const box=await tab.boundingBox();assert(box&&box.x>=0&&box.x+box.width<=width);await p.screenshot({path:'/tmp/trenomi-event-chat-badge-'+role+'-'+width+'.png'});}
+    await tab.click();await dialog.getByText('Nová zpráva za běhu',{exact:true}).waitFor();await badge.waitFor({state:'detached'});assert(communication.reads[role+':'+events[0].id]);
+    await dialog.getByRole('tab',{name:'Informace',exact:true}).click();add(events[0].id,'other','Další nepřečtená');await p.clock.fastForward(10000);await badge.waitFor();assert.equal(await badge.textContent(),'1');await tab.click();await dialog.getByText('Další nepřečtená',{exact:true}).waitFor();await badge.waitFor({state:'detached'});
+    await v.c.close();
+   }
+   console.log('PASS event chat unread badge: coach/member, event-only incoming unread count, 10s refresh, other tabs preserve unread, chat marks read, subsequent new messages, 320/390/1440');return;
+  }
   if(process.env.STG_ATTENDANCE_GUESTS_ONLY==='1'){
    const v=await context('coach'),p=v.page,s=v.state();p.setDefaultTimeout(10000);
    const person=(id,name,kind,extra={})=>({id,club_id:club,name,kind,removed_at:null,purge_after:null,...extra});

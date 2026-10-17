@@ -284,3 +284,5 @@ html[data-theme="light"] .cloud-dashboard .kind-switch button.selected{backgroun
 html[data-theme="light"] .spotlight.overview-event-color .spotlight-meta>b,html[data-theme="light"] .member-featured.overview-event-color .member-featured-top>b{color:color-mix(in srgb,var(--event-color) 45%,#14332e)}
 html[data-theme="light"] .cloud-dashboard .club-sidebar button.active{background:var(--orange);color:#10151b;border-color:var(--orange)}
 html[data-theme="light"] :is(button,a,input,select,textarea,summary):focus-visible{outline-color:#8a5200}
+
+html[data-theme="light"] .detail-tabs button.has-unread{color:#765000}

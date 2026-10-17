@@ -525,3 +525,5 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .settings-panel[aria-label="Mobilní oznámení"]>small{display:block;margin-top:10px;font-size:11px;line-height:1.5}
 
 .attendance-matrix .attendance-section th{position:static;padding:9px 10px;text-align:left;font-size:12px;letter-spacing:.05em;color:var(--orange);border-bottom:1px solid #586373;background:transparent}
+
+.detail-tabs button.has-unread{color:var(--orange);font-weight:700}.detail-tabs .event-chat-unread{flex-shrink:0;min-width:18px;min-height:18px;padding:2px 4px;font-weight:700}

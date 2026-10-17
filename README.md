@@ -21,7 +21,7 @@ Založení Supabase, první migrace a přiřazení vlastníka jsou popsané v [d
 
 Výchozí stránka `/` otevírá přihlášení nebo již přihlášený klub. Původní trenérský prototyp na `/?workspace=demo` byl vyřazen; tato adresa nyní otevře stejnou aktuální aplikaci a odstraní zastaralý parametr z adresy. Dřívější lokální demo data zůstávají v prohlížeči, ale nejsou načítaná ani automaticky importovaná do databáze.
 
-Dřívější adresa `/?workspace=cloud` zůstává podporovaná. Přihlášení e-mailem a heslem používá Supabase Auth. Klub je dostupný pouze po ověření identity a načtení přiřazených rolí. Cloudový režim používá data vybraného klubu, nikdy nesahá po demo datech při chybě. Relace je v sessionStorage; klubová data jsou pouze v paměti stránky. Odhlášení a přepnutí klubu odstraní příslušný klubový prostor. Obnovení tokenu neruší výběr klubu.
+Dřívější adresa `/?workspace=cloud` zůstává podporovaná. Přihlášení e-mailem a heslem používá Supabase Auth. Klub je dostupný pouze po ověření identity a načtení přiřazených rolí. Cloudový režim používá data vybraného klubu, nikdy nesahá po demo datech při chybě. Volba **Zapamatovat přihlášení** (výchozí zapnuto) ukládá relaci do localStorage a zachová přihlášení i po zavření aplikace. Při vypnutí je relace pouze v sessionStorage; klubová data jsou pouze v paměti stránky. Ukládá se relace Supabase, nikoli heslo, a původní klíč Auth zůstává zachovaný. Odhlášení odstraňuje relaci z obou úložišť. Odhlášení a přepnutí klubu odstraní příslušný klubový prostor. Obnovení tokenu neruší výběr klubu.
 
 ### Etapa 1 — dokončené demo
 
@@ -373,3 +373,5 @@ V nabídce Můj účet je přepínač vzhledu. Mobilní viewport a formuláře j
 ### Přihlášky nových členů (032)
 
 V sekci Členové lze pozvat zájemce pouze e-mailem bez zakládání člena. Vyplní si jméno a příjmení a vybere klub; přístup vznikne až po potvrzeném schválení trenérem. Při schválení lze zachovat historii existujícího hosta/člena. Původní přidávání a přímé pozvánky zůstávají dostupné. Samostatná registrace je nová volitelná možnost, která mění starší doporučení nechat signups vypnuté. [Aktivace migrace, funkce invite-member a registrací](docs/MEMBERSHIP_APPLICATIONS_SETUP.md).
+
+Ověření zapamatování přihlášení: `CHROMIUM_PATH=/usr/bin/chromium npm run test:auth-ui` používá fiktivní Auth/API odpovědi a izolovaný profil prohlížeče. Ukončí a znovu spustí Chromium, ověří obnovení prošlé relace, vypnuté zapamatování, odhlášení a shodu potvrzení hesla při registraci. Žádné skutečné e-maily ani uživatelské změny.

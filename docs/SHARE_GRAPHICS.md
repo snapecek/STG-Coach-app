@@ -80,8 +80,8 @@ Na PC je okno sdílení explicitně vystředěné a široké až 960 px. V dení
 
 **Sdílet trénink → Upravit obrázek** nyní otevírá fotografické studio. Mobil má náhled nad záložkami **Šablony / Data / Samolepky**, na PC jsou nástroje vedle náhledu. **Další** přesune fokus k textu příspěvku a exportu.
 
-- **Šablony:** nové celoplošné fotografické kompozice **Kilometry, Sloupec dat, Jen titulek**. Dosavadních 12 návrhů je stále očíslovaných 01–12 v rozbalovacím výběru. Nové kompozice používají záměrný překryv typografie přes fotografii podle návrhu editoru; původní šablony zachovávají oddělené oblasti fotografie a textu.
-- **Barva grafiky:** oranžová `#FFB317`, modrá, zelená a fialová. Volba mění tento export, nikoli barvy aplikace či klubová data.
+- **Šablony:** nové celoplošné fotografické kompozice **Kilometry, Sloupec dat, Jen titulek**. Všechny kompozice jsou v jednom výběru 15 šablon, který ukazuje aktivní název. Dosavadních 12 návrhů zůstává očíslovaných 01–12. Nové kompozice používají záměrný překryv typografie přes fotografii podle návrhu editoru; původní šablony zachovávají oddělené oblasti fotografie a textu.
+- **Barva grafiky:** 16 odstínů včetně původní oranžové `#FFB317`; akcent se promítá také do starších šablon včetně Nočního tréninku. Volba mění tento export, nikoli barvy aplikace či klubová data.
 - **Data:** titulek, přepínače skutečných údajů z deníku, výřez, celá fotografie / vyplnění rámečku a přesné posuvníky. Na mobilu funguje i přímý posun a pinch fotografie.
 - **Samolepky:** odznak, páska, kruh docházky, kilometry, razítko, blesk, série, RPE, lístek, obrysový nápis, tým na startu a rekord. Dostupné údaje se vyplňují z tréninku; série a rekord vyžadují vlastní text před exportem. Výpočet docházky vychází ze skutečné přítomnosti a soupisky tréninku, nikoli z odpovědí na pozvánku.
 - Lze vložit až 16 samolepek, posouvat je myší/prstem/šipkami, otáčet a měnit velikost tažením za roh nebo dvěma prsty, použít posuvníky, upravit text, duplikovat, odstranit a změnit pořadí vrstev. Vložené vrstvy mají samostatný seznam pro výběr překrytých samolepek.
@@ -90,3 +90,8 @@ Na PC je okno sdílení explicitně vystředěné a široké až 960 px. V dení
 Editor nemění původní fotografii, deník ani klubová nastavení. Úpravy jsou návrhem v otevřeném editoru. Není potřeba SQL migrace ani nasazení Edge funkce.
 
 Ověření: `npm run build`, `npm test`, `test:share-ui`, `test:share-editor`, `test:share-touch-ui`, `test:journal-share-ui` (u prohlížečových kontrol `CHROMIUM_PATH=/usr/bin/chromium`). Nový test pokrývá 3 nové kompozice × 3 formáty, všech 12 druhů samolepek, jejich transformace, přesné shody náhledu a PNG, editaci a skrývání dat i šířky 320/390/1440 px. Dotyková kontrola používá skutečné dvouprsté vstupy přes Chromium CDP.
+
+
+Logo a název klubu se do grafiky nevkládají automaticky. V záložce **Samolepky → Vložit logo a název klubu** lze vložit samostatný posuvný prvek. Logo zachovává původní proporce a barvy, název původní velikost písmen a znění; tyto údaje se v editoru nepřepisují. Pokud klub logo nemá, vloží se jeho název. Odstranění prvku nemění klubový profil.
+
+Vybraný prvek má na náhledu malé **×** pro okamžité odstranění. Pod náhledem jsou obdobné křížky pro jednotlivé metriky, datum, místo a titulek. Skrytá data lze znovu zapnout v záložce **Data**. Ovládací křížky se neexportují. Regrese editoru navíc ověřuje 16 odlišných exportovaných barev, přepínání a editaci starší šablony, volitelné vložení identity s původním zněním a poměrem stran loga a odstranění křížky.

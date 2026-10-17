@@ -1,25 +1,36 @@
-export const shareAccents=[{value:'#FFB317',name:'Oranžová'},{value:'#46C6E8',name:'Modrá'},{value:'#77E47D',name:'Zelená'},{value:'#A88AF8',name:'Fialová'}] as const;
+export const shareAccents=[
+ {value:'#FFB317',name:'Oranžová'},{value:'#46C6E8',name:'Modrá'},{value:'#77E47D',name:'Zelená'},{value:'#A88AF8',name:'Fialová'},
+ {value:'#FFD166',name:'Zlatá'},{value:'#F97316',name:'Mandarinková'},{value:'#EF4444',name:'Červená'},{value:'#FB7185',name:'Korálová'},
+ {value:'#F472B6',name:'Růžová'},{value:'#D946EF',name:'Purpurová'},{value:'#6366F1',name:'Indigová'},{value:'#2563EB',name:'Královská modrá'},
+ {value:'#14B8A6',name:'Tyrkysová'},{value:'#34D399',name:'Smaragdová'},{value:'#A3E635',name:'Limetková'},{value:'#F5F6F7',name:'Stříbrná'}
+] as const;
 export type StickerKind='badge'|'tape'|'attendance'|'distance'|'stamp'|'bolt'|'streak'|'effort'|'ticket'|'outline'|'team'|'record';
 export const stickerKinds:{id:StickerKind;name:string;hint:string}[]=[
  {id:'badge',name:'Odznak',hint:'Vlastní úspěch'},{id:'tape',name:'Páska',hint:'Bez výmluv'},{id:'attendance',name:'Kruh docházky',hint:'Účast z tréninku'},{id:'distance',name:'Počítadlo km',hint:'Vzdálenost z deníku'},
  {id:'stamp',name:'Razítko',hint:'Odmakáno'},{id:'bolt',name:'Blesk',hint:'Tempo týmu'},{id:'streak',name:'Série',hint:'Vlastní text'},{id:'effort',name:'Ukazatel zátěže',hint:'RPE z deníku'},
  {id:'ticket',name:'Lístek',hint:'Název tréninku'},{id:'outline',name:'Obrysový nápis',hint:'Dnes jsme to dali'},{id:'team',name:'Tým na startu',hint:'Počet přítomných'},{id:'record',name:'Rekord',hint:'Doplňte vlastní výkon'}
 ];
-export type ShareSticker={id:string;kind:StickerKind;x:number;y:number;scale:number;rotation:number;text:string;value:string};
+export type ShareSticker={id:string;kind:StickerKind|'club';x:number;y:number;scale:number;rotation:number;text:string;value:string};
 export type StickerData={title:string;date?:string;metrics:{label:string;value:string}[];attendance?:{present:number;total:number}};
 export function newShareSticker(kind:StickerKind,data:StickerData,id?:string):ShareSticker{
  const metric=(label:string)=>data.metrics.find(m=>m.label===label)?.value||'—';
  const values:Record<StickerKind,[string,string]>={badge:['MŮJ VÝKON','TRÉNINK'],tape:['','BEZ VÝMLUV'],attendance:['DOCHÁZKA',data.attendance&&data.attendance.total?Math.round(data.attendance.present/data.attendance.total*100)+' %':'—'],distance:['VZDÁLENOST',metric('vzdálenost')],stamp:[data.date||'','ODMAKÁNO'],bolt:['','SPOLU RYCHLEJI'],streak:['MOJE SÉRIE','DOPLŇTE'],effort:['ZÁTĚŽ Z 10',metric('zátěž')],ticket:['TRÉNINKOVÝ DENÍK',data.title],outline:['D N E S  J S M E','TO DALI'],team:['NA STARTU',data.attendance?`${data.attendance.present} / ${data.attendance.total}`:metric('přítomných')],record:['VLASTNÍ REKORD','DOPLŇTE']};
  const [text,value]=values[kind];return {id:id??crypto.randomUUID(),kind,x:.64,y:.56,scale:1,rotation:kind==='tape'?-8:kind==='stamp'?-9:0,text,value};
 }
-export function stickerSize(kind:StickerKind){return ['tape','distance','bolt','stamp','ticket','team','outline'].includes(kind)?{width:440,height:160}:{width:290,height:260}}
+export const stickerName=(kind:ShareSticker['kind'])=>kind==='club'?'Logo a název klubu':stickerKinds.find(k=>k.id===kind)!.name;
+export function stickerSize(kind:ShareSticker['kind']){return ['tape','distance','bolt','stamp','ticket','team','outline','club'].includes(kind)?{width:440,height:160}:{width:290,height:260}}
 export function safeSticker(s:ShareSticker):ShareSticker{const finite=(n:number,fallback:number)=>Number.isFinite(n)?n:fallback;return {...s,x:Math.max(0,Math.min(1,finite(s.x,.5))),y:Math.max(0,Math.min(1,finite(s.y,.5))),scale:Math.max(.35,Math.min(2.4,finite(s.scale,1))),rotation:((finite(s.rotation,0)+180)%360+360)%360-180,text:s.text.slice(0,60),value:s.value.slice(0,80)}}
 function label(ctx:CanvasRenderingContext2D,value:string,y:number,size:number,color:string,max:number,outline=false){ctx.font=`800 ${size}px "Trenomi Display", sans-serif`;while(ctx.measureText(value).width>max&&size>12){ctx.font=`800 ${--size}px "Trenomi Display", sans-serif`}ctx.textAlign='center';ctx.textBaseline='middle';if(outline){ctx.strokeStyle=color;ctx.lineWidth=2;ctx.strokeText(value,0,y,max)}else{ctx.fillStyle=color;ctx.fillText(value,0,y,max)}}
-export function drawShareSticker(ctx:CanvasRenderingContext2D,raw:ShareSticker,width:number,height:number,accent:string){
+export function drawShareSticker(ctx:CanvasRenderingContext2D,raw:ShareSticker,width:number,height:number,accent:string,clubLogo?:HTMLImageElement|null){
  const s=safeSticker(raw),b=stickerSize(s.kind),w=b.width,h=b.height,white='#F5F6F7',dark='#101216';ctx.save();ctx.translate(s.x*width,s.y*height);ctx.rotate(s.rotation*Math.PI/180);ctx.scale(s.scale,s.scale);
  const rect=(fill:string,r=8)=>{ctx.fillStyle=fill;ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,r);ctx.fill()};
  const ring=(radius:number)=>{ctx.beginPath();ctx.arc(0,0,radius,0,Math.PI*2);ctx.fillStyle=dark;ctx.fill();ctx.lineWidth=12;ctx.strokeStyle=accent;ctx.stroke()};
  switch(s.kind){
+ case 'club':{
+  rect('#101216DD',14);const logoWidth=clubLogo?105:0;
+  if(clubLogo){const factor=Math.min(90/clubLogo.naturalWidth,110/clubLogo.naturalHeight);ctx.drawImage(clubLogo,-w/2+18,-clubLogo.naturalHeight*factor/2,clubLogo.naturalWidth*factor,clubLogo.naturalHeight*factor)}
+  ctx.fillStyle=white;ctx.textAlign='left';ctx.textBaseline='middle';let size=34;ctx.font=`700 ${size}px "Trenomi Text",sans-serif`;while(ctx.measureText(s.value).width>w-logoWidth-42&&size>12)ctx.font=`700 ${--size}px "Trenomi Text",sans-serif`;ctx.fillText(s.value,-w/2+20+logoWidth,0,w-logoWidth-40);break;}
+
  case 'badge':case 'record':{
   const n=s.kind==='badge'?6:24;ctx.beginPath();for(let i=0;i<n;i++){const a=i/n*Math.PI*2-Math.PI/2,r=s.kind==='record'&&i%2?98:128;const x=Math.cos(a)*r,y=Math.sin(a)*r;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.closePath();ctx.fillStyle=s.kind==='record'?accent:dark;ctx.fill();ctx.lineWidth=9;ctx.strokeStyle=s.kind==='record'?dark:accent;ctx.stroke();label(ctx,s.value,5,64,s.kind==='record'?dark:accent,218);label(ctx,s.text,63,21,s.kind==='record'?dark:white,210);break;}
  case 'attendance':ring(115);label(ctx,s.value,-7,79,white,210);label(ctx,s.text,54,19,accent,205);break;
@@ -35,4 +46,4 @@ export function drawShareSticker(ctx:CanvasRenderingContext2D,raw:ShareSticker,w
  }
  ctx.restore();
 }
-export function drawShareStickers(ctx:CanvasRenderingContext2D,stickers:ShareSticker[]|undefined,width:number,height:number,accent:string){for(const sticker of (stickers||[]).slice(0,16))drawShareSticker(ctx,sticker,width,height,accent)}
+export function drawShareStickers(ctx:CanvasRenderingContext2D,stickers:ShareSticker[]|undefined,width:number,height:number,accent:string,clubLogo?:HTMLImageElement|null){for(const sticker of (stickers||[]).slice(0,16))drawShareSticker(ctx,sticker,width,height,accent,clubLogo)}

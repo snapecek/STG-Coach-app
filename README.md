@@ -363,7 +363,7 @@ Kontrola značky: `STG_BRAND_ONLY=1 npm run test:member-ui` proti spuštěnému 
 
 ## Klubový chat, chat událostí a podněty
 
-Obecný chat je soukromý mezi členem a trenéry klubu, chat jednotlivé události je společný. Chat najdete vedle Můj účet, podněty uvnitř této nabídky. Na migraci 024 navazuje [025 – soukromé konverzace](supabase/migrations/202610150025_private_coach_chat.sql). Postup nasazení, oprávnění, obnovování zpráv a kontroly jsou v [dokumentaci komunikace](docs/COMMUNICATION.md).
+Obecný chat je soukromý mezi členem a trenéry klubu, chat jednotlivé události je společný. Chat najdete vedle Můj účet, podněty a přidání aplikace na plochu v **Můj účet → Nápověda**. Přihláška do dalšího klubu je v **Můj účet → Nastavení → Členství v klubech**. Na migraci 024 navazuje [025 – soukromé konverzace](supabase/migrations/202610150025_private_coach_chat.sql). Postup nasazení, oprávnění, obnovování zpráv a kontroly jsou v [dokumentaci komunikace](docs/COMMUNICATION.md).
 
 ## Světlý režim, mobil a hosté členů
 

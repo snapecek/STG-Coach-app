@@ -508,3 +508,7 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 }
 
 .auth-card .remember-login{display:flex;align-items:center;gap:10px;min-height:44px;margin:10px 0 0;cursor:pointer}.auth-card .remember-login input{flex-shrink:0;width:18px;height:18px;margin:0;padding:0;accent-color:var(--orange)}.auth-card .remember-login-hint{margin:0 0 16px;font-size:11px}
+
+.user-menu .user-help>summary{justify-content:flex-start;border:0;background:transparent;padding:9px 10px;margin-top:14px;min-height:40px}.user-help-panel{margin:4px 0 0 12px;padding-left:8px;border-left:1px solid var(--border)}.user-help-panel .text-button{display:flex;width:100%;min-height:40px;margin:0;text-align:left}.user-menu-panel .user-help-panel button{margin-top:0}
+
+.user-help>summary .help-chevron{margin-left:auto;transition:transform .15s}.user-help[open]>summary .help-chevron{transform:rotate(180deg)}

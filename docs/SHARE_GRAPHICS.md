@@ -66,3 +66,12 @@ Přehled lze znovu vytvořit: `npm run preview:share-gallery -- /cesta/k/ilustra
 Sdílení se otevírá tlačítkem **Sdílet trénink** vedle **Upravit** v samostatném okně. Zavření tlačítkem či Escape vrátí fokus na původní tlačítko. Galerie pamatuje vybranou fotografii pro každý klub a trénink v rámci otevřené relace prohlížeče (sessionStorage); ukládá cestu, nikoli dočasnou blob URL. Při smazání fotografie použije dostupnou první fotografii.
 
 Regresní ověření okna a výběru: `CHROMIUM_PATH=/usr/bin/chromium npm run test:journal-share-ui`.
+
+
+### Titulní fotografie tréninku (migrace 036)
+
+V deníku otevřete trénink → **Upravit** → pod galerií zvolte **Zvolit titulní**. Volba se ukládá okamžitě, označí se jako **Titulní fotografie** a při opakovaném otevření má přednost před dřívějším dočasným výběrem. **Zrušit titulní fotografii** vrátí automatický výběr. Při odstranění souboru galerie bezpečně použije dostupnou fotografii.
+
+Nejdříve spusťte `supabase/migrations/202610170036_training_cover_photo.sql` v Supabase SQL Editoru. Přidává pouze volitelný sloupec `events.cover_photo_path` s kontrolou souboru ze stejného klubu a události. Dosavadní fotografie se nepřesouvají a volba titulní fotografie nemění dokončení tréninku. Nastavení chrání stávající oprávnění trenérů a archivace klubu. Edge funkce se nemění.
+
+Na PC je okno sdílení explicitně vystředěné a široké až 960 px. V deníku se hlavní fotografie vykresluje v původním poměru stran bez ořezu a souhrn docházky, délky, vzdálenosti a RPE je napravo. Mobilní rozložení zůstává pod sebou.

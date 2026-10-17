@@ -17,7 +17,7 @@ try:
   try:docker('exec',name,'pg_isready','-h','127.0.0.1','-U','postgres',capture_output=True);break
   except subprocess.CalledProcessError:sleep(1)
  else:raise RuntimeError('PostgreSQL did not start')
- tests=['tenant_access','club_management','journal_photos','race_results','distinct_races','member_access','training_capacity','training_groups','event_tasks','training_series','weekly_goals','journal_distance','attendance_matrix','training_performances','race_teams','training_games','member_event_roster','race_companion','preset_library_team_games','open_races','event_type_colors','communication','private_chat','member_guests','chat_mentions','club_settings','owner_controls_archive','club_activity','membership_applications','member_join_dates','recorded_training_guests','shareable_club_invitations']
+ tests=['tenant_access','club_management','journal_photos','race_results','distinct_races','member_access','training_capacity','training_groups','event_tasks','training_series','weekly_goals','journal_distance','attendance_matrix','training_performances','race_teams','training_games','member_event_roster','race_companion','preset_library_team_games','open_races','event_type_colors','communication','private_chat','member_guests','chat_mentions','club_settings','owner_controls_archive','club_activity','membership_applications','member_join_dates','recorded_training_guests','shareable_club_invitations','training_cover_photo']
  files=[root/'supabase/tests/local-bootstrap.sql',*sorted((root/'supabase/migrations').glob('*.sql')),*[root/f'supabase/tests/{test}.sql' for test in tests]]
  for file in files:
   try:sql(file.read_text())

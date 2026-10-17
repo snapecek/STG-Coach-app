@@ -19,6 +19,11 @@ describe('Cloudový adaptér',()=>{
   }} as unknown as SupabaseClient;
   const data=await loadClubData(client,club);expect(data.members).toHaveLength(500);expect(ranges).toEqual([[0,499],[500,999]]);
  });
+ it('before migration 033 preserves guest fields and loads members without a join date',async()=>{
+  const selections:string[]=[];
+  const client={auth:{getUser:async()=>({data:{user:{id:'user'}},error:null})},from:(table:string)=>{let columns='';const q={select:(value:string)=>{columns=value;if(table==='members')selections.push(value);return q},eq:()=>q,order:()=>q,range:()=>q,then:(fn:(v:unknown)=>unknown)=>Promise.resolve(table==='members'&&columns.includes('joined_at')?{data:null,error:{code:'42703'}}:{data:table==='members'?[{id:'guest',name:'Host',event_guest:true,event_guest_of:'parent'}]:[],error:null}).then(fn)};return q}} as unknown as SupabaseClient;
+  const data=await loadClubData(client,club);expect(data.members[0]).toMatchObject({event_guest:true,event_guest_of:'parent'});expect(selections).toHaveLength(2);expect(selections[1]).toContain('event_guest_of');expect(selections[1]).not.toContain('joined_at');
+ });
  it('členovi vůbec nenačítá registr ani účast',async()=>{const m=mock();await loadClubData(m.client,{...club,role:'member'});expect(m.tables).toEqual(['templates','events','event_type_colors'])});
  it('člen nesmí zapisovat ani při chybě UI',async()=>{const m=mock();await expect(addMember(m.client,{...club,role:'member'},'Fiktivní člen','member')).rejects.toThrow();expect(m.tables).toEqual([])});
  it('neověřený účet nečte tabulky',async()=>{const m=mock();m.auth.getUser.mockResolvedValue({data:{user:null as never},error:null});await expect(loadClubData(m.client,club)).rejects.toThrow();expect(m.tables).toEqual([])});

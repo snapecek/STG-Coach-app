@@ -11,16 +11,20 @@ Nejprve nasaďte frontend podporující `token_hash`. Potom v **Authentication �
 ### Invite user / Pozvat uživatele
 
 ```html
-<h2>Pozvánka do Trenomi</h2>
-<p>Trenér vás zve do aplikace Trenomi. Pokračujte k nastavení hesla a vstupu do klubu.</p>
+<h2>Pozvánka do klubové aplikace Trenomi</h2>
+<p>Dobrý den, trenér našeho sportovního klubu vás zve do aplikace <strong>Trenomi</strong>.</p>
+<p>V Trenomi najdete termíny tréninků a závodů, potvrdíte svou účast, prohlédnete si tréninkový deník a domluvíte se s trenérem nebo s ostatními členy u událostí.</p>
+<p>Pomocí tlačítka níže otevřete pozvánku, nastavíte si heslo a případně vyplníte jméno a příjmení. U registrační pozvánky váš vstup do klubu následně schválí trenér.</p>
 <p><a href="{{ .RedirectTo }}#token_hash={{ .TokenHash }}&amp;type=invite">Otevřít pozvánku v Trenomi</a></p>
-<p>V aplikaci potvrďte tlačítkem Pokračovat do Trenomi.</p>
+<p>V aplikaci potvrďte tlačítkem Pokračovat do Trenomi. Přihlašovací odkaz je jednorázový; při dalších návštěvách se můžete přihlásit e-mailem a heslem.</p>
+<p>Pokud pozvánku neočekáváte, před otevřením si ji ověřte u svého trenéra. Pokud se vás netýká, můžete zprávu ignorovat. Heslo nikomu neposílejte.</p>
 ```
 
 ### Magic Link / Přihlašovací odkaz
 
 ```html
-<h2>Přihlášení do Trenomi</h2>
+<h2>Pozvánka do klubové aplikace Trenomi</h2>
+<p>Trenér vás zve do aplikace Trenomi, kterou váš sportovní klub používá pro kalendář tréninků a závodů, potvrzování účasti, tréninkový deník a komunikaci. Protože už máte účet, použijte k přihlášení následující odkaz.</p>
 <p><a href="{{ .RedirectTo }}#token_hash={{ .TokenHash }}&amp;type=magiclink">Přihlásit se do Trenomi</a></p>
 <p>V aplikaci potvrďte tlačítkem Pokračovat do Trenomi. Pro běžné návraty můžete používat také svůj e-mail a heslo.</p>
 ```
@@ -48,3 +52,7 @@ Nejprve nasaďte frontend podporující `token_hash`. Potom v **Authentication �
 Odešlete novou pozvánku na vlastní testovací e-mail. Při prvním otevření se má ukázat **Potvrďte otevření odkazu**. Po stisku **Pokračovat do Trenomi** nový člen nastaví heslo; existující člen pokračuje přihlášený. Ověřte i nový odkaz na obnovu hesla. Používejte nejnovější e-mail a test nedělejte s odkazy skutečných členů bez jejich souhlasu.
 
 Pokud i nová pozvánka selže až po potvrzovacím tlačítku, zkontrolujte Authentication Logs, dobu platnosti a SMTP přepisování/sledování odkazů. Pokud se potvrzovací stránka vůbec neukáže, zkontrolujte uloženou šablonu a zda e-mail vznikl až po její úpravě. Změna šablony neupraví již odeslané zprávy. Není třeba další SQL migrace ani měnit `invite-member` kvůli samotnému potvrzovacímu kroku.
+
+## Text pozvánky a předmět
+
+Pro **Invite user** použijte celý soubor [invite.html](../supabase/templates/invite.html), pro **Magic Link** soubor [magic-link.html](../supabase/templates/magic-link.html). Doporučený předmět obou pozvánkových zpráv je **Pozvánka do Trenomi – klubová aplikace**. Druhou šablonu Supabase používá také při běžném přihlášení odkazem; popis aplikace v ní proto zůstává obecný. Soubory jsou podklady pro editor Supabase, samotný deploy webu je do Auth nenahrává.

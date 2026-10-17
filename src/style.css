@@ -334,3 +334,12 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 /* The overview already displays the club identity in its main heading. */
 @media(max-width:760px){.cloud-card:has(.cloud-dashboard .page-title h1 .club-identity)>.current-club-identity{display:none}}
 @media(max-width:760px){.cloud-dashboard .page-club-context{display:none}}
+
+.member-row{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center}
+.member-row .member-info{min-width:0}.member-row>.row-actions{margin-left:0;justify-content:flex-end;align-items:center;flex-wrap:wrap}
+.member-row>.row-actions>button:last-child{min-width:78px}.member-row .member-info>b{display:block}
+.invitation-row>div:first-child{min-width:0}.invitation-row>.row-actions{flex-shrink:0;flex-wrap:wrap}
+.journal-delete{margin-bottom:14px;display:flex;align-items:center;gap:6px}
+@media(max-width:760px){.member-row{grid-template-columns:34px minmax(0,1fr) 78px;gap:9px;align-items:start}.member-row>.avatar{width:34px;height:34px}.member-row>.row-actions{display:flex;flex-direction:column;align-items:stretch;gap:8px;width:78px;margin-left:0}.member-row>.row-actions>button{width:100%;min-width:0;padding:9px 5px;font-size:10px;overflow-wrap:anywhere}.member-row>.row-actions>button:last-child{order:-1;min-width:0}.invitation-row>.row-actions{width:100%;justify-content:flex-end}}
+
+.member-row>.row-actions>button{display:flex;align-items:center;justify-content:center;gap:4px}.member-row>.row-actions>button svg{flex-shrink:0}

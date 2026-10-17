@@ -1,0 +1,10 @@
+import {describe,it,expect} from 'vitest';
+import {gestureCrop,photoPlacement} from './sharePhotoTransform';
+const box={x:100,y:200,width:800,height:600},photo={width:1600,height:900},start={x:.5,y:.5,zoom:2};
+describe('photo gestures',()=>{
+ it('moves the source by the finger displacement, independently of preview size',()=>{const a=photoPlacement(box,photo,'cover',start),next=gestureCrop(box,photo,'cover',start,{x:500,y:500},{x:580,y:455}),b=photoPlacement(box,photo,'cover',next);expect(b.x-a.x).toBeCloseTo(80);expect(b.y-a.y).toBeCloseTo(-45)});
+ it('keeps an off-center source point under the pinch midpoint',()=>{const from={x:430,y:470},to={x:450,y:480},a=photoPlacement(box,photo,'cover',start),next=gestureCrop(box,photo,'cover',start,from,to,1.3),b=photoPlacement(box,photo,'cover',next);expect((from.x-a.x)/a.width).toBeCloseTo((to.x-b.x)/b.width);expect((from.y-a.y)/a.height).toBeCloseTo((to.y-b.y)/b.height)});
+ it('clamps zoom and panning without introducing gaps in cover mode',()=>{for(const ratio of [.001,1,100]){const next=gestureCrop(box,photo,'cover',start,{x:0,y:0},{x:1e6,y:-1e6},ratio),p=photoPlacement(box,photo,'cover',next);expect(next.zoom).toBeGreaterThanOrEqual(1);expect(next.zoom).toBeLessThanOrEqual(3);expect(p.x).toBeLessThanOrEqual(box.x);expect(p.y).toBeLessThanOrEqual(box.y);expect(p.x+p.width).toBeGreaterThanOrEqual(box.x+box.width);expect(p.y+p.height).toBeGreaterThanOrEqual(box.y+box.height)}});
+ it('avoids division by zero on an exactly fitting axis',()=>{const next=gestureCrop(box,photo,'cover',{...start,zoom:1},{x:500,y:500},{x:540,y:530});expect(Number.isFinite(next.y)).toBe(true);expect(next.y).toBe(.5)});
+ it('preserves the complete source at reset in contain mode',()=>{const p=photoPlacement(box,photo,'contain',{x:.5,y:.5,zoom:1});expect(p.x).toBeGreaterThanOrEqual(box.x);expect(p.y).toBeGreaterThanOrEqual(box.y);expect(p.x+p.width).toBeLessThanOrEqual(box.x+box.width);expect(p.y+p.height).toBeLessThanOrEqual(box.y+box.height)});
+});

@@ -27,4 +27,8 @@ Rozšířit stávající renderování v src/journalShare.ts o samostatné kompo
 
 ## Realizované varianty
 
-Všechny čtyři směry jsou zapojené do panelu Sdílet trénink. Přibyly další čtyři styly: Galerijní rám, Filmový pás, Boční panel a Čistá fotografie. Finální fotografické kompozice včetně původního plakátu oddělují text od fotografie a neztmavují ji. Návrhový obrázek výše zachycuje původní koncepty; aktuální chování a všech devět voleb včetně Nejlepších výkonů popisuje [SHARE_GRAPHICS.md](SHARE_GRAPHICS.md).
+Původní čtyři směry byly rozpracovány do 12 kompozic, včetně magazínové sazby, diagonál, filmového pásu, černobílého dokumentu, atletických oválů a klubové vstupenky. Aktuální přehled vznikl přímo z exportního rendereru, nejde o generovaný koncept:
+
+![12 implementovaných šablon](designs/trenomi-share-12-implemented.png)
+
+Ovládání na notebooku, mobilní dotykový výřez, dostupné styly a podmínky ilustrační fotografie popisuje [SHARE_GRAPHICS.md](SHARE_GRAPHICS.md).

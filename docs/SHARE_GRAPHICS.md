@@ -2,21 +2,28 @@
 
 V trenérském Deníku otevřete záznam tréninku a panel **Sdílet trénink**.
 
-| Šablona | Kompozice |
+![Skutečné exporty všech 12 kompozic](designs/trenomi-share-12-implemented.png)
+
+Přehled výše vzniká přímo stejným Canvas rendererem jako stažené PNG. Používá ilustrační fotografii z Unsplash (photo-1518611012118-696072aa579a) a smyšlené údaje, nikoli data členů. Fotografie se do aplikace nepřidává; každý klub používá vlastní galerii.
+
+| Šablona | Vlastní vizuální princip |
 | --- | --- |
-| Fotografický plakát | Velká fotografie, samostatný spodní název s jemným žlutým akcentem a údaji. |
-| Přehled výkonu | Dominantní skutečná hodnota a další údaje, bez fotografie. |
-| Klubový deník | Světlá magazínová sazba: název nad fotografií, údaje pod ní. |
-| Sportovní poster | Žlutý titulkový pás a boční diagonální akcent, oba mimo fotografii. |
-| Galerijní rám | Světlý paspartový rám, fotografie a samostatný popisek. |
-| Filmový pás | Tmavá kompozice s jemnými linkami kolem fotografie. |
-| Boční panel | Fotografie vpravo a údaje vlevo; ve Story fotografie nahoře a dva sloupce pod ní. |
-| Čistá fotografie | Největší prostor pro fotografii a drobnější doprovodný text mimo ni. |
-| Nejlepší výkony | Dosavadní přehled měřených výsledků. Jména jsou ve výchozím stavu skrytá. |
+| 01 Fotografický plakát | Celoplošný snímek, diagonální žlutý titulkový pás a kompaktní údaje mimo fotografii. |
+| 02 Přehled výkonu | Výrazná hlavní skutečná hodnota, obrysová typografie a žluté datové bloky. Bez fotografie. |
+| 03 Klubový deník | Světlá magazínová sazba s výrazným kurzivním serifovým písmem a boční tiráží. |
+| 04 Sportovní poster | Žlutá kampaňová grafika, velký název, diagonální fotografický výřez a černé datové štítky. |
+| 05 Galerijní rám | Nakloněná papírová karta se stínem, fotografií a serifovým popiskem. |
+| 06 Filmový pás | Filmové perforace po stranách, titulková sazba a tmavá kompozice. |
+| 07 Boční panel | Portrétní karta s fotografií vpravo, žlutým názvem a datovými štítky vlevo; ve Story rozvržení nad sebou. |
+| 08 Černobílý dokument | Velká monochromatická fotografie a drobná čistá sazba. Černobílá úprava platí jen pro export, ne pro originál. |
+| 09 Nejlepší výkony | Tři výsledkové karty s velkým pořadím, skutečnými hodnotami a jmény standardně skrytými. Bez fotografie. |
+| 10 Noční trénink | Tmavý zelený přechod, jemná bodová síť, obloukový fotografický rám a mátové datové bloky. |
+| 11 Atletická dráha | Žluté pozadí a soustředné atletické ovály kolem asymetricky zaoblené fotografie. |
+| 12 Klubová vstupenka | Krémová perforovaná vstupenka, fotografie a samostatný žlutý datový útržek. Nejde o vstupní oprávnění ani QR kód. |
 
-Volbu otevřete kliknutím na aktuální šablonu (**Změnit · 9 šablon**). Nabídka obsahuje miniatury a po volbě se zavře, aby panel zůstal krátký. Náhledy nabídky se vykreslují jen při jejím otevření.
+Volbu otevřete kliknutím na aktuální šablonu (**Změnit · 12 šablon**). Nabídka obsahuje číslované miniatury a po volbě se zavře. Náhledy nabídky se vykreslují jen při jejím otevření.
 
-U všech sedmi fotografických šablon mají klubová hlavička, název, metriky i značka oddělené plochy mimo fotografii. Fotografie se neztmavuje a nepřekrývá textem. Dlouhé názvy se zalomí a podle dostupného prostoru zmenší či zkrátí výpustkou; každá textová plocha má vlastní ořez.
+U všech deseti fotografických šablon mají klubová hlavička, název, metriky i značka oddělené plochy mimo fotografii. Snímek se nepřekrývá textem. Dlouhé názvy se zalomí, případně zmenší či zkrátí výpustkou. Sportovní, noční a atletický styl mají ve vyplněném režimu vlastní tvar fotografického rámečku; volba Celá fotografie zachová obdélníkový snímek celý.
 Náhledové kartičky používají aktuální údaje. Grafika zahrnuje název a dostupné logo klubu, datum v časové zóně Europe/Prague, místo a oficiální logo Trenomi. Chybějící délka, vzdálenost či RPE se nevymýšlí. Výstup používá barvy #FFB317 a #101216 nezávisle na režimu aplikace.
 
 ## Fotografie a výřez
@@ -26,7 +33,11 @@ Fotografii vyberte v galerii tréninku. Ve všech fotografických šablonách lz
 - **Vyplnit rámeček** (výchozí): fotografie zaplní vyhrazenou plochu, přesah se ořízne.
 - **Celá fotografie**: při základním přiblížení zůstane vidět celý snímek; rozdíl poměrů stran vyplní neutrální pozadí. Vhodné pro skupiny, kde nechcete nikoho oříznout.
 
-Dále upravte **Přiblížení**, **Vodorovný posun** a **Svislý posun**. **Obnovit výřez** vrátí střed a základní přiblížení při zachování vybraného způsobu zobrazení. Při vyplnění může být v základním přiblížení jeden posuv bez účinku, pokud fotografie daný rozměr přesně vyplňuje. Výřez ovlivňuje jen aktuální grafiku, nikoli původní soubor či data tréninku. Výběr jiné fotografie resetuje posun a přiblížení.
+Na notebooku a počítači zůstávají posuvníky **Přiblížení**, **Vodorovný posun** a **Svislý posun**.
+
+Na mobilním zařízení posouvejte fotografii přímo prstem v náhledu; dvěma prsty ji přibližujte/oddalujte v rozsahu 1–3×. Přiblížení drží uchopené místo pod prsty a lze současně posouvat. Dotyková plocha odpovídá fotografii včetně tvarovaných rámečků; rolování stránky funguje mimo snímek. Pro přístupnost zůstávají posuvníky dostupné pod **Přesné nastavení výřezu**. Dotykový režim se určuje podle vstupu zařízení (coarse pointer bez hover), nikoli pouze podle šířky okna. Na notebooku s myší tak zůstane původní ovládání i v úzkém okně.
+
+**Obnovit výřez** vrátí střed a základní přiblížení při zachování způsobu zobrazení. Při vyplnění může být v základním přiblížení jeden posuv bez účinku, pokud fotografie daný rozměr přesně vyplňuje. Výběr jiné fotografie resetuje posun a přiblížení. Výřez i případná monochromatická varianta ovlivňují jen aktuální export, nikoli původní soubor či data tréninku.
 
 ## Výstupy
 
@@ -39,8 +50,15 @@ PNG 1080 × 1080 (1:1), 1080 × 1350 (4:5), 1080 × 1920 (9:16). Story má vět�
 Písma jsou hostována v `public/fonts`, aby export nezávisel na externím fontovém serveru:
 
 - Barlow Condensed ExtraBold: https://github.com/google/fonts/tree/main/ofl/barlowcondensed
+- Cormorant Garamond Italic: https://github.com/google/fonts/tree/main/ofl/cormorantgaramond
 - Manrope: https://github.com/google/fonts/tree/main/ofl/manrope
 
-Obě písma mají přiloženou licenci SIL Open Font License (`*-OFL.txt`). Používají se jen ve sdílené grafice.
+Všechna tři písma mají přiloženou licenci SIL Open Font License (`*-OFL.txt`). Používají se jen ve sdílené grafice.
 
-Kontroly: `npm run build`, `npm test`, `npm run test:share-ui` (běžící Vite na portu 5173; pro systémový Chromium lze nastavit `CHROMIUM_PATH=/usr/bin/chromium`). Poslední kontrola používá pouze smyšlená data a ověřuje 27 PNG výstupů všech devíti šablon a tří formátů, přesnou shodu náhledu a stažení, posun/přiblížení/reset, chybějící fotku/logo, dlouhé české názvy, soukromí jmen a šířky 320/390/1440 px. Navíc u 21 fotografických kombinací ověřuje každý pixel plochy fotografie, aby přes ni nebyl vykreslen text ani dekorace; jednotkové testy hlídají oddělení ploch a bezpečné okraje Stories. Neukládá změny do Supabase.
+Kontroly: `npm run build`, `npm test`, `npm run test:share-ui`, `npm run test:share-touch-ui` (běžící Vite na portu 5173; pro systémový Chromium nastavte `CHROMIUM_PATH=/usr/bin/chromium`). Kontroly používají jen smyšlená data, nezapisují do Supabase a ověřují:
+
+- 36 PNG kombinací všech 12 šablon a tří formátů, shodu náhledu a stažení, chybějící fotografii/logo/údaje, dlouhé české názvy a šířky 320/390/1440 px.
+- U 30 fotografických kombinací pixely uvnitř skutečného fotografického tvaru, aby přes snímek nebyl vykreslen text ani dekorace; výslovně také monochromatický výstup dokumentární varianty.
+- Skutečné dvouprsté dotykové události v mobilním Chromiu: zoom, posun, ukotvení, limit přiblížení, zrušení, reset, přesnou shodu staženého PNG, rolování mimo fotografii a neaktivní odříznuté rohy rámečků.
+
+Přehled lze znovu vytvořit: `npm run preview:share-gallery -- /cesta/k/ilustracni-fotografii.jpg /tmp/prehled.png`. Používá přímo produkční renderer; ilustrační fotografii je potřeba dodat lokálně. Licence přehledové fotografie: https://unsplash.com/license; zdroj: https://images.unsplash.com/photo-1518611012118-696072aa579a .

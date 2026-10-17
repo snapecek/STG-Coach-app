@@ -52,6 +52,16 @@ Trenér nebo správce zvolí **Zapsat úhradu**, vyplní skutečně přijatou č
 
 **Detail** obsahuje historii úhrad. Chybně zapsanou úhradu lze stornovat s povinným důvodem; původní záznam, datum a důvod zůstávají. Toto není vrácení peněz ani záznam refundace. Dluh se znovu otevře. Předpis lze stornovat pouze bez platných úhrad, s povinným důvodem. Předpisy s přijatými platbami se nestornují bez vyřešení jejich úhrad. Platné platby nestornujte jen kvůli změně ceny. Stornované předpisy jsou dostupné ve filtru **Stornováno** a nepočítají se do dluhu.
 
+## Upozornění člena na prodlení
+
+Ve zvonečku **Moje upozornění → Příspěvky po splatnosti** člen vidí své neuhrazené členské příspěvky i platby za tréninky. Každý předpis má vlastní upozornění s názvem, splatností a zbývající částkou. Do počtu u zvonečku se přidá počet takových předpisů. Den splatnosti ještě není prodlení; rozhoduje datum v Europe/Prague.
+
+Upozornění vzniká z aktuálního zůstatku, neukládá se jako samostatná zastaralá zpráva. Po celé úhradě automaticky zmizí i bez přečtení, u částečné platby zůstane se zbývající částkou. Stornované a smazané předpisy se nezobrazují. Při stornu chybné úhrady se upozornění může znovu objevit, jestliže opět vznikl nedoplatek.
+
+Změny se načítají po 10 sekundách, při návratu do viditelné aplikace a po obnovení připojení. Před zobrazením finančních upozornění při otevření zvonečku i před otevřením jejich předpisu proběhne nové ověření. Platba potvrzená mezitím trenérem se proto neukáže jako nevyřízený dluh ze staré cache. Otevřením upozornění se přejde přímo na jeho detail; upozornění trvá do vyřešení nedoplatku. Při nedostupném připojení se neověřené finanční upozornění skryje a zobrazí se možnost ověřit znovu, ostatní upozornění fungují dál.
+
+Člen nemůže přes upozornění potvrdit platbu ani číst jiné členy. Používá se dosavadní serverově omezený finanční přehled. Vypnutí příspěvků stáhne i jejich upozornění. Toto rozšíření nevyžaduje novou migraci nad stávající evidencí 041/042.
+
 ## Přístup a data
 
 - Hlavní správce zapíná/vypíná funkci pro klub.
@@ -71,3 +81,5 @@ Přehled se obnovuje po 10 sekundách a při návratu do viditelné karty. Běhe
 - Pro běžící Vite s fiktivní Supabase konfigurací: `STG_FEES_ONLY=1 npm run test:member-ui`. Fiktivní API projde zapnutí, měsíční i roční sazbu, předpisy, opakování bez duplicit, dílčí úhradu, odmítnutý přeplatek, trénink/hosta, storna, členský přehled, vypnutí/zapnutí bez ztráty dat, formulář po obnově i 320/390/1440 px ve světlém a tmavém vzhledu. Žádné skutečné platby, e-maily ani klubové údaje se nemění.
 
 Rozšířené ověření: `fee_deletion_recurring.sql` kontroluje měsíční generování, chybějící období, únor/duben, duplicity, role a soukromí, ochranu zaplacených předpisů, audit smazání, pauzu, deaktivaci evidence a archivaci/obnovu. `STG_FEE_RECURRING_ONLY=1 npm run test:member-ui` ověřuje potvrzování smazání, zachování úhrad, nastavení a vypnutí automatiky i mobil/desktop a oba vzhledy.
+
+Kontrola upozornění: `STG_FEE_ALERTS_ONLY=1 npm run test:member-ui` pokrývá platbu před otevřením zvonečku i před kliknutím na zprávu, částečné doplacení, zmizení otevřeného upozornění, storno úhrady, otevření konkrétního předpisu, vypnutí evidence, návrat po odpojení a oba vzhledy na 320/390/1440 px. Jednotkové testy `memberFeeAlerts.test.ts` kontrolují splatnost, zbývající částky a volání jen serverově omezeného přehledu.

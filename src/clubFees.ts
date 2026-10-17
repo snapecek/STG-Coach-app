@@ -2,7 +2,7 @@ import {useEffect,useState} from 'react';
 import type {SupabaseClient} from '@supabase/supabase-js';
 import {AUTO_REFRESH_MS,useAutoRefresh} from './useAutoRefresh';
 export type FeePlan={id:string;name:string;frequency:'monthly'|'yearly';amount_cents:number;archived_at:string|null;auto_monthly?:boolean;auto_next_month?:string|null;auto_due_day?:number;auto_member_ids?:string[]};
-export type FeeCharge={id:string;member_id:string|null;member_name:string;kind:'membership'|'training';title:string;amount_cents:number;due_date:string;plan_id:string|null;period_start:string|null;event_id:string|null;event_name:string|null;event_starts_at:string|null;created_at:string;cancelled_at:string|null;cancel_reason:string;is_automatic?:boolean};
+export type FeeCharge={id:string;member_id:string|null;member_name:string;kind:'membership'|'training';title:string;amount_cents:number;due_date:string;plan_id:string|null;period_start:string|null;event_id:string|null;event_name:string|null;event_starts_at:string|null;created_at:string;cancelled_at:string|null;cancel_reason:string;deleted_at?:string|null;is_automatic?:boolean};
 export type FeePayment={id:string;charge_id:string;amount_cents:number;paid_on:string;method:'cash'|'bank'|'other';note:string;created_at:string;voided_at:string|null;void_reason:string};
 export type FeeLedger={recurring_ready?:boolean|null;plans:FeePlan[];charges:FeeCharge[];payments:FeePayment[]};
 export const feeMethods={cash:'Hotově',bank:'Převodem',other:'Jinak'};

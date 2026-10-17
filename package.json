@@ -16,6 +16,7 @@
     "test:groups-ui": "node scripts/check-groups-ui.cjs",
     "test:race-teams-ui": "node scripts/check-race-teams-ui.cjs",
     "test:journal-share-ui": "node scripts/check-journal-share-dialog.cjs",
+    "test:share-editor": "node scripts/check-share-editor.cjs",
     "test:share-ui": "node scripts/check-share-ui.cjs",
     "test:share-touch-ui": "node scripts/check-share-touch-ui.cjs",
     "preview:share-gallery": "node scripts/render-share-gallery.cjs"

@@ -1,11 +1,13 @@
+import {drawShareStickers,type ShareSticker} from './shareStickers';
 import {photoPlacement} from './sharePhotoTransform';
 import {photoShareLayout,usesSharePhoto,sharePhotoPath,type GraphicBox} from './journalShareLayouts';
 export {usesSharePhoto} from './journalShareLayouts';
 export const shareFormats={'1:1':{width:1080,height:1080,label:'Příspěvek 1:1'},'4:5':{width:1080,height:1350,label:'Příspěvek 4:5'},'9:16':{width:1080,height:1920,label:'Story 9:16'}};
 export type ShareFormat=keyof typeof shareFormats;
-export type ShareTemplate='stats'|'photo'|'best'|'editorial'|'sport'|'frame'|'cinema'|'split'|'clean'|'neon'|'track'|'ticket';
+export type ShareTemplate='stats'|'photo'|'best'|'editorial'|'sport'|'frame'|'cinema'|'split'|'clean'|'neon'|'track'|'ticket'|'distance'|'column'|'headline';
 export const shareTemplates=[{id:'photo',name:'Fotografický plakát'},{id:'stats',name:'Přehled výkonu'},{id:'editorial',name:'Klubový deník'},{id:'sport',name:'Sportovní poster'},{id:'frame',name:'Galerijní rám'},{id:'cinema',name:'Filmový pás'},{id:'split',name:'Boční panel'},{id:'clean',name:'Černobílý dokument'},{id:'best',name:'Nejlepší výkony'},{id:'neon',name:'Noční trénink'},{id:'track',name:'Atletická dráha'},{id:'ticket',name:'Klubová vstupenka'}] as const;
-export type ShareGraphic={team:string;title:string;photo:string|null;photoFit?:'contain'|'cover';clubLogo?:string;date?:string;place?:string;crop?:{x:number;y:number;zoom:number};format:ShareFormat;template:ShareTemplate;metrics:{value:string;label:string}[];best:{name:string;value:string}[]};
+export const editorTemplates=[{id:'distance',name:'Kilometry'},{id:'column',name:'Sloupec dat'},{id:'headline',name:'Jen titulek'}] as const;
+export type ShareGraphic={accent?:string;stickers?:ShareSticker[];team:string;title:string;photo:string|null;photoFit?:'contain'|'cover';clubLogo?:string;date?:string;place?:string;crop?:{x:number;y:number;zoom:number};format:ShareFormat;template:ShareTemplate;metrics:{value:string;label:string}[];best:{name:string;value:string}[]};
 const orange='#FFB317',background='#101216',white='#F5F6F7',muted='#A9AFB8';
 let fonts:Promise<void>|undefined;
 function loadFonts(){return fonts??=Promise.all([
@@ -53,7 +55,8 @@ function polygon(ctx:CanvasRenderingContext2D,points:number[][],color:string){ct
 function line(ctx:CanvasRenderingContext2D,x:number,y:number,x2:number,y2:number,color:string,width=2){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x2,y2);ctx.stroke()}
 function photoGraphic(ctx:CanvasRenderingContext2D,input:ShareGraphic,brand:HTMLImageElement,photo:HTMLImageElement|null,clubLogo:HTMLImageElement|null){
  if(!usesSharePhoto(input.template))return;
- const l=photoShareLayout(input.template,input.format),height=shareFormats[input.format].height,p=l.photo,t=l.title,m=l.metrics,top=l.header.y;
+ const orange=input.accent||'#FFB317';
+ const l=photoShareLayout(input.template,input.format);if(l.background==='#FFB317')l.background=orange;const height=shareFormats[input.format].height,p=l.photo,t=l.title,m=l.metrics,top=l.header.y;
  ctx.fillStyle=l.background;ctx.fillRect(0,0,1080,height);
  // Artwork is drawn before the unfiltered photograph; ornaments never cover people.
  switch(input.template){
@@ -121,10 +124,32 @@ function photoGraphic(ctx:CanvasRenderingContext2D,input:ShareGraphic,brand:HTML
  }));
  clipped(ctx,l.footer,()=>{const w=160,h=w*420/1530;ctx.drawImage(brand,l.footer.x+l.footer.width-w,l.footer.y+(l.footer.height-h)/2,w,h);text(ctx,input.template==='editorial'?'SPOLU V POHYBU':'TRÉNINKOVÝ DENÍK',l.footer.x,l.footer.y+l.footer.height*.72,l.footer.width-w-28,16,l.light?'#65615C':l.muted)});
 }
+function editorPhotoGraphic(ctx:CanvasRenderingContext2D,input:ShareGraphic,brand:HTMLImageElement,photo:HTMLImageElement|null,clubLogo:HTMLImageElement|null){
+ const {height}=shareFormats[input.format],accent=input.accent||'#FFB317',story=input.format==='9:16',top=story?155:52,bottom=height-(story?175:56),left=56;
+ photoBox(ctx,photo,{x:0,y:0,width:1080,height},input);
+ const shade=ctx.createLinearGradient(0,0,0,height);shade.addColorStop(0,'#080B10A6');shade.addColorStop(.3,'#080B1008');shade.addColorStop(.55,'#080B1070');shade.addColorStop(1,'#080B10FA');ctx.fillStyle=shade;ctx.fillRect(0,0,1080,height);
+ text(ctx,input.date||'',left,top+28,420,26,white);text(ctx,input.team.toLocaleUpperCase('cs-CZ'),580,top+28,clubLogo?355:444,25,accent);
+ if(clubLogo){const scale=Math.min(54/clubLogo.naturalWidth,54/clubLogo.naturalHeight);ctx.drawImage(clubLogo,970,top-8,clubLogo.naturalWidth*scale,clubLogo.naturalHeight*scale)}
+ const metrics=input.metrics.filter(m=>m.value.trim()&&m.label.trim()),distance=metrics.find(m=>m.label==='vzdálenost'),other=metrics.filter(m=>m!==distance);
+ let titleY=bottom-240;
+ if(input.template==='distance'){
+  const main=distance;if(main){const km=/\s*km$/i.test(main.value);text(ctx,main.label.toLocaleUpperCase('cs-CZ'),left,bottom-580,968,28,accent);text(ctx,km?main.value.replace(/\s*km$/i,''):main.value,left,bottom-290,km?740:968,height===1080?260:350,accent,true);if(km)text(ctx,'KM',830,bottom-290,194,128,white,true)}
+ }else if(input.template==='column'){
+  const items=metrics.slice(0,3);ctx.fillStyle=accent;ctx.fillRect(left,top+90,9,items.length*152);items.forEach((m,i)=>{text(ctx,m.label.toLocaleUpperCase('cs-CZ'),left+30,top+124+i*152,600,22,muted);text(ctx,m.value,left+30,top+222+i*152,600,104,white,true)});
+  titleY=bottom-190;
+ }else titleY=bottom-270;
+ clipped(ctx,{x:left,y:titleY,width:968,height:150},()=>title(ctx,input.title,left,titleY+72,968,input.template==='headline'?120:88));
+ rule(ctx,left,bottom-76,968,accent);
+ if(input.template!=='column'){const items=(input.template==='distance'?other:metrics).slice(0,3),cw=720/Math.max(1,items.length);items.forEach((m,i)=>{text(ctx,m.value,left+i*cw,bottom-27,cw-18,49,white,true);text(ctx,m.label.toLocaleUpperCase('cs-CZ'),left+i*cw,bottom+1,cw-18,16,muted)})}
+ else text(ctx,input.place||'TRÉNINKOVÝ DENÍK',left,bottom-20,700,23,muted);
+ ctx.drawImage(brand,846,bottom-35,178,178*420/1530);
+}
 export async function renderShareGraphic(input:ShareGraphic){
  await loadFonts();const [{width,height},brand,photo,clubLogo]=await Promise.all([Promise.resolve(shareFormats[input.format]),image(usesSharePhoto(input.template)&&photoShareLayout(input.template,input.format).light?'/brand/trenomi-logo.svg':'/brand/trenomi-logo-dark.svg'),usesSharePhoto(input.template)&&input.photo?image(input.photo):null,input.clubLogo?image(input.clubLogo).catch(()=>null):null]);
  const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Grafiku nelze připravit.');ctx.fillStyle=background;ctx.fillRect(0,0,width,height);
- if(usesSharePhoto(input.template)){photoGraphic(ctx,input,brand,photo,clubLogo);return canvas}
+ const orange=input.accent||'#FFB317';
+ if(['distance','column','headline'].includes(input.template)){editorPhotoGraphic(ctx,input,brand,photo,clubLogo);drawShareStickers(ctx,input.stickers,width,height,orange);return canvas}
+ if(usesSharePhoto(input.template)){photoGraphic(ctx,input,brand,photo,clubLogo);drawShareStickers(ctx,input.stickers,width,height,orange);return canvas}
  const story=input.format==='9:16',top=story?160:64,bottom=height-(story?170:64),left=72,right=1008,contentWidth=936;
  // Club identity and application brand stay inside Story safe areas.
  const clubX=clubLogo?left+74:left;
@@ -139,7 +164,7 @@ export async function renderShareGraphic(input:ShareGraphic){
   const primary=metrics.find(m=>m.label==='délka')??metrics.find(m=>m.label==='vzdálenost')??metrics[0],mainY=Math.min(bottom-350,top+(story?800:height>1080?650:530));
   if(primary){text(ctx,primary.value,72,mainY,936,story?360:300,orange,true);text(ctx,primary.label.toLocaleUpperCase('cs-CZ'),76,mainY+52,900,26,muted)}
   const rest=metrics.filter(m=>m!==primary),cw=936/Math.max(1,rest.length),y=bottom-204;
-  rest.forEach((v,i)=>{rounded(ctx,{x:72+i*cw,y,width:cw-12,height:116},'#FFB317',0);text(ctx,v.value,90+i*cw,y+64,cw-46,76,background,true);text(ctx,v.label.toLocaleUpperCase('cs-CZ'),90+i*cw,y+99,cw-46,18,'#493A17')});
+  rest.forEach((v,i)=>{rounded(ctx,{x:72+i*cw,y,width:cw-12,height:116},orange,0);text(ctx,v.value,90+i*cw,y+64,cw-46,76,background,true);text(ctx,v.label.toLocaleUpperCase('cs-CZ'),90+i*cw,y+99,cw-46,18,'#493A17')});
   for(let i=0;i<8;i++)line(ctx,1030,top+350+i*26,1080,top+320+i*26,orange,8);
  }else{
   rounded(ctx,{x:0,y:top+128,width:1080,height:172},orange,0);
@@ -148,6 +173,6 @@ export async function renderShareGraphic(input:ShareGraphic){
   rows.forEach((row,i)=>{const y=start+i*rowH;rounded(ctx,{x:72,y,width:936,height:rowH-14},i===0?'#293022':'#1B2027',12);text(ctx,String(i+1).padStart(2,'0'),96,y+rowH*.73,152,rowH*.9,i===0?orange:'#87919F',true);text(ctx,row.name,274,y+rowH*.38,700,28);text(ctx,row.value,274,y+rowH*.73,700,46,i===0?orange:white,true)});
   if(!rows.length){text(ctx,'VÝKONY',72,top+540,936,180,orange,true);text(ctx,'Měřené výkony zatím nejsou zadané.',72,top+605,936,26,muted)}
  }
- footer();return canvas;
+ footer();drawShareStickers(ctx,input.stickers,width,height,orange);return canvas;
 }
 export function canvasPng(canvas:HTMLCanvasElement){return new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Grafiku nelze exportovat.')),'image/png'));}

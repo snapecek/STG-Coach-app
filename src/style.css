@@ -590,3 +590,110 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
  .header-view-mode .view-mode-switch{display:none}
  .header-view-mode .view-mode-select{display:block;width:106px;min-height:44px;margin:0;padding:6px;font-size:16px;border-color:var(--orange)}
 }
+
+/* Compact workspace controls and a viewport-bound navigation bar for mobile Safari. */
+.header-notifications{min-width:0;justify-self:end}
+.cloud-card:has(.header-notifications){grid-template-columns:auto minmax(0,1fr) auto auto;column-gap:16px}
+.cloud-card:has(.header-notifications)>.header-notifications{grid-column:4;grid-row:1}
+.cloud-card:has(.header-notifications)>.account-actions{grid-column:3;grid-row:1}
+.header-notifications .member-bell{width:44px;height:44px;min-height:44px}
+.attendance-kind-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;min-width:0}
+.attendance-kind-toolbar .attendance-kind-tabs{margin:0}
+.attendance-kind-toolbar>.primary{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.attendance-help{margin-bottom:10px;font-size:13px}
+.attendance-help summary{cursor:pointer;min-height:32px;align-content:center}
+.attendance-matrix{width:max-content;min-width:0;border-spacing:4px}
+.attendance-matrix th:first-child{width:180px;min-width:180px;max-width:180px;white-space:normal;overflow-wrap:anywhere}
+.attendance-matrix thead th:not(:first-child):not(:last-child){width:120px;min-width:120px;max-width:120px}
+.attendance-matrix thead th button{width:100%;min-width:0;overflow-wrap:anywhere}
+.attendance-matrix td:last-child,.attendance-matrix thead th:last-child{width:68px;min-width:68px}
+.attendance-matrix .attendance-section th{width:auto;min-width:0;max-width:none}
+.attendance-choice{border-radius:6px;position:relative;display:flex;align-items:center;justify-content:center;width:120px;min-height:44px;padding:6px;font-size:12px}
+.attendance-matrix .attendance-choice select{position:absolute;inset:0;width:100%;height:100%;min-width:0;margin:0;opacity:0;cursor:pointer}
+.attendance-choice:focus-within{outline:2px solid var(--orange);outline-offset:2px}
+.attendance-choice:has(select:disabled){opacity:.6}
+.attendance-short-state{display:none}
+.attendance-matrix .race-attendance-cell{width:120px;min-width:0}
+@media(max-width:1150px){
+ .cloud-card:has(.header-notifications){grid-template-columns:auto minmax(0,1fr) auto;gap:12px}
+ .cloud-card:has(.header-notifications)>.current-club-identity{grid-column:2/-1;grid-row:1}
+ .cloud-card:has(.header-notifications)>.account-actions{grid-column:1/3;grid-row:2}
+ .cloud-card:has(.header-notifications)>.header-notifications{grid-column:3;grid-row:2}
+}
+@media(max-width:900px){
+ .mobile-club-nav{display:grid;position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;max-width:100%;height:calc(64px + env(safe-area-inset-bottom,0px));grid-auto-flow:row;grid-auto-columns:auto;grid-template-rows:56px;gap:0;padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));box-sizing:border-box;overflow:hidden;z-index:20;background:var(--surface,#181e27);border-top:1px solid var(--border,#354151);backdrop-filter:none;-webkit-backdrop-filter:none}
+ .mobile-club-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:48px;gap:5px;padding:5px 1px;border-radius:12px;font-size:9px;white-space:nowrap;color:var(--muted,#96a4b7);background:transparent}
+ .mobile-club-nav button.active,.mobile-club-nav button[aria-current=page]{background:var(--orange);color:#101216;border-color:var(--orange);box-shadow:none}
+ .mobile-club-nav.member-mobile-nav button{font-size:11px}
+ .cloud-card:has(.cloud-dashboard){padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+}
+@media(max-width:760px){
+ .cloud-card:has(.header-notifications){row-gap:12px;column-gap:8px}
+ .cloud-dashboard>.club-content>.page-title{flex-wrap:nowrap;gap:10px;margin-bottom:14px;align-items:center}
+ .cloud-dashboard:not(.member-dashboard) .page-title>div:first-child{flex:1 1 0;min-width:0}
+ .cloud-dashboard .page-title h1{font-size:24px;line-height:1.15;margin:4px 0}
+ .cloud-dashboard .page-title .eyebrow{font-size:9px;margin-bottom:5px}
+ .cloud-dashboard .page-title>.primary{flex-shrink:0;min-height:44px;padding:10px 12px;font-size:12px;gap:5px}
+ .attendance-kind-toolbar{gap:8px;margin-bottom:8px}
+ .attendance-kind-toolbar .attendance-kind-tabs{gap:4px}
+ .attendance-kind-toolbar .attendance-kind-tabs button{min-height:44px;padding:8px 11px;font-size:12px}
+ .attendance-kind-toolbar>.primary{min-height:44px;padding:8px 10px;font-size:12px;gap:4px}
+ .attendance-toolbar{gap:0;margin-bottom:10px}
+ .attendance-toolbar>.muted{font-size:11px;line-height:1.5;margin:6px 0 10px}
+ .attendance-filters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-bottom:10px}
+ .attendance-filters .attendance-group-pills{grid-column:1/-1}
+ .attendance-filters input,.attendance-filters select{width:100%;min-width:0;min-height:44px;margin:0;padding:8px;font-size:16px}
+ .attendance-board .attendance-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:10px}
+ .attendance-stats article{min-width:0;padding:9px 7px;border-radius:12px}
+ .attendance-stats article small{font-size:9px;letter-spacing:.2px;line-height:1.3}
+ .attendance-stats article strong{font-size:20px;line-height:1.25;margin:5px 0 0;overflow-wrap:anywhere}
+ .attendance-stats article>span{display:none}
+ .attendance-insights{margin-bottom:10px;padding:10px;font-size:12px}
+ .attendance-panel{padding:8px}
+ .attendance-help{font-size:12px;margin:0}
+ .attendance-help .attendance-legend{margin:8px 0}
+ .attendance-help p{font-size:12px;line-height:1.5}
+ .attendance-scroll{margin:6px 0 10px}
+ .attendance-matrix{border-spacing:4px;font-size:12px}
+ .attendance-matrix th:first-child{width:96px;min-width:96px;max-width:96px;padding:6px}
+ .attendance-person-name>span{display:block;line-height:1.35}
+ .attendance-matrix thead th:not(:first-child):not(:last-child){width:68px;min-width:68px;max-width:68px}
+ .attendance-matrix thead th button{padding:6px 2px;font-size:10px;line-height:1.4;white-space:normal}
+ .attendance-matrix thead th small{display:block;max-width:64px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9px}
+ .attendance-matrix td:last-child,.attendance-matrix thead th:last-child{width:48px;min-width:48px}
+ .attendance-matrix .attendance-choice,.attendance-matrix .race-attendance-cell{width:68px;min-height:44px;padding:5px 2px;font-size:16px;box-sizing:border-box}
+ .attendance-long-state{display:none}
+ .attendance-short-state{display:inline;font-size:14px;font-weight:700}
+ .race-attendance-cell small{display:none}
+ .race-companion-note{font-size:10px}
+ .attendance-pagination{gap:6px;font-size:11px}
+ .attendance-pagination button{padding:8px 6px;min-height:44px;font-size:11px}
+ .journal-heading{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,150px);align-items:end;gap:10px;margin:0 0 12px}
+ .journal-heading>label{width:auto;min-width:0}
+ .journal-heading select{min-width:0;font-size:16px;padding:8px;min-height:44px;margin-top:4px}
+ .journal-heading p{font-size:11px;line-height:1.5}
+ .journal-controls{flex-direction:row;align-items:flex-end;gap:10px;margin-bottom:12px}
+ .journal-controls>label{width:110px;flex-shrink:0;min-width:0}
+ .journal-controls select{min-width:0;font-size:16px;padding:8px;min-height:44px}
+ .journal-type-pills{flex-wrap:wrap;gap:5px}
+ .journal-type-pills button{padding:8px 10px;min-height:44px;font-size:12px}
+ .journal-records{padding:12px}
+ .journal-records .journal-filters{gap:8px}
+ .club-content input[type=date],.club-content input[type=time]{min-inline-size:0;max-inline-size:100%;box-sizing:border-box}
+}
+@media(max-width:360px){
+ .cloud-card:has(.header-notifications)>.current-club-identity{grid-column:2;grid-row:1}
+ .cloud-card:has(.header-notifications)>.header-notifications{grid-column:3;grid-row:1}
+ .cloud-card:has(.header-notifications)>.account-actions{grid-column:1/-1;grid-row:2}
+ .cloud-dashboard .page-title h1{font-size:22px}
+ .attendance-kind-toolbar .attendance-kind-tabs button{padding:8px}
+ .attendance-kind-toolbar>.primary{padding:8px;font-size:11px}
+}
+
+@media(max-width:760px){.attendance-matrix tfoot td{max-width:68px;overflow-wrap:anywhere;font-size:10px;line-height:1.4}.journal-records .journal-filters{grid-template-columns:minmax(0,1fr) 110px}.journal-records .journal-filters input,.journal-records .journal-filters select{min-width:0;padding:8px;font-size:16px;min-height:44px}.journal-records .panel-title{gap:8px;align-items:center;margin-bottom:10px}.journal-records .panel-title h2{font-size:16px}.journal-records .journal-filters label{margin:6px 0}.journal-controls .journal-type-pills{flex:1;min-width:0}}
+@media(max-width:760px){
+ .work-queue-row{flex-direction:row;align-items:center;gap:10px;padding:12px 0}
+ .work-queue-row>div:first-child{flex:1}
+ .work-queue-row .work-queue-actions{width:auto;max-width:42%;flex-direction:column;gap:4px}
+ .work-queue-actions button{min-height:44px;padding:8px 10px;font-size:11px;flex:none}
+}

@@ -20,6 +20,7 @@ async function run(args,extra={}){
   if(!ready)throw new Error('Vite did not start');
   for(const flag of flags)await run(['scripts/check-member-ui.cjs'],{flag});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_ANALYSIS_LAYOUT_ONLY',engine:'webkit'});
+  await run(['scripts/check-member-ui.cjs'],{flag:'STG_COMPACT_MOBILE_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_EXPERIENCE_ONLY',engine:'webkit'});
   for(const file of ['check-auth-persistence.cjs','check-share-editor.cjs','check-share-touch-ui.cjs','check-journal-share-dialog.cjs','check-release-runtime.cjs'])await run(['scripts/'+file]);
   console.log('Browser logs: '+logDir);if(failed)process.exitCode=1;

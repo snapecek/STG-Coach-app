@@ -159,6 +159,43 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
  async function openMemberEvent(p,event,tab='Účast'){const close=p.getByRole('button',{name:'Zavřít',exact:true});if(await close.count())await close.click();await p.getByRole('navigation').getByRole('button',{name:'Kalendář',exact:true}).filter({visible:true}).first().click();await p.locator('.calendar-event').filter({hasText:event.name}).first().click();await p.getByRole('dialog',{name:event.name,exact:true}).waitFor();await p.getByRole('tab',{name:tab,exact:true}).click();}
  async function themeFromMenu(p,role,label){if(role==='coach'||role==='member'){await p.getByRole('button',{name:'Nastavení',exact:true}).click();await p.getByRole('heading',{name:'Nastavení',exact:true}).waitFor();await p.getByRole('button',{name:label,exact:true}).click();await p.getByRole('navigation').getByRole('button',{name:'Přehled',exact:true}).filter({visible:true}).first().click();await p.getByLabel('Uživatelské menu',{exact:true}).click();}else await p.getByRole('button',{name:label,exact:true}).click();}
  try{
+  if(process.env.STG_COMPACT_MOBILE_ONLY==='1'){
+   fees.enabled=true;
+   const v=await context('coach',false,false,true,true),p=v.page,s=v.state();
+   s.events[0].starts_at=new Date(Date.now()-86400000).toISOString();
+   for(let i=0;i<18;i++)s.people.push({id:'compact-'+i,club_id:club,name:'Jméno Příjmení'+i,kind:i<12?'member':'guest',removed_at:null});
+   for(const m of s.people)if(m.id!==member)s.participation.push({club_id:club,event_id:events[0].id,member_id:m.id,response:'yes',attended:null});
+   await login(p);await p.locator('.cloud-dashboard').waitFor();
+   const nav=p.getByRole('navigation',{name:'Mobilní navigace',exact:true});
+   const navigate=async name=>{await p.getByRole('navigation').getByRole('button',{name,exact:true}).filter({visible:true}).first().click()};
+   for(const width of [320,390,760,1024,1440]){
+    await p.setViewportSize({width,height:844});await navigate('Docházka');await p.locator('.attendance-matrix').waitFor();
+    assert(await p.evaluate(w=>document.documentElement.scrollWidth<=w,width),'Workspace overflow '+width);
+    const tabs=await p.locator('.attendance-kind-tabs').boundingBox(),action=await p.getByRole('button',{name:'Nová událost',exact:true}).boundingBox();assert(Math.abs((tabs.y+tabs.height/2)-(action.y+action.height/2))<3,'Attendance action belongs beside tabs');
+    const cell=p.locator('.attendance-choice').first();assert((await cell.boundingBox()).width<=(width<=760?70:122),'Compact attendance cells');
+    if(width<=760){
+     const stats=await p.locator('.attendance-stats article').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().y));assert(Math.max(...stats)-Math.min(...stats)<2,'Stats stay in one row');
+     const name=p.locator('.attendance-person-name').first();const parts=await name.locator('span').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().y));assert(parts[1]>parts[0],'Names stack');
+     const scroll=p.locator('.attendance-scroll'),sb=await scroll.boundingBox(),cb=await cell.boundingBox();assert(cb.x+cb.width+68<=sb.x+sb.width,'At least two event columns fit');
+     assert.equal(await p.locator('.attendance-help').getAttribute('open'),null);assert(await p.locator('tbody[aria-label="Hosté"]').count());
+    }
+    if(width<900){
+     for(const theme of ['light','dark']){await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);assert(await p.evaluate(w=>document.documentElement.scrollWidth<=w,width));const active=nav.getByRole('button',{name:'Docházka',exact:true});await expectBackground(active,'rgb(255, 179, 23)')}
+     const bell=p.getByRole('button',{name:'Moje upozornění',exact:true});await bell.click();const notice=await p.getByRole('region',{name:'Moje upozornění',exact:true}).boundingBox();assert(notice.x>=0&&notice.x+notice.width<=width,'Notifications stay on screen');await bell.click();
+     assert.equal(await nav.evaluate(e=>e.parentElement===document.body),true);
+     // A transformed workspace must not become the fixed bar's containing block.
+     await p.locator('.cloud-card').evaluate(e=>e.style.transform='translateZ(0)');
+     for(const height of [844,650,930]){await p.setViewportSize({width,height});for(const where of [0,500,100000]){await p.evaluate(y=>window.scrollTo(0,y),where);await p.waitForTimeout(60);const r=await nav.boundingBox();assert(Math.abs(r.y+r.height-height)<2,'Navigation anchored to viewport');assert(r.height<=100&&r.height>=60,'Bounded navigation height');}}
+     await p.locator('.cloud-card').evaluate(e=>e.style.transform='');await p.setViewportSize({width,height:844});
+    }else assert(!(await nav.isVisible()));
+    await p.evaluate(()=>window.scrollTo(0,0));await p.screenshot({path:'/tmp/trenomi-compact-attendance-'+engine+'-'+width+'.png'});
+    if(width===390){const select=cell.locator('select');await select.selectOption('absent');await p.waitForFunction(()=>document.querySelector('.attendance-choice select')?.value==='absent');assert(s.participation.some(r=>r.event_id===events[0].id&&r.attended===false));await select.selectOption('present');}
+    await p.getByRole('tab',{name:'Závody',exact:true}).click();await p.locator('.race-attendance-board').waitFor();assert(await p.evaluate(w=>document.documentElement.scrollWidth<=w,width));
+    await navigate('Deník');await p.locator('.journal-heading').waitFor();const title=await p.locator('.page-title h1').boundingBox(),add=await p.getByRole('button',{name:'Nový záznam',exact:true}).boundingBox();assert(Math.abs((title.y+title.height/2)-(add.y+add.height/2))<20,'Journal title and action share row');assert(await p.evaluate(w=>document.documentElement.scrollWidth<=w,width));await p.screenshot({path:'/tmp/trenomi-compact-journal-'+engine+'-'+width+'.png'});
+   }
+   await p.waitForLoadState('networkidle');await v.c.close();
+   console.log('PASS compact workspace: aligned actions, stacked names, small editable cells, guests, compact stats, stable fixed navigation through scrolling/resizing, mobile/tablet/desktop');return;
+  }
   if(process.env.STG_EXPERIENCE_ONLY==='1'){
    fees.enabled=true;
    for(const width of [320,390,1440]){

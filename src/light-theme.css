@@ -294,3 +294,6 @@ html[data-theme="light"] .fees-dialog :is(input,select){color-scheme:light}
  :root[data-theme="light"] .mobile-club-nav button.active,:root[data-theme="light"] .mobile-club-nav button[aria-current="page"]{background:var(--orange);color:#101216;border-color:var(--orange)}
 }
 html[data-theme="light"] .mobile-club-nav{background:#eff2f5}
+
+html[data-theme="light"]{--workspace-edge-bg:#f0f2f4}
+@media(max-width:900px){html[data-theme="light"] .mobile-club-nav{background:var(--workspace-edge-bg);border-top:0}}

@@ -493,19 +493,9 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .journal-cover-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}.journal-cover-actions button{min-height:44px}.journal-cover-actions small{color:var(--muted)}
 .share-photo-picker{min-width:0;margin:0 0 12px;padding:8px;border:1px solid var(--border,#293340);border-radius:10px}.share-photo-picker>div{display:flex;gap:8px;overflow-x:auto;padding:4px}.share-photo-picker button{flex:0 0 66px;padding:0;border:2px solid transparent;border-radius:6px;overflow:hidden;background:transparent}.share-photo-picker button[aria-pressed=true]{border-color:var(--orange,#ffb317)}.share-photo-picker img{width:62px;height:48px;object-fit:cover;display:block}.share-photo-picker small{display:block;color:var(--muted);font-size:11px;margin-top:6px}.share-edit-photo{min-height:44px;margin-top:8px}.share-photo-rotate{display:flex;gap:8px;margin:8px 0}.share-photo-rotate button{min-height:44px}.member-training-photos{margin:16px 0}.member-training-photos .journal-gallery{display:block}.member-training-photos .journal-photo-hero>img{height:auto;max-height:400px;object-fit:contain}
 
-/* Keep all header elements in one shared row instead of independent offsets. */
-.cloud-card:has(.account-actions){display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:32px;row-gap:24px;align-content:start;align-items:center}
-.cloud-card:has(.account-actions)>*{grid-column:1/-1;min-width:0}
-.cloud-card:has(.account-actions)>.brand{grid-column:1;grid-row:1;margin:0}
-.cloud-card:has(.account-actions)>.current-club-identity{position:static;grid-column:2;grid-row:1;margin:0}
-.cloud-card:has(.account-actions)>.account-actions{position:relative;inset:auto;grid-column:3;grid-row:1;justify-self:end}
 .account-actions .header-chat,.account-actions .user-menu>summary{min-height:44px;display:flex;align-items:center;justify-content:center}
 .account-actions .header-chat>svg,.account-actions .user-menu>summary>svg{display:block;flex-shrink:0;width:20px;height:20px}
-@media(max-width:760px){
- .cloud-card:has(.account-actions){grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:18px}
- .cloud-card:has(.account-actions)>.account-actions{grid-column:2}
- .cloud-card:has(.account-actions)>.current-club-identity{grid-column:1/-1;grid-row:2}
-}
+
 
 .auth-card .remember-login{display:flex;align-items:center;gap:10px;min-height:44px;margin:10px 0 0;cursor:pointer}.auth-card .remember-login input{flex-shrink:0;width:18px;height:18px;margin:0;padding:0;accent-color:var(--orange)}.auth-card .remember-login-hint{margin:0 0 16px;font-size:11px}
 
@@ -575,9 +565,6 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 
 /* Compact workspace controls and a viewport-bound navigation bar for mobile Safari. */
 .header-notifications{min-width:0;justify-self:end}
-.cloud-card:has(.header-notifications){grid-template-columns:auto minmax(0,1fr) auto auto;column-gap:16px}
-.cloud-card:has(.header-notifications)>.header-notifications{grid-column:4;grid-row:1}
-.cloud-card:has(.header-notifications)>.account-actions{grid-column:3;grid-row:1}
 .header-notifications .member-bell{width:44px;height:44px;min-height:44px}
 .attendance-kind-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;min-width:0}
 .attendance-kind-toolbar .attendance-kind-tabs{margin:0}
@@ -596,12 +583,7 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .attendance-choice:has(select:disabled){opacity:.6}
 .attendance-short-state{display:none}
 .attendance-matrix .race-attendance-cell{width:120px;min-width:0}
-@media(max-width:1150px){
- .cloud-card:has(.header-notifications){grid-template-columns:auto minmax(0,1fr) auto;gap:12px}
- .cloud-card:has(.header-notifications)>.current-club-identity{grid-column:2/-1;grid-row:1}
- .cloud-card:has(.header-notifications)>.account-actions{grid-column:1/3;grid-row:2}
- .cloud-card:has(.header-notifications)>.header-notifications{grid-column:3;grid-row:2}
-}
+
 @media(max-width:900px){
  .mobile-club-nav{display:grid;position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;max-width:100%;height:calc(64px + env(safe-area-inset-bottom,0px));grid-auto-flow:row;grid-auto-columns:auto;grid-template-rows:56px;gap:0;padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));box-sizing:border-box;overflow:hidden;z-index:20;background:var(--surface,#181e27);border-top:1px solid var(--border,#354151);backdrop-filter:none;-webkit-backdrop-filter:none}
  .mobile-club-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:48px;gap:5px;padding:5px 1px;border-radius:12px;font-size:9px;white-space:nowrap;color:var(--muted,#96a4b7);background:transparent}
@@ -610,7 +592,6 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
  .cloud-card:has(.cloud-dashboard){padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))}
 }
 @media(max-width:760px){
- .cloud-card:has(.header-notifications){row-gap:12px;column-gap:8px}
  .cloud-dashboard>.club-content>.page-title{flex-wrap:nowrap;gap:10px;margin-bottom:14px;align-items:center}
  .cloud-dashboard:not(.member-dashboard) .page-title>div:first-child{flex:1 1 0;min-width:0}
  .cloud-dashboard .page-title h1{font-size:24px;line-height:1.15;margin:4px 0}
@@ -664,9 +645,6 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
  .club-content input[type=date],.club-content input[type=time]{min-inline-size:0;max-inline-size:100%;box-sizing:border-box}
 }
 @media(max-width:360px){
- .cloud-card:has(.header-notifications)>.current-club-identity{grid-column:2;grid-row:1}
- .cloud-card:has(.header-notifications)>.header-notifications{grid-column:3;grid-row:1}
- .cloud-card:has(.header-notifications)>.account-actions{grid-column:1/-1;grid-row:2}
  .cloud-dashboard .page-title h1{font-size:22px}
  .attendance-kind-toolbar .attendance-kind-tabs button{padding:8px}
  .attendance-kind-toolbar>.primary{padding:8px;font-size:11px}
@@ -686,13 +664,46 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .settings-view-mode .view-mode-toolbar{justify-content:flex-start;margin:0}
 .settings-view-mode .view-mode-switch button{min-height:44px}
 .settings-view-mode p{font-size:11px;line-height:1.5;margin:7px 0 0}
-@media(max-width:1150px){.cloud-card:has(.header-notifications)>.account-actions{justify-self:stretch}.cloud-card:has(.header-notifications)>.account-actions .club-switcher-panel{left:0;right:auto}}
+
 @media(max-width:760px){
- .cloud-card:has(.header-notifications)>.account-actions{justify-content:flex-start;gap:4px}
- .cloud-card:has(.header-notifications)>.account-actions .header-chat,.cloud-card:has(.header-notifications)>.account-actions .user-menu>summary{width:40px;min-height:44px;padding:8px}
  .club-analysis .analysis-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
  .analysis-stats .stat{min-width:0;padding:10px 12px;border-radius:12px}
  .analysis-stats .stat-title{font-size:11px;line-height:1.35}
  .analysis-stats .stat strong{font-size:24px;line-height:1.2;margin:6px 0;letter-spacing:-.4px;overflow-wrap:anywhere}
  .analysis-stats .stat small{display:block;font-size:10px;line-height:1.4;overflow-wrap:anywhere}
+}
+
+/* One sticky containing block keeps every account menu below the icon row. */
+:root{--workspace-edge-bg:#101216}
+html:has(.workspace-header){scroll-padding-top:calc(var(--workspace-header-height,140px) + 16px);scroll-padding-bottom:100px}
+.cloud-card:has(.workspace-header){display:block;padding-top:0}
+.workspace-header{position:sticky;top:0;z-index:25;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;grid-template-areas:"brand identity bell actions";align-items:center;gap:12px 20px;padding:20px 0 12px;margin:0 0 24px;background:var(--workspace-edge-bg);isolation:isolate}
+.workspace-header::after{content:"";position:absolute;top:100%;left:0;right:0;height:24px;background:linear-gradient(to bottom,var(--workspace-edge-bg),transparent);pointer-events:none;z-index:-1}
+.workspace-brand{grid-area:brand;min-width:0}
+.workspace-brand .brand{margin:0;display:flex}
+.workspace-header .current-club-identity{grid-area:identity;position:static;inset:auto;margin:0;min-width:0;max-width:100%}
+.workspace-header .account-actions{grid-area:actions;position:static;inset:auto;justify-self:end;justify-content:flex-end;gap:8px;z-index:auto;min-width:0}
+.workspace-header .header-notifications{grid-area:bell;justify-self:start;min-width:44px}
+.workspace-header .club-switcher,.workspace-header .user-menu,.workspace-header .notification-bell{position:static;inset:auto;z-index:auto}
+.workspace-header :is(.club-switcher-panel,.user-menu-panel,.notification-panel){position:absolute;top:calc(100% + 8px);bottom:auto;left:auto;right:0;z-index:2;max-width:100%;max-height:calc(100dvh - var(--workspace-header-height,140px) - 104px);overflow:auto;overscroll-behavior:contain;margin:0;box-sizing:border-box}
+.workspace-header .notification-panel{left:0;right:auto}
+.workspace-header .user-menu-panel{width:280px}
+.workspace-header .club-switcher-panel{width:320px}
+.workspace-header .notification-bell .member-bell{width:44px;height:44px;min-height:44px}
+@media(max-width:900px){
+ .workspace-header{grid-template-areas:"brand identity" "bell actions";grid-template-columns:auto minmax(0,1fr);gap:10px 12px;margin:0 -17px 16px;padding:max(10px,env(safe-area-inset-top,0px)) 17px 8px}
+ .workspace-header .workspace-brand .brand-wordmark{display:none}
+ .workspace-header .workspace-brand .brand-symbol{display:block;width:44px;height:42px}
+ .workspace-header .account-actions{gap:5px}
+ .workspace-header .account-actions .header-chat,.workspace-header .account-actions .user-menu>summary{width:40px;height:44px;min-height:44px;padding:8px}
+ .workspace-header .header-chat>span,.workspace-header .user-menu>summary>span{display:none}
+ .workspace-header .current-club-identity{font-size:16px}
+ .workspace-header :is(.club-switcher-panel,.user-menu-panel,.notification-panel){max-width:calc(100% - 34px);right:17px}
+ .workspace-header .notification-panel{left:17px;right:auto}
+ .mobile-club-nav{overflow:visible;background:var(--workspace-edge-bg);border-top:0}
+ .mobile-club-nav::before{content:"";position:absolute;bottom:100%;left:0;right:0;height:24px;background:linear-gradient(to top,var(--workspace-edge-bg),transparent);pointer-events:none}
+}
+@media(min-width:761px) and (max-width:900px){.workspace-header{margin-left:-25px;margin-right:-25px;padding-left:25px;padding-right:25px}}
+@media(min-width:901px){
+ .cloud-card:has(.workspace-header) .calendar-editor{top:calc(var(--workspace-header-height,82px) + 20px);max-height:calc(100dvh - var(--workspace-header-height,82px) - 40px)}
 }

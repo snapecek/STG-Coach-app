@@ -1,4 +1,4 @@
-import {useEffect,useState} from 'react';
+import {useCallback,useEffect,useRef,useState} from 'react';
 import type {SupabaseClient} from '@supabase/supabase-js';
 import {AUTO_REFRESH_MS,useAutoRefresh} from './useAutoRefresh';
 export type FeePlan={id:string;name:string;frequency:'monthly'|'yearly';amount_cents:number;archived_at:string|null;auto_monthly?:boolean;auto_next_month?:string|null;auto_due_day?:number;auto_member_ids?:string[]};
@@ -32,8 +32,16 @@ export function useFeesEnabled(client:SupabaseClient,clubId:string){
  return state.clubId===clubId?state:{clubId,enabled:false,error:'',loading:!!clubId};
 }
 export function useFeeLedger(client:SupabaseClient,clubId:string,busy:boolean){
- const [data,setData]=useState<FeeLedger>(emptyFeeLedger),[error,setError]=useState(''),[loading,setLoading]=useState(true),[version,setVersion]=useState(0);
- useEffect(()=>{let active=true;setLoading(true);feeRpc<FeeLedger>(client,'club_fee_ledger',{target_club:clubId}).then(value=>{if(active){setData(value);setError('')}}).catch(e=>{if(active)setError(e.message)}).finally(()=>{if(active)setLoading(false)});return()=>{active=false}},[client,clubId,version]);
- useAutoRefresh(client,clubId,{canRefresh:()=>!busy&&!loading,revision:()=>version,load:()=>feeRpc<FeeLedger>(client,'club_fee_ledger',{target_club:clubId}),apply:value=>{setData(value);setError('')},onError:e=>setError((e as Error).message)});
- return {data,error,loading,reload:()=>setVersion(v=>v+1)};
+ const [data,setData]=useState<FeeLedger>(emptyFeeLedger),[error,setError]=useState(''),[loading,setLoading]=useState(true);
+ const generation=useRef(0),alive=useRef(false);
+ const refresh=useCallback(async()=>{
+  const revision=++generation.current;setLoading(true);
+  try{const value=await feeRpc<FeeLedger>(client,'club_fee_ledger',{target_club:clubId});if(alive.current&&generation.current===revision){setData(value);setError('')}return value}
+  catch(e){if(alive.current&&generation.current===revision)setError((e as Error).message);throw e}
+  finally{if(alive.current&&generation.current===revision)setLoading(false)}
+ },[client,clubId]);
+ const reload=useCallback(()=>{void refresh().catch(()=>{})},[refresh]);
+ useEffect(()=>{alive.current=true;setData(emptyFeeLedger);reload();return()=>{alive.current=false;generation.current++}},[reload]);
+ useAutoRefresh(client,clubId,{canRefresh:()=>!busy&&!loading,revision:()=>generation.current,load:()=>feeRpc<FeeLedger>(client,'club_fee_ledger',{target_club:clubId}),apply:value=>{setData(value);setError('')},onError:e=>setError((e as Error).message)});
+ return {data,error,loading,reload,refresh};
 }

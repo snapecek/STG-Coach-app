@@ -1,3 +1,6 @@
+import {ReleaseNotice} from './ReleaseNotice';
+import {DialogAccessibility} from './DialogAccessibility';
+import {UnsavedChangesPrompt} from './UnsavedChanges';
 import React from 'react';
 import {RenderBoundary} from './LoadBoundary';
 import {createRoot} from 'react-dom/client';
@@ -11,5 +14,5 @@ if(url.searchParams.get('workspace')==='demo'){
  url.searchParams.delete('workspace');
  window.history.replaceState(null,'',url.pathname+url.search+url.hash);
 }
-createRoot(document.getElementById('root')!).render(<React.StrictMode><RenderBoundary root><CloudWorkspace/></RenderBoundary></React.StrictMode>);
+createRoot(document.getElementById('root')!).render(<React.StrictMode><RenderBoundary root><DialogAccessibility/><UnsavedChangesPrompt/><ReleaseNotice/><CloudWorkspace/></RenderBoundary></React.StrictMode>);
 if(import.meta.env.PROD&&'serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js');

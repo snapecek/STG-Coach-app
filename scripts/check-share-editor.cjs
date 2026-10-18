@@ -1,6 +1,6 @@
 // Local fictional workout only, no Auth, Storage, message or database writes.
 const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs');
-(async()=>{const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium'});try{
+(async()=>{const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||undefined});try{
  const page=await browser.newPage({viewport:{width:1440,height:1000},acceptDownloads:true});
  await page.route('**/editor-test.html',r=>r.fulfill({contentType:'text/html',body:'<meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/src/style.css"><div id="test"></div>'}));
  await page.goto('http://127.0.0.1:5173/editor-test.html');await page.evaluate(async()=>{const {default:r}=await import('/@react-refresh');r.injectIntoGlobalHook(window);window.$RefreshReg$=()=>{};window.$RefreshSig$=()=>t=>t;window.__vite_plugin_react_preamble_installed__=true;

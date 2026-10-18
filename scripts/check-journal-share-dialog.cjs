@@ -1,7 +1,7 @@
 // Fictional local fixtures only; no backend or storage writes.
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
-(async()=>{const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium'});try{
+(async()=>{const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||undefined});try{
  const page=await browser.newPage({hasTouch:true,isMobile:true,viewport:{width:390,height:900}});
  await page.route('**/journal-dialog-test.html',r=>r.fulfill({contentType:'text/html',body:'<meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/src/style.css"><div id="test"></div>'}));
  await page.goto('http://127.0.0.1:5173/journal-dialog-test.html');

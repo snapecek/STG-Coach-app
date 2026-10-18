@@ -26,4 +26,4 @@ export async function disableCoachPush(client?:SupabaseClient){
 }
 export async function reconcilePushIdentity(userId:string|null){if(!pushSupported())return;const owner=localStorage.getItem(pushOwnerKey);if(owner&&owner!==userId)await disableCoachPush()}
 export type PushTarget={clubId:string;eventId:string};
-export function readPushTarget(url:string):PushTarget|null{const u=new URL(url),clubId=u.searchParams.get('push-club')||'',eventId=u.searchParams.get('push-event')||'',uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;return uuid.test(clubId)&&uuid.test(eventId)?{clubId,eventId}:null}
+export function readPushTarget(url:string):PushTarget|null{const u=new URL(url),prefix=u.searchParams.has('rsvp-club')?'rsvp':'push',clubId=u.searchParams.get(prefix+'-club')||'',eventId=u.searchParams.get(prefix+'-event')||'',uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;return uuid.test(clubId)&&uuid.test(eventId)?{clubId,eventId}:null}

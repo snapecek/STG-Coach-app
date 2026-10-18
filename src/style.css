@@ -573,24 +573,6 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 .notification-state dt,.notification-state dd{margin:0;overflow-wrap:anywhere}.notification-state dd{text-align:right}
 @media(max-width:600px){.view-mode-toolbar{justify-content:flex-start}.view-mode-switch button{min-height:38px}.first-steps ol{grid-template-columns:1fr;gap:6px}}
 
-/* Workspace mode belongs to the club controls, without a separate content row. */
-.header-view-mode{flex-shrink:0;min-width:0}
-.header-view-mode .view-mode-toolbar{margin:0}
-.header-view-mode .view-mode-switch button{min-height:36px}
-.view-mode-select{display:none}
-@media(max-width:1150px){
- .cloud-card:has(.header-view-mode){grid-template-columns:auto minmax(0,1fr)}
- .cloud-card:has(.header-view-mode)>.current-club-identity{grid-column:2;grid-row:1;justify-self:start;max-width:100%}
- .cloud-card:has(.header-view-mode)>.account-actions{grid-column:1/-1;grid-row:2;justify-self:stretch}
- .account-actions:has(.header-view-mode) .club-switcher-panel{left:0;right:auto}
-}
-@media(max-width:760px){
- .cloud-card:has(.header-view-mode)>.account-actions{justify-content:flex-start;gap:4px}
- .account-actions:has(.header-view-mode) .header-chat,.account-actions:has(.header-view-mode) .user-menu>summary{width:40px;min-height:44px;padding:8px}
- .header-view-mode .view-mode-switch{display:none}
- .header-view-mode .view-mode-select{display:block;width:106px;min-height:44px;margin:0;padding:6px;font-size:16px;border-color:var(--orange)}
-}
-
 /* Compact workspace controls and a viewport-bound navigation bar for mobile Safari. */
 .header-notifications{min-width:0;justify-self:end}
 .cloud-card:has(.header-notifications){grid-template-columns:auto minmax(0,1fr) auto auto;column-gap:16px}
@@ -696,4 +678,21 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
  .work-queue-row>div:first-child{flex:1}
  .work-queue-row .work-queue-actions{width:auto;max-width:42%;flex-direction:column;gap:4px}
  .work-queue-actions button{min-height:44px;padding:8px 10px;font-size:11px;flex:none}
+}
+
+/* Reuse the compact attendance rhythm for analysis summaries. */
+.settings-view-mode{margin:12px 0 16px}
+.settings-view-mode h3{font-size:13px;margin:0 0 8px}
+.settings-view-mode .view-mode-toolbar{justify-content:flex-start;margin:0}
+.settings-view-mode .view-mode-switch button{min-height:44px}
+.settings-view-mode p{font-size:11px;line-height:1.5;margin:7px 0 0}
+@media(max-width:1150px){.cloud-card:has(.header-notifications)>.account-actions{justify-self:stretch}.cloud-card:has(.header-notifications)>.account-actions .club-switcher-panel{left:0;right:auto}}
+@media(max-width:760px){
+ .cloud-card:has(.header-notifications)>.account-actions{justify-content:flex-start;gap:4px}
+ .cloud-card:has(.header-notifications)>.account-actions .header-chat,.cloud-card:has(.header-notifications)>.account-actions .user-menu>summary{width:40px;min-height:44px;padding:8px}
+ .club-analysis .analysis-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+ .analysis-stats .stat{min-width:0;padding:10px 12px;border-radius:12px}
+ .analysis-stats .stat-title{font-size:11px;line-height:1.35}
+ .analysis-stats .stat strong{font-size:24px;line-height:1.2;margin:6px 0;letter-spacing:-.4px;overflow-wrap:anywhere}
+ .analysis-stats .stat small{display:block;font-size:10px;line-height:1.4;overflow-wrap:anywhere}
 }

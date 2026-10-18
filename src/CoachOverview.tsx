@@ -9,7 +9,7 @@ import type {EventTask} from './eventTasks';
 import {eventEnd,participationSummary,pragueDate,pragueTime} from './management';
 import {overviewStats,coachWorkQueue} from './overview';
 const dateLabel=(value:string)=>new Date(value).toLocaleDateString('cs-CZ',{timeZone:'Europe/Prague',weekday:'short',day:'numeric',month:'long'});
-export function CoachOverview({client,club,data,tasks,taskError,now,onOpen,onCalendar,onAnalysis,onCreate,createDisabled}:{onCreate:()=>void;createDisabled:boolean;client:SupabaseClient;club:ClubAccess;data:ClubData;tasks:EventTask[];taskError:string;now:number;onOpen:(id:string,tab?:string)=>void;onCalendar:(date?:string)=>void;onAnalysis:()=>void}){
+export function CoachOverview({client,club,data,tasks,taskError,now,onOpen,onCalendar,onAnalysis,onCreate,createDisabled}:{onCreate:()=>void;createDisabled:boolean;client:SupabaseClient;club:ClubAccess;data:ClubData;tasks:EventTask[];taskError:string;now:number;onOpen:(id:string,tab?:string)=>void;onCalendar:(date?:string)=>void;onAnalysis?:()=>void}){
  const [allWork,setAllWork]=useState(false);
  const stats=overviewStats(data,now),today=pragueDate(new Date(now).toISOString()),upcoming=data.events.filter(e=>e.status==='scheduled'&&eventEnd(e)>=now).sort((a,b)=>a.starts_at.localeCompare(b.starts_at)),first=upcoming[0];
  const work=coachWorkQueue(data,tasks,now),summary=first?participationSummary(data,first):null,companions=first?data.participation.filter(p=>p.event_id===first.id&&p.response==='companion').length:0;

@@ -8,7 +8,7 @@ export type MemberRow={id:string;club_id:string;name:string;kind:'member'|'guest
 export type TemplateRow={event_location?:EventLocation|null;id:string;club_id:string;name:string;type:string;place:string;minutes:number;plan:string};
 export type EventRow={event_location?:EventLocation|null;id:string;club_id:string;template_id:string|null;name:string;starts_at:string;place:string;type:string;plan:string;duration_minutes:number;event_kind:'training'|'race';status:'scheduled'|'cancelled';actual_notes:string;completed_at:string|null;completed_by:string|null;actual_duration_minutes:number|null;perceived_effort:number|null;equipment:string[];race_distance_km?:number|null;race_registration_url?:string;capacity?:number|null;source_group_id?:string|null;group_name?:string;roster_only?:boolean;series_id?:string|null;actual_distance_km?:number|null;cover_photo_path?:string|null};
 export type ParticipationRow={club_id:string;event_id:string;member_id:string;response:'yes'|'no'|'maybe'|'companion'|null;attendance_excused?:boolean;attended:boolean|null;confirmed_by:string|null;seat_status?:'confirmed'|'waiting'|null;reservation_order?:number|null};
-export type ClubData={eventTypeColors?:EventTypeColor[];members:MemberRow[];templates:TemplateRow[];events:EventRow[];participation:ParticipationRow[]};
+export type ClubData={workspaceCursor?:string|null;eventTypeColors?:EventTypeColor[];members:MemberRow[];templates:TemplateRow[];events:EventRow[];participation:ParticipationRow[]};
 export const emptyClubData=():ClubData=>({members:[],templates:[],events:[],participation:[]});
 export const canManage=(club:ClubAccess)=>club.role==='owner'||club.role==='coach';
 export const clubTimeZone='Europe/Prague';

@@ -18,7 +18,7 @@ export function useExperience(client:SupabaseClient,user:User|null|undefined){
 }
 export type Experience=ReturnType<typeof useExperience>;
 export function ViewModeSwitch({mode,busy,onChange}:{mode:ViewMode;busy:boolean;onChange:(mode:ViewMode)=>void}){
- return <div className="view-mode-toolbar"><div className="view-mode-switch" role="group" aria-label="Rozsah zobrazení">{([{id:'basic',name:'Základní'},{id:'advanced',name:'Pokročilý'}] as const).map(item=><button key={item.id} disabled={busy} aria-pressed={mode===item.id} onClick={()=>onChange(item.id)}>{item.name}</button>)}</div></div>;
+ return <div className="view-mode-toolbar"><select className="view-mode-select" aria-label="Rozsah zobrazení" value={mode} disabled={busy} onChange={e=>onChange(e.target.value as ViewMode)}><option value="basic">Základní</option><option value="advanced">Pokročilý</option></select><div className="view-mode-switch" role="group" aria-label="Rozsah zobrazení">{([{id:'basic',name:'Základní'},{id:'advanced',name:'Pokročilý'}] as const).map(item=><button key={item.id} disabled={busy} aria-pressed={mode===item.id} onClick={()=>onChange(item.id)}>{item.name}</button>)}</div></div>;
 }
 export function FirstSteps({role,experience,steps}:{role:'coach'|'member';experience:Experience;steps:{label:string;description:string;done?:boolean;action:()=>void}[]}){
  const [expanded,setExpanded]=useState(false);

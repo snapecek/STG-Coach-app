@@ -19,7 +19,7 @@ async function run(args,extra={}){
   let ready=false;for(let i=0;i<100;i++){if(server?.exitCode!=null)throw new Error('Vite failed to start');try{const response=await fetch('http://127.0.0.1:5173');if(response.ok){ready=true;break}}catch{}await new Promise(resolve=>setTimeout(resolve,100))}
   if(!ready)throw new Error('Vite did not start');
   for(const flag of flags)await run(['scripts/check-member-ui.cjs'],{flag});
-  for(const file of ['check-auth-persistence.cjs','check-share-editor.cjs','check-share-touch-ui.cjs','check-journal-share-dialog.cjs'])await run(['scripts/'+file]);
+  for(const file of ['check-auth-persistence.cjs','check-share-editor.cjs','check-share-touch-ui.cjs','check-journal-share-dialog.cjs','check-release-runtime.cjs'])await run(['scripts/'+file]);
   console.log('Browser logs: '+logDir);if(failed)process.exitCode=1;
  }finally{server?.kill('SIGTERM')}
 })().catch(error=>{console.error(error.message);server?.kill('SIGTERM');process.exitCode=1});

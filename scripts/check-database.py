@@ -17,7 +17,7 @@ try:
   try:docker('exec',name,'pg_isready','-h','127.0.0.1','-U','postgres',capture_output=True);break
   except subprocess.CalledProcessError:sleep(1)
  else:raise RuntimeError('PostgreSQL did not start')
- tests=['tenant_access','club_management','journal_photos','race_results','distinct_races','member_access','training_capacity','training_groups','event_tasks','training_series','weekly_goals','journal_distance','attendance_matrix','training_performances','race_teams','training_games','member_event_roster','race_companion','preset_library_team_games','open_races','event_type_colors','communication','private_chat','member_guests','chat_mentions','club_settings','owner_controls_archive','club_activity','membership_applications','member_join_dates','recorded_training_guests','shareable_club_invitations','training_cover_photo','member_training_photos','event_location_map','saved_event_locations','coach_rsvp_push','club_fees','fee_deletion_recurring','bulk_fee_deletion','member_rsvp_email']
+ tests=['tenant_access','club_management','journal_photos','race_results','distinct_races','member_access','training_capacity','training_groups','event_tasks','training_series','weekly_goals','journal_distance','attendance_matrix','training_performances','race_teams','training_games','member_event_roster','race_companion','preset_library_team_games','open_races','event_type_colors','communication','private_chat','member_guests','chat_mentions','club_settings','owner_controls_archive','club_activity','membership_applications','member_join_dates','recorded_training_guests','shareable_club_invitations','training_cover_photo','member_training_photos','event_location_map','saved_event_locations','coach_rsvp_push','club_fees','fee_deletion_recurring','bulk_fee_deletion','member_rsvp_email','workspace_sync_notifications']
  files=[root/'supabase/tests/local-bootstrap.sql',*sorted((root/'supabase/migrations').glob('*.sql')),*[root/f'supabase/tests/{test}.sql' for test in tests]]
  for file in files:
   try:sql(file.read_text())
@@ -37,6 +37,34 @@ try:
  counts=sql(f"select count(*) filter(where seat_status='confirmed'),count(*) filter(where seat_status='waiting') from participation where event_id='{event}';").strip()
  if counts!='1|1':raise RuntimeError('Concurrent reservations exceeded capacity: '+counts)
  print('PASS competing transactions: one confirmed, one waiting',flush=True)
+
+ # A writer that obtained an XID before the checkpoint commits after a newer
+ # transaction. An inclusive snapshot xmin cursor must not lose its late write.
+ import json
+ sync_owner='10000000-0000-4000-8000-000000000089'
+ sync_event='50000000-0000-4000-8000-000000000089'
+ sql(f"insert into auth.users(id) values('{sync_owner}');insert into club_roles values('{club}','{sync_owner}','coach');")
+ def changes(cursor=None):
+  argument='null' if cursor is None else "'"+cursor+"'"
+  result=sql(f"begin;set local role authenticated;select set_config('request.jwt.claims','{{\"sub\":\"{sync_owner}\"}}',true);select club_workspace_changes('{club}',{argument});commit;")
+  return json.loads(next(line for line in result.splitlines() if '"changes"' in line))
+ late=subprocess.Popen(['docker','--host=unix:///var/run/docker.sock','exec','-i',name,'psql','-U','postgres','-v','ON_ERROR_STOP=1','-At'],env=env,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+ late.stdin.write("begin;select pg_current_xact_id();select 'SYNC_XID_HELD';\n");late.stdin.flush()
+ for line in late.stdout:
+  if line.strip()=='SYNC_XID_HELD':break
+ else:raise RuntimeError('Sync writer failed before assigning XID')
+ checkpoint=changes()['cursor']
+ sql(f"insert into templates(club_id,name,place,type,minutes,plan) values('{club}','Novější změna','Park','Běh',60,'');")
+ first_delta=changes(checkpoint)
+ if any(c['key']==sync_event for c in first_delta['changes']):raise RuntimeError('Late writer committed before race could be tested')
+ late.stdin.write(f"insert into events(id,club_id,name,starts_at,place,type) values('{sync_event}','{club}','Pozdní změna',now()+interval '3 days','Park','Běh');commit;\n");late.stdin.close()
+ if late.wait(timeout=10)!=0:raise RuntimeError(late.stderr.read())
+ second_delta=changes(first_delta['cursor'])
+ if not any(c['key']==sync_event and c['row']['name']=='Pozdní změna' for c in second_delta['changes']):raise RuntimeError('Workspace cursor lost an older transaction committed later')
+ idle=changes(second_delta['cursor'])
+ if idle['changes']:raise RuntimeError('Idle workspace replayed settled changes')
+ print('PASS workspace sync: out-of-order commit is replayed, settled history is not transferred',flush=True)
+
  # A writer already holding the club lock must finish before the archive snapshot.
  archive_club='20000000-0000-4000-8000-000000000091'
  archive_event='50000000-0000-4000-8000-000000000091'

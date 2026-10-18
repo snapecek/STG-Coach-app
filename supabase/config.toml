@@ -12,3 +12,7 @@ verify_jwt = false
 [functions.push-rsvp]
 # GET exposes only the public VAPID key. POST requires the independent cron secret.
 verify_jwt = false
+
+[functions.remind-rsvp]
+# Scheduler-only endpoint; handler checks the independent dispatch secret.
+verify_jwt = false

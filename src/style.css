@@ -707,3 +707,8 @@ html:has(.workspace-header){scroll-padding-top:calc(var(--workspace-header-heigh
 @media(min-width:901px){
  .cloud-card:has(.workspace-header) .calendar-editor{top:calc(var(--workspace-header-height,82px) + 20px);max-height:calc(100dvh - var(--workspace-header-height,82px) - 40px)}
 }
+
+/* Keep every template category visible without a sideways scroll. */
+.template-kind-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;overflow:visible}
+.template-kind-tabs button{min-width:0;min-height:44px;padding:10px 12px;white-space:normal;overflow-wrap:anywhere}
+@media(max-width:480px){.template-kind-tabs{grid-template-columns:repeat(2,minmax(0,1fr));margin:10px 0 14px}.template-kind-tabs button{font-size:13px}}

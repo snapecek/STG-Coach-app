@@ -115,7 +115,7 @@ export function ClubDashboard({pushTarget,onPushOpened,client,club,chatRequest,o
  const setMember=(row:ClubData['members'][number])=>{if(mounted.current)setData(s=>({...s,members:s.members.map(m=>m.id===row.id?row:m)}));};
  useEffect(()=>{if(chatRequest?.clubId!==club.id)return;if(page==='Chat')navigate(chatReturnPage.current);else{chatReturnPage.current=page;navigate('Chat')}},[chatRequest,club.id]);
  useEffect(()=>{onChatStateChange?.({unread:chat.unread,active:page==='Chat'})},[chat.unread,page,onChatStateChange]);
- function navigate(name:string){if(experience.busy)return;requestLeave(()=>{setCalendarDate('');setJournalId('');setPage(name);setModal(null);setEventId('');setSidebarOpen(false)})}
+ function navigate(name:string){if(experience.busy)return;if(experience.mode==='basic'&&['Analýza','Šablony'].includes(name))name='Přehled';requestLeave(()=>{setCalendarDate('');setJournalId('');setPage(name);setModal(null);setEventId('');setSidebarOpen(false)})}
  function newEvent(date=pragueDate(new Date().toISOString()),groupId=''){if(modal==='event'||experience.busy)return;requestLeave(()=>{setEventGroup(groupId);setFormDate(date);setEventId('');setModal('event')})}
  function newTemplate(){setTemplateLocation(null);setTemplatePlace('');setEditingTemplate('');setModal('template');}
  function closeDialog(){if(!saving)requestLeave(()=>{setModal(null);setEventId('');setDetailTab('info');setError('')})}

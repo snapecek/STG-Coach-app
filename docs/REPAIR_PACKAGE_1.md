@@ -26,7 +26,7 @@ Verze je Git SHA z prostředí nasazení, jinak lokální Git SHA. Sestavení ze
 npm ci
 npm test
 npm run build
-npx playwright install --with-deps chromium
+npx playwright install --with-deps chromium webkit
 npm run test:release-ui
 npm run test:database
 ```
@@ -36,3 +36,5 @@ Poslední příkaz potřebuje Docker. Browser runner spouští vlastní Vite a p
 Nové scénáře `STG_REPAIR_ONLY` a `STG_FEE_SYNC_ONLY` pokrývají ovládání dialogů, zachování/zahození konceptu, chybu a úspěch uložení deníku, šířky 320–1440 px a neúspěšné načtení po platbě bez dvojího zápisu.
 
 Živé doručení e-mailu a push na fyzický telefon zůstává samostatným provozním ověřením; automatické kontroly ho nedokládají. Rovněž nebyla měněna správa oprávnění, databázové identifikátory ani klíče místního úložiště.
+
+Následná oprava pro Safari doplňuje explicitní rozměry nativních datumových polí a scénář `STG_ANALYSIS_LAYOUT_ONLY`. Ten ověřuje meze jednotlivých polí i celého dokumentu, vyplnění/vymazání data, funkci filtrů a světlý/tmavý režim na šířkách 320–1440 px v Chromiu a WebKitu. Linuxový WebKit s mobilním profilem není totožný s fyzickým iPhonem.

@@ -548,6 +548,9 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 /* First repair package: filters must shrink to the available mobile width. */
 .analysis-filters>label{min-width:0}
 .analysis-filters input,.analysis-filters select{min-width:0;max-width:100%;box-sizing:border-box}
+.analysis-filters input[type=date]{-webkit-appearance:none;appearance:none;display:block;inline-size:100%;min-inline-size:0;max-inline-size:100%;height:46px;text-align:left}
+.analysis-filters input[type=date]::-webkit-date-and-time-value{min-width:0;text-align:left}
+.analysis-filters input[type=date]::-webkit-datetime-edit{min-width:0;padding:0}
 .discard-overlay{z-index:1000}
 @media(max-width:480px){.analysis-filters{grid-template-columns:minmax(0,1fr)}}
 

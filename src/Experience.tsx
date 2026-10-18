@@ -8,7 +8,7 @@ export function useExperience(client:SupabaseClient,user:User|null|undefined){
  async function save(patch:Record<string,unknown>){
   if(lock.current||!user)return false;lock.current=true;setBusy(true);setError('');const id=user.id;
   try{
-   const current=await client.auth.getUser();if(current.error||current.data.user?.id!==id)throw new Error();
+   const current=await client.auth.getUser();if(current.error||current.data.user?.id!==id||identity.current!==id)throw new Error();
    const result=await client.auth.updateUser({data:patch});if(result.error||result.data.user?.id!==id)throw new Error();
    if(identity.current===id)setMetadata(result.data.user.user_metadata);return identity.current===id;
   }catch{if(identity.current===id)setError('Nastavení se nepodařilo uložit. Zkuste to znovu.');return false}

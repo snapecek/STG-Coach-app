@@ -582,11 +582,11 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
  .cloud-card:has(.header-view-mode){grid-template-columns:auto minmax(0,1fr)}
  .cloud-card:has(.header-view-mode)>.current-club-identity{grid-column:2;grid-row:1;justify-self:start;max-width:100%}
  .cloud-card:has(.header-view-mode)>.account-actions{grid-column:1/-1;grid-row:2;justify-self:stretch}
+ .account-actions:has(.header-view-mode) .club-switcher-panel{left:0;right:auto}
 }
 @media(max-width:760px){
- .cloud-card:has(.header-view-mode)>.account-actions{justify-content:space-between;gap:4px}
+ .cloud-card:has(.header-view-mode)>.account-actions{justify-content:flex-start;gap:4px}
  .account-actions:has(.header-view-mode) .header-chat,.account-actions:has(.header-view-mode) .user-menu>summary{width:40px;min-height:44px;padding:8px}
  .header-view-mode .view-mode-switch{display:none}
  .header-view-mode .view-mode-select{display:block;width:106px;min-height:44px;margin:0;padding:6px;font-size:16px;border-color:var(--orange)}
- .account-actions:has(.header-view-mode) .club-switcher-panel{left:0;right:auto}
 }

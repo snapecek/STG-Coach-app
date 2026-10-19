@@ -4,3 +4,11 @@ dist/
 .env
 .env.*
 !.env.example
+!.env.native.example
+dist-native/
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+android/local.properties
+android/keystore.properties

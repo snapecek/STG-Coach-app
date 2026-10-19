@@ -1,0 +1,60 @@
+name: Native mobile
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'android/**'
+      - 'ios/**'
+      - 'capacitor.config.ts'
+      - 'src/native*'
+      - 'scripts/build-native.cjs'
+      - 'package-lock.json'
+      - '.github/workflows/native.yml'
+permissions:
+  contents: read
+concurrency:
+  group: native-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  # Build checks use a fictional backend. No production keys or signing secrets.
+  VITE_SUPABASE_URL: https://stg-test.example.invalid
+  VITE_SUPABASE_ANON_KEY: sb_publishable_fictional_native_checks
+  VITE_PUBLIC_APP_URL: https://stg-test.example.invalid
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - run: npm ci
+      - run: npm run native:sync
+      - run: ./gradlew --no-daemon :app:assembleDebug :app:lintDebug
+        working-directory: android
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-fixture-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: xcodebuild -version
+      - run: npm ci
+      - run: npm run native:sync
+      - run: xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/trenomi-ios-build CODE_SIGNING_ALLOWED=NO build

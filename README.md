@@ -4,6 +4,8 @@ Mobilní aplikace pro malé sportovní kluby: React, TypeScript, Vite, Tailwind 
 
 ## Spuštění a nasazení
 
+Pro Android a iPhone jsou připravené projekty Capacitor v `android/` a `ios/`. Postup nastavení, sestavení, zbývající požadavky pro oznámení a vydání do obchodů: **[Nativní aplikace krok za krokem](docs/NATIVE_APPS.md)**. Web se nadále nasazuje samostatně z `dist`; nativní sestavení používá `dist-native` a `npm run native:sync`.
+
 Node.js 22+ (ověřeno na 24), Python 3 pro integrační kontroly.
 
 ```sh

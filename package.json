@@ -21,9 +21,26 @@
     "test:share-touch-ui": "node scripts/check-share-touch-ui.cjs",
     "preview:share-gallery": "node scripts/render-share-gallery.cjs",
     "test:auth-ui": "node scripts/check-auth-persistence.cjs",
-    "test:release-ui": "node scripts/check-release-ui.cjs"
+    "test:release-ui": "node scripts/check-release-ui.cjs",
+    "build:native": "node scripts/build-native.cjs",
+    "native:sync": "npm run build:native && cap sync",
+    "native:android": "npm run native:sync && cap open android",
+    "native:ios": "npm run native:sync && cap open ios",
+    "native:doctor": "cap doctor",
+    "native:icons": "capacitor-assets generate --android --ios --iconBackgroundColor \"#101216\" --iconBackgroundColorDark \"#101216\" --splashBackgroundColor \"#101216\" --splashBackgroundColorDark \"#101216\""
   },
   "dependencies": {
+    "@aparajita/capacitor-secure-storage": "8.0.1",
+    "@capacitor/android": "8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/browser": "8.0.5",
+    "@capacitor/camera": "8.2.6",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/filesystem": "8.1.5",
+    "@capacitor/ios": "8.5.3",
+    "@capacitor/keyboard": "8.0.6",
+    "@capacitor/share": "8.0.3",
+    "@capacitor/splash-screen": "8.0.2",
     "@supabase/supabase-js": "^2.58.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.468.0",
@@ -31,6 +48,8 @@
     "react-dom": "^19.1.1"
   },
   "devDependencies": {
+    "@capacitor/assets": "3.0.5",
+    "@capacitor/cli": "8.5.3",
     "@tailwindcss/vite": "^4.1.0",
     "@types/leaflet": "^1.9.22",
     "@types/node": "^22.20.5",

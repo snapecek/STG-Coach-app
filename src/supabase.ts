@@ -1,4 +1,6 @@
 import {createAuthStorage} from './authStorage';
+import {createNativeAuthStorage} from './nativeAuthStorage';
+import {isNativeApp} from './nativePlatform';
 import {createClient,type SupabaseClient} from '@supabase/supabase-js';
 
 export function validatePublicConfig(url:string|undefined,key:string|undefined){
@@ -13,14 +15,15 @@ export function validatePublicConfig(url:string|undefined,key:string|undefined){
   return {url:parsed.origin,key};
 }
 let client:SupabaseClient|undefined;
-let loginStorage:ReturnType<typeof createAuthStorage>|undefined;
+let loginStorage:ReturnType<typeof createAuthStorage>|ReturnType<typeof createNativeAuthStorage>|undefined;
 export const rememberLoginEnabled=()=>loginStorage?.getRemember()??true;
-export function setRememberLogin(value:boolean){if(!loginStorage)throw new Error('Přihlašování není připravené. Obnovte stránku.');try{loginStorage.setRemember(value)}catch{throw new Error('Prohlížeč nepovoluje uložit volbu přihlášení. Povolte úložiště webu a zkuste to znovu.')}}
+export async function setRememberLogin(value:boolean){if(!loginStorage)throw new Error('Přihlašování není připravené. Obnovte stránku.');try{await loginStorage.setRemember(value)}catch{throw new Error('Zařízení nepovoluje uložit volbu přihlášení. Zkontrolujte úložiště a zkuste to znovu.')}}
 export function configuredClient(){
   if(client)return client;
   const config=validatePublicConfig(import.meta.env.VITE_SUPABASE_URL,import.meta.env.VITE_SUPABASE_ANON_KEY);
-  loginStorage=createAuthStorage(window.localStorage,window.sessionStorage);
-  client=createClient(config.url,config.key,{auth:{storage:loginStorage.storage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+  loginStorage=isNativeApp()?createNativeAuthStorage(window.localStorage,window.sessionStorage):createAuthStorage(window.localStorage,window.sessionStorage);
+  client=createClient(config.url,config.key,{auth:{storage:loginStorage.storage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:isNativeApp()?'pkce':'implicit'}});
+  if(isNativeApp())window.addEventListener('trenomi-app-state',event=>{if((event as CustomEvent<{active:boolean}>).detail.active)client?.auth.startAutoRefresh();else client?.auth.stopAutoRefresh()});
   return client;
 }
 export type ClubAccess={id:string;name:string;role:'owner'|'coach'|'member'};

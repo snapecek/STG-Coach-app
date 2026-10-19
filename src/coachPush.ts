@@ -1,7 +1,8 @@
 import type {SupabaseClient} from '@supabase/supabase-js';
+import {isNativeApp} from './nativePlatform';
 const pushOwnerKey='trenomi-push-owner';
-export const pushSupported=()=>typeof window!=='undefined'&&window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
-export function needsHomeScreen(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)?!matchMedia('(display-mode: standalone)').matches&&!(navigator as Navigator&{standalone?:boolean}).standalone:false}
+export const pushSupported=()=>!isNativeApp()&&typeof window!=='undefined'&&window.isSecureContext&&'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+export function needsHomeScreen(){if(isNativeApp())return false;return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)?!matchMedia('(display-mode: standalone)').matches&&!(navigator as Navigator&{standalone?:boolean}).standalone:false}
 function keyBytes(key:string){const raw=atob(key.replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(raw,c=>c.charCodeAt(0))}
 async function registration(){return 'serviceWorker' in navigator?await navigator.serviceWorker.getRegistration():undefined}
 export async function pushEnabled(client:SupabaseClient){const sub=await(await registration())?.pushManager.getSubscription();if(!sub)return false;const {data,error}=await client.rpc('coach_push_enabled',{push_endpoint:sub.endpoint});if(error)throw new Error('Stav oznámení nelze načíst. Ověřte migraci 040.');return data===true}

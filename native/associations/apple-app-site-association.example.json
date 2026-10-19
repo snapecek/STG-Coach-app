@@ -1,0 +1,8 @@
+{
+  "applinks": {
+    "details": [{
+      "appIDs": ["YOUR_APPLE_TEAM_ID.eu.trenomi.app"],
+      "components": [{"/": "/", "comment": "Current Trenomi links use query parameters on the root route."}]
+    }]
+  }
+}

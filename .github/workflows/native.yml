@@ -51,6 +51,10 @@ jobs:
   ios:
     runs-on: macos-15
     timeout-minutes: 30
+    env:
+      # The runner still defaults to Xcode 16.4. Compile against the modern
+      # Apple SDK required for the intended App Store release, not that default.
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

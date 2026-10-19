@@ -736,3 +736,10 @@ html:has(.workspace-header){scroll-padding-top:calc(var(--workspace-header-heigh
 .event-participant-group .member-roster{margin:0}
 .member-detail-dialog .event-participant-group .member-roster li{border-top:0}
 .event-participant-group .attendance-row:last-child{border-bottom:0}
+
+.workspace-tabs{display:none;min-width:0}
+@media(min-width:901px){
+ .workspace-header{grid-template-areas:"brand identity bell actions" "tabs tabs tabs tabs";row-gap:8px}
+ .workspace-tabs:not(:empty){display:block;grid-area:tabs}
+ .workspace-tabs .club-sidebar{margin:0;padding:0 0 8px}
+}

@@ -717,12 +717,13 @@ html:has(.workspace-header){scroll-padding-top:calc(var(--workspace-header-heigh
 .workspace-scroll{min-width:0}
 @media(max-width:900px){
  html:has(.workspace-header),body:has(.workspace-header),#root:has(.workspace-header){height:100%;min-height:0;overflow:hidden;overscroll-behavior:none}
- .cloud-screen:has(.workspace-header){height:100dvh;min-height:0;overflow:hidden}
+ /* Reserve the iOS status-bar area outside the header and its artwork. */
+ .cloud-screen:has(.workspace-header){height:100dvh;min-height:0;overflow:hidden;padding-top:env(safe-area-inset-top,0px);background:var(--workspace-edge-bg)}
  .cloud-card:has(.workspace-header){display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100%;min-height:0;padding:0 17px;overflow:visible}
  .cloud-card:has(.workspace-header)>.brand{display:none}
- .workspace-header{position:relative;top:auto;margin:0 -17px;padding-left:17px;padding-right:17px}
- /* Reserve plain background for iOS's native PWA blur band, above all identity content. */
- .ios-pwa-top-clearance .workspace-header{padding-top:calc(max(10px,env(safe-area-inset-top,0px)) + 16px)}
+ .workspace-header{position:relative;top:auto;margin:0 -17px;padding:10px 17px 8px;filter:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+ /* Add 16px for the native PWA blur band; the safe area is reserved by cloud-screen. */
+ .ios-pwa-top-clearance .workspace-header{padding-top:26px}
  /* Clip the mobile fade to the scrolling content, away from the logo and icons. */
  .workspace-header::after{content:none}
  .workspace-scroll{min-height:0;margin:0 -17px;padding:16px 17px 24px;overflow:auto;overscroll-behavior:contain;scroll-padding:16px 0 24px}

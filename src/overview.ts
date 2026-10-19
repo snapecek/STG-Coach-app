@@ -1,6 +1,6 @@
 import {sortAttendancePeople} from './attendancePeople';
 import type {ClubData} from './clubData';
-import {eventEnd,pragueDate,reviewMembers,participationSummary} from './management';
+import {eventEnd,pragueDate,reviewMembers} from './management';
 export function weekDates(now:number){const today=pragueDate(new Date(now).toISOString()),date=new Date(today+'T12:00:00Z'),offset=(date.getUTCDay()+6)%7;return Array.from({length:7},(_,i)=>new Date(date.getTime()+(i-offset)*86400000).toISOString().slice(0,10));}
 export function overviewStats(data:ClubData,now:number){
  const days=weekDates(now),first=days[0];
@@ -16,12 +16,12 @@ export function overviewStats(data:ClubData,now:number){
 }
 
 // One actionable row per event, even when notes, attendance and tasks all need work.
-export function coachWorkQueue(data:ClubData,tasks:import('./eventTasks').EventTask[],now:number){
+export function coachWorkQueue(data:ClubData,tasks:import('./eventTasks').EventTask[],now:number,userId?:string){
  const rows=new Map<string,{event:import('./clubData').EventRow;labels:string[];tabs:('attendance'|'record'|'tasks')[];priority:number}>();
  function add(event:import('./clubData').EventRow,label:string,tab:'attendance'|'record'|'tasks',priority:number){let row=rows.get(event.id);if(!row){row={event,labels:[],tabs:[],priority};rows.set(event.id,row)}if(!row.labels.includes(label))row.labels.push(label);if(!row.tabs.includes(tab))row.tabs.push(tab);row.priority=Math.min(row.priority,priority);}
  for(const e of data.events.filter(e=>e.status==='scheduled')){
   if(eventEnd(e)<=now&&!e.completed_at){const roster=reviewMembers(data,e),missing=roster.filter(m=>!data.participation.some(p=>p.event_id===e.id&&p.member_id===m.id&&p.attended!=null)).length;if(missing)add(e,`${missing} neověřených účastí`,'attendance',0);add(e,e.event_kind==='race'?'Doplnit výsledky a uzavřít závod':!e.actual_notes.trim()?'Doplnit průběh a uzavřít trénink':'Uzavřít trénink','record',0);}
-  if(Date.parse(e.starts_at)>now&&Date.parse(e.starts_at)<=now+7*86400000){const unknown=participationSummary(data,e).unknown;if(unknown)add(e,`${unknown} bez odpovědi`,'attendance',2);}
+  if(Date.parse(e.starts_at)>now&&Date.parse(e.starts_at)<=now+7*86400000){const self=userId?reviewMembers(data,e).find(m=>!m.removed_at&&m.user_id===userId):undefined;if(self&&!data.participation.some(p=>p.event_id===e.id&&p.member_id===self.id&&p.response))add(e,'Potvrdit vlastní účast','attendance',2);}
   const pending=tasks.filter(t=>t.event_id===e.id&&!t.completed_at);if(pending.length)add(e,`${pending.length} organizačních úkolů${pending.some(t=>t.due_at&&Date.parse(t.due_at)<now)?' · po termínu':''}`,'tasks',pending.some(t=>t.due_at&&Date.parse(t.due_at)<now)?0:1);
  }
  for(const a of overviewStats(data,now).attention)add(a.event,`Delší absence: ${a.member.name}`,'attendance',1);

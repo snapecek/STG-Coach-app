@@ -1,5 +1,5 @@
 import {authRedirectUrl,isNativeApp} from './nativePlatform';
-import {AppHelp} from './AppHelp';
+import {AppHelp} from './AppHelpDialog';
 import {WorkspaceHeader} from './WorkspaceHeader';
 import {createPortal} from 'react-dom';
 import {NotificationSettings} from './NotificationSettings';

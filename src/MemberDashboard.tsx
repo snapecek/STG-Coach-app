@@ -17,7 +17,7 @@ import {ChatNotifications} from './ChatNotifications';
 import {MemberGuests} from './MemberGuests';
 import {ClubChat,ChatPanel,useChatThreads} from './TeamChat';
 import {overviewEventStyle} from './eventTypeColors';
-import {EventTasks} from './EventTasks';
+import {EventTasks} from './EventTaskList';
 import {loadEventTasks,completeEventTask,pendingEventTasks,type EventTask} from './eventTasks';
 import {useEffect,useRef,useState,lazy} from 'react';
 import {LayoutDashboard,CalendarDays,Check,Minus,HelpCircle,RefreshCw,MapPin,X,Clock,ChevronLeft,BookOpen} from 'lucide-react';

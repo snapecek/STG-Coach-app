@@ -2,6 +2,7 @@ import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {BookOpen,X} from 'lucide-react';
 import {findHelpTopics,helpSteps,type HelpRole} from './appHelp';
+import {DisplayDiagnostics} from './DisplayDiagnostics';
 
 export function AppHelp({initialRole,onClose,returnFocus}:{initialRole:HelpRole;onClose:()=>void;returnFocus?:HTMLElement|null}){
  const [role,setRole]=useState(initialRole),[search,setSearch]=useState('');
@@ -22,6 +23,6 @@ export function AppHelp({initialRole,onClose,returnFocus}:{initialRole:HelpRole;
    {!searching&&<section className="app-help-start"><h3>{role==='member'?'Jak začít jako člen':'Běžný postup trenéra'}</h3><ol>{helpSteps[role].map(step=><li key={step}>{step}</li>)}</ol></section>}
    {searching&&<p role="status" className="app-help-results">{topics.length?`Nalezená témata: ${topics.length}`:'Žádné téma neodpovídá hledání. Zkuste kratší výraz nebo přepněte pohled.'} <button type="button" className="text-button" onClick={()=>setSearch('')}>Vymazat hledání</button></p>}
    {topics.map(topic=><details className="app-help-topic" key={role+':'+topic.id} open={searching||undefined}><summary>{topic.title}</summary><div><p>{topic.summary}</p><ul>{topic.items.map(item=><li key={item}>{item}</li>)}</ul>{topic.note&&<p className="app-help-note"><strong>Na co si dát pozor: </strong>{topic.note}</p>}</div></details>)}
-  </div><footer className="app-help-links"><h3>Další návody</h3><a href="/navod-na-plochu.html" target="_blank" rel="noopener noreferrer">Přidat Trenomi na plochu — iPhone a Android ↗</a><a href="/navod-clenove.html" target="_blank" rel="noopener noreferrer">Obrázkový návod k registraci a vstupu do klubu ↗</a><p>Nenašli jste odpověď? Členství a docházku řešte s trenérem. Chybu nebo nápad pošlete přes Můj účet → Nápověda → Podněty k aplikaci.</p></footer></div>
+  </div><footer className="app-help-links"><h3>Další návody</h3><a href="/navod-na-plochu.html" target="_blank" rel="noopener noreferrer">Přidat Trenomi na plochu — iPhone a Android ↗</a><a href="/navod-clenove.html" target="_blank" rel="noopener noreferrer">Obrázkový návod k registraci a vstupu do klubu ↗</a><p>Nenašli jste odpověď? Členství a docházku řešte s trenérem. Chybu nebo nápad pošlete přes Můj účet → Nápověda → Podněty k aplikaci.</p><DisplayDiagnostics/></footer></div>
  </dialog>,document.body);
 }

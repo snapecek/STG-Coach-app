@@ -10,6 +10,7 @@ Projekt používá **Capacitor 8.5.3**. React rozhraní se sestaví do balíčku
 | iOS projekt | `ios/App/App.xcodeproj`, stejné bundle ID; iOS 17.4+, Swift Package Manager |
 | Společný kód | Web i nativní balíček používají stejné role, klubová data, deník, Studio a Supabase RLS |
 | Přihlášení | Nativně Keychain / Android Keystore + AES-GCM, bez iCloud synchronizace; volba Zapamatovat přihlášení zůstává |
+| Síť | Nativní HTTP vrstva Capacitoru pro vzdálené požadavky; soukromé klíče se nepřidávají a dosavadní webová CORS politika Edge Functions se nemění |
 | E-mailové odkazy | Nativní registrace a obnova hesla používají PKCE a `trenomi://auth/`; nutné doplnit Supabase allowlist níže |
 | Fotografie | Nativní fotoaparát/galerie v deníku; po výběru se dál použije stávající zmenšení a odstranění metadat |
 | Sdílení a export | Systémová nabídka pro PNG, CSV, JSON a ZIP; lze zvolit další aplikaci nebo uložení do souborů |

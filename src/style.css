@@ -743,3 +743,38 @@ html:has(.workspace-header){scroll-padding-top:calc(var(--workspace-header-heigh
  .workspace-tabs:not(:empty){display:block;grid-area:tabs}
  .workspace-tabs .club-sidebar{margin:0;padding:0 0 8px}
 }
+
+/* Searchable help stays above both workspace bars without leaving the current task. */
+.app-help-dialog{width:min(920px,calc(100% - 24px));height:min(840px,calc(100dvh - 32px));max-width:none;max-height:calc(100dvh - 32px);margin:auto;padding:0;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:inherit;overscroll-behavior:contain;box-shadow:0 24px 80px #0006}
+.app-help-dialog[open]{display:grid;grid-template-rows:auto auto minmax(0,1fr)}
+.app-help-dialog::backdrop{background:#080b10b3;backdrop-filter:blur(3px)}
+.app-help-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px;border-bottom:1px solid var(--border)}
+.app-help-heading>div{display:flex;align-items:center;gap:10px;min-width:0}
+.app-help-heading svg{flex-shrink:0}
+.app-help-heading h2{font-size:20px;margin:0;overflow-wrap:anywhere}
+.app-help-heading>button{display:grid;place-items:center;min-width:44px;min-height:44px;padding:10px;border:1px solid var(--border);background:var(--raised);color:inherit}
+.app-help-controls{padding:14px 22px;border-bottom:1px solid var(--border)}
+.app-help-controls>p{font-size:13px;color:var(--muted);margin:0 0 12px;line-height:1.5}
+.app-help-roles{display:flex;gap:8px;margin-bottom:12px}
+.app-help-roles button{flex:1;min-height:44px;padding:10px;border:1px solid var(--border);background:transparent;color:inherit}
+.app-help-roles button[aria-selected=true]{background:var(--orange);color:#101216;border-color:var(--orange)}
+.app-help-controls label{display:block;font-size:12px;color:var(--muted)}
+.app-help-controls input{width:100%;margin:6px 0 0;box-sizing:border-box;min-width:0}
+.app-help-content{overflow:auto;min-height:0;padding:16px 22px 22px;overscroll-behavior:contain;font-size:14px;line-height:1.65;overflow-wrap:anywhere}
+.app-help-content h3{font-size:15px;margin:0 0 8px}
+.app-help-start{padding:14px 16px;border:1px solid var(--border);border-left:3px solid var(--orange);border-radius:12px;margin-bottom:18px}
+.app-help-start ol{padding-left:20px;margin:0;list-style:decimal}
+.app-help-content li+li{margin-top:8px}
+.app-help-topic{border-bottom:1px solid var(--border)}
+.app-help-topic>summary{padding:14px 0;cursor:pointer;font-weight:700;min-height:44px;box-sizing:border-box}
+.app-help-topic>div{padding:0 0 16px}
+.app-help-topic p{margin:0 0 10px}
+.app-help-topic ul{padding-left:20px;margin:0;list-style:disc}
+.app-help-topic .app-help-note{border-left:2px solid var(--orange);padding:9px 12px;margin:14px 0 0;background:color-mix(in srgb,var(--orange) 7%,transparent);border-radius:0 8px 8px 0}
+.app-help-links{margin-top:24px;color:var(--muted);font-size:12px}
+.app-help-links>a{display:block;color:inherit;text-decoration:underline;margin:10px 0;min-height:32px}
+.app-help-links>p{margin:12px 0 0}
+.app-help-results{margin:0 0 8px;font-size:13px;color:var(--muted)}
+.app-help-results button{font-size:12px;color:inherit}
+@media(max-width:600px){.app-help-dialog{height:calc(100dvh - 16px);max-height:calc(100dvh - 16px);border-radius:16px}.app-help-heading{padding:10px 14px}.app-help-heading h2{font-size:17px}.app-help-controls{padding:12px 14px}.app-help-controls input{font-size:16px}.app-help-content{padding:12px 14px 20px}}
+html[data-theme="light"] .app-help-roles button[aria-selected=true]{background:var(--orange);color:#101216;border-color:var(--orange)}

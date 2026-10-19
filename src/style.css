@@ -808,3 +808,5 @@ button.studio-entry.compact small{font-size:10px}
 html[data-theme="light"] button.studio-entry{background:linear-gradient(110deg,var(--orange),color-mix(in srgb,var(--orange) 72%,white));color:#101216}
 
 @media(max-width:900px){.event-dialog-full{height:calc(100dvh - max(12px,env(safe-area-inset-top,0px)) - max(12px,env(safe-area-inset-bottom,0px)))}.event-dialog-full .event-dialog-body{flex:1}}
+
+@media(max-width:480px){.journal-detail-status{width:100%}.journal-header-actions{display:grid;grid-template-columns:auto minmax(0,1fr) auto;width:100%;gap:6px}.journal-header-actions>button{min-height:50px}.journal-header-actions button.studio-entry.compact{width:100%;justify-content:center}}

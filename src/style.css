@@ -802,6 +802,14 @@ button.studio-entry small{display:block;font-size:11px;line-height:1.4;margin-to
 button.studio-entry.compact{width:auto;min-height:50px;padding:8px 10px;gap:7px}
 button.studio-entry.compact strong{font-size:13px;white-space:nowrap}
 button.studio-entry.compact small{font-size:10px}
+/* Keep the desktop journal actions on one line with a shared control size. */
+@media(min-width:901px){
+  .journal-header-actions>button{height:40px;min-height:40px;padding:8px 14px;border-radius:10px;font-size:14px}
+  .journal-header-actions button.studio-entry.compact{height:40px;min-height:40px;padding:8px 14px;border-radius:10px;gap:6px}
+  .journal-header-actions button.studio-entry.compact strong{font-size:14px;line-height:1.3}
+  .journal-header-actions button.studio-entry.compact small{display:none}
+  .journal-header-actions button.studio-entry.compact>svg{width:16px;height:16px}
+}
 .member-training-photos>button.studio-entry{margin:0 0 14px}
 .journal-share-dialog-toolbar{justify-content:space-between;align-items:center;gap:10px}
 .journal-share-dialog-toolbar>strong{color:var(--orange);font-size:14px}

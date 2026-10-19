@@ -1,7 +1,12 @@
 import {describe,it,expect} from 'vitest';
-import {nativeLinkTarget} from './nativeLinks';
+import {nativeLinkTarget,singleUseNativeLink} from './nativeLinks';
 const origin='https://trenomi.eu';
 describe('native incoming links',()=>{
+ it('deduplicates exchanged auth sessions while allowing repeated event links and unconfirmed invitations',()=>{
+  expect(singleUseNativeLink('/?code=one-time-code')).toBe(true);
+  expect(singleUseNativeLink('/#type=recovery&access_token=access')).toBe(true);
+  for(const target of ['/?rsvp-club=club&rsvp-event=event','/?join-invite=token','/?token_hash=unconfirmed&type=signup'])expect(singleUseNativeLink(target)).toBe(false);
+ });
  it('accepts PKCE recovery and invitation links without redirecting the WebView off origin',()=>{
   expect(nativeLinkTarget('trenomi://auth/?auth=recovery&code=one-time-code',origin)).toBe('/?auth=recovery&code=one-time-code');
   expect(nativeLinkTarget(origin+'/?join-invite='+'a'.repeat(64),origin)).toBe('/?join-invite='+'a'.repeat(64));

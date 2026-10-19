@@ -1,20 +1,21 @@
 import {Capacitor,SystemBars,SystemBarsStyle} from '@capacitor/core';
 import {isNativeApp,publicAppOrigin,setNativeAppActive} from './nativePlatform';
-import {nativeLinkTarget} from './nativeLinks';
+import {nativeLinkTarget,singleUseNativeLink} from './nativeLinks';
 import {requestLeave} from './UnsavedChanges';
 
 export async function initializeNativeApp(){
  if(!isNativeApp())return;
  const {App}=await import('@capacitor/app');
- let lastUrl='';
  const accept=async(value:string,cold=false)=>{
-  const target=nativeLinkTarget(value,publicAppOrigin());if(!target||value===lastUrl)return;
+  const target=nativeLinkTarget(value,publicAppOrigin());if(!target)return;
   // App.getLaunchUrl can keep the original intent across WebView reloads.
   // Store only digests, never raw email tokens, to avoid consuming it twice.
   const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))),n=>n.toString(16).padStart(2,'0')).join('');
-  let consumed:string[]=[];try{const saved=JSON.parse(sessionStorage.getItem('trenomi-native-consumed-links')||'[]');if(Array.isArray(saved))consumed=saved.filter(v=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v))}catch{}
-  if(consumed.includes(digest))return;
-  const remember=()=>{lastUrl=value;try{sessionStorage.setItem('trenomi-native-consumed-links',JSON.stringify([...consumed.slice(0,1),...consumed.slice(-126),digest]))}catch{}};
+  const once=singleUseNativeLink(target);
+  let consumed:string[]=[];try{const saved=JSON.parse(localStorage.getItem('trenomi-native-consumed-auth')||'[]');if(Array.isArray(saved))consumed=saved.filter(v=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v))}catch{}
+  if(once&&consumed.includes(digest))return;
+  try{if(cold&&sessionStorage.getItem('trenomi-native-launch-consumed')===digest)return}catch{}
+  const remember=()=>{try{if(once)localStorage.setItem('trenomi-native-consumed-auth',JSON.stringify([...consumed.slice(-127),digest]));if(cold)sessionStorage.setItem('trenomi-native-launch-consumed',digest)}catch{}};
   if(cold){remember();history.replaceState(history.state,'',target)}
   else requestLeave(()=>{remember();void import('@capacitor/browser').then(({Browser})=>Browser.close()).catch(()=>{});location.assign(target)});
  };

@@ -20,21 +20,23 @@ function deviceStore(preferences:WebStore):Store{
 export function createNativeAuthStorage(preferences:WebStore,temporary:WebStore,persistent:Store=deviceStore(preferences)){
  let remember=rememberLoginPreference(preferences),pending=Promise.resolve();
  const keys=new Set<string>();
+ const durable=(key:string)=>key.endsWith('-code-verifier');
  function run<T>(action:()=>Promise<T>){const result=pending.then(action);pending=result.then(()=>{},()=>{});return result}
  const storage={
-  getItem(key:string){keys.add(key);return run(async()=>remember?persistent.getItem(key):temporary.getItem(key))},
-  setItem(key:string,value:string){keys.add(key);return run(async()=>{if(remember){await persistent.setItem(key,value);temporary.removeItem(key)}else{temporary.setItem(key,value);await persistent.removeItem(key)}})},
+  getItem(key:string){keys.add(key);return run(async()=>remember||durable(key)?persistent.getItem(key):temporary.getItem(key))},
+  setItem(key:string,value:string){keys.add(key);return run(async()=>{if(remember||durable(key)){await persistent.setItem(key,value);temporary.removeItem(key)}else{temporary.setItem(key,value);await persistent.removeItem(key)}})},
   removeItem(key:string){keys.add(key);return run(async()=>{temporary.removeItem(key);await persistent.removeItem(key)})},
  };
  return {storage,getRemember:()=>remember,setRemember(value:boolean){return run(async()=>{
   if(value===remember)return;
   for(const key of keys){
+   if(durable(key))continue; // PKCE must survive the OS terminating the app while mail is open.
    const saved=remember?await persistent.getItem(key):temporary.getItem(key);
    if(value){if(saved===null)await persistent.removeItem(key);else await persistent.setItem(key,saved)}
    else{if(saved===null)temporary.removeItem(key);else temporary.setItem(key,saved)}
   }
   // Do not delete any source item until every destination write succeeded.
-  for(const key of keys)if(value)temporary.removeItem(key);else await persistent.removeItem(key);
+  for(const key of keys)if(!durable(key)){if(value)temporary.removeItem(key);else await persistent.removeItem(key)}
   preferences.setItem(rememberLoginKey,value?'1':'0');remember=value;
  })}};
 }

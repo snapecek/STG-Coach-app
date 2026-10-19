@@ -87,6 +87,8 @@ Nativní aplikace používá pro vlastní registraci a obnovu hesla tento callba
 
 Ověřte registraci, potvrzení e-mailu i obnovu hesla ve skutečném poštovním klientu na telefonu. Při testu PKCE otevřete odkaz na stejném zařízení, kde jste žádost zahájili.
 
+Jednorázový PKCE ověřovací údaj se ukládá šifrovaně i při vypnuté volbě Zapamatovat přihlášení, aby návrat z e-mailu přežil ukončení aplikace systémem. Nejde o uloženou přihlašovací relaci. Již převzaté jednorázové relace se poznávají pouze podle lokálních hashů odkazů; běžné odkazy na události a dosud nepotvrzené pozvánky lze otevřít opakovaně.
+
 ## 5. Co zbývá před vydáním
 
 ### Vývojářské účty

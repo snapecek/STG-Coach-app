@@ -712,3 +712,19 @@ html:has(.workspace-header){scroll-padding-top:calc(var(--workspace-header-heigh
 .template-kind-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;overflow:visible}
 .template-kind-tabs button{min-width:0;min-height:44px;padding:10px 12px;white-space:normal;overflow-wrap:anywhere}
 @media(max-width:480px){.template-kind-tabs{grid-template-columns:repeat(2,minmax(0,1fr));margin:10px 0 14px}.template-kind-tabs button{font-size:13px}}
+
+/* Mobile app shell: only the middle row scrolls; bars never use viewport fixing. */
+.workspace-scroll{min-width:0}
+@media(max-width:900px){
+ html:has(.workspace-header),body:has(.workspace-header),#root:has(.workspace-header){height:100%;min-height:0;overflow:hidden;overscroll-behavior:none}
+ .cloud-screen:has(.workspace-header){height:100dvh;min-height:0;overflow:hidden}
+ .cloud-card:has(.workspace-header){display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100%;min-height:0;padding:0 17px;overflow:visible}
+ .cloud-card:has(.workspace-header)>.brand{display:none}
+ .workspace-header{position:relative;top:auto;margin:0 -17px;padding-left:17px;padding-right:17px}
+ .workspace-scroll{min-height:0;margin:0 -17px;padding:16px 17px 24px;overflow:auto;overscroll-behavior:contain;scroll-padding:16px 0 24px}
+ .workspace-scroll .calendar-editor{position:static;max-height:none;overflow:visible}
+ .workspace-nav{position:relative;min-width:0;min-height:0;margin:0 -17px;z-index:20}
+ .workspace-nav:empty{display:none}
+ .workspace-nav .mobile-club-nav{position:relative;inset:auto;width:100%;max-width:100%;margin:0}
+ .workspace-header :is(.club-switcher-panel,.user-menu-panel,.notification-panel){max-height:calc(100dvh - var(--workspace-header-height,140px) - 104px - env(safe-area-inset-bottom,0px))}
+}

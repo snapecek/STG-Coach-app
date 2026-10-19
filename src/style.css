@@ -678,7 +678,7 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 html:has(.workspace-header){scroll-padding-top:calc(var(--workspace-header-height,140px) + 16px);scroll-padding-bottom:100px}
 .cloud-card:has(.workspace-header){display:block;padding-top:0}
 .workspace-header{position:sticky;top:0;z-index:25;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;grid-template-areas:"brand identity bell actions";align-items:center;gap:12px 20px;padding:20px 0 12px;margin:0 0 24px;background:var(--workspace-edge-bg);isolation:isolate}
-.workspace-header::after{content:"";position:absolute;top:100%;left:0;right:0;height:24px;background:linear-gradient(to bottom,var(--workspace-edge-bg),transparent);pointer-events:none;z-index:-1}
+.workspace-header::after{content:"";position:absolute;top:100%;left:0;right:0;height:24px;background:linear-gradient(to bottom,var(--workspace-edge-bg),transparent);pointer-events:none;z-index:1}
 .workspace-brand{grid-area:brand;min-width:0}
 .workspace-brand .brand{margin:0;display:flex}
 .workspace-header .current-club-identity{grid-area:identity;position:static;inset:auto;margin:0;min-width:0;max-width:100%}

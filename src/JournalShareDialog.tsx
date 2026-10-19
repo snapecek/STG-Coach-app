@@ -13,7 +13,7 @@ export function JournalShareDialog({open,onClose,children}:{open:boolean;onClose
   return()=>{element.close();document.body.style.overflow=overflow;trigger?.focus()};
  },[open]);
  return createPortal(<dialog ref={dialog} className="journal-share-dialog" aria-label="Sdílet trénink" onCancel={e=>{e.preventDefault();onClose()}}>
-  <div className="journal-share-dialog-toolbar"><button type="button" aria-label="Zavřít sdílení tréninku" onClick={onClose}><X size={18}/> Zavřít</button></div>
+  <div className="journal-share-dialog-toolbar"><strong>Studio Trenomi</strong><button type="button" aria-label="Zavřít sdílení tréninku" onClick={onClose}><X size={18}/> Zavřít</button></div>
   {open&&children}
  </dialog>,document.body);
 }

@@ -49,7 +49,7 @@ export const helpTopics:Record<HelpRole,HelpTopic[]>={member:[
  ]},
  {id:'journal',title:'Můj deník, fotografie a sdílení',summary:'Deník ukazuje vaši historii a průběh zapsaný trenérem.',items:[
   'Docházku a tréninkové údaje berte jako potvrzené záznamy, nikoli jen vaše předchozí odpovědi. Chybějící či chybnou docházku řešte s trenérem.',
-  'U dostupných fotografií otevřete sdílení tréninku, zvolte svou fotografii a šablonu. V editoru můžete upravit výřez, grafiku, údaje a samolepky.',
+  'U dostupných fotografií otevřete Studio Trenomi tlačítkem Sdílet trénink, zvolte svou fotografii a šablonu. V editoru můžete upravit výřez, grafiku, údaje a samolepky.',
   'Výběr fotografie pro vaše sdílení nemění společnou titulní fotografii v deníku. Tu nastavuje trenér.',
  ],note:'Před zveřejněním zkontrolujte výsledný obrázek i to, zda můžete sdílet zachycené osoby.'},
  {id:'fees',title:'Moje klubové příspěvky',summary:'Ikona příspěvků je viditelná, pokud klub evidenci používá.',items:[
@@ -95,7 +95,7 @@ export const helpTopics:Record<HelpRole,HelpTopic[]>={member:[
  ],note:'Uplynutí času samo nepotvrzuje vyplněný deník. V Analýze kontrolujte období, filtry a to, zda nechybí skutečně zapsané hodnoty.'},
  {id:'photos',title:'Fotografie, hlavní fotka a sdílení',summary:'Hlavní fotografie patří společnému deníku, fotku pro sdílení si každý vybírá sám.',items:[
   'U fotografií v deníku označte hlavní fotku pro společné zobrazení tréninku. Tato volba nemění osobní výběr pro sdílení.',
-  'Sdílet trénink vedle Upravit otevře samostatný editor. Zvolte fotku, formát a očíslovanou šablonu; upravte výřez, otočení, údaje, samolepky a případné logo.',
+  'Studio Trenomi (Sdílet trénink) vedle Upravit otevře samostatný editor. Zvolte fotku, formát a očíslovanou šablonu; upravte výřez, otočení, údaje, samolepky a případné logo.',
   'Na mobilu fotografii posouvejte prstem a přibližujte dvěma prsty. Na PC použijte ovládání editoru. Před exportem zkontrolujte čitelnost a to, zda grafika nezakrývá důležité části fotografie.',
  ]},
  {id:'templates',title:'Šablony, pomůcky a Analýza',summary:'Šablony šetří opakované zadávání, Analýza vyhodnocuje zapsané údaje.',items:[

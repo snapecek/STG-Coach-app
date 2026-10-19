@@ -722,6 +722,8 @@ html:has(.workspace-header){scroll-padding-top:calc(var(--workspace-header-heigh
  .cloud-card:has(.workspace-header){display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100%;min-height:0;padding:0 17px;overflow:visible}
  .cloud-card:has(.workspace-header)>.brand{display:none}
  .workspace-header{position:relative;top:auto;margin:0 -17px;padding:10px 17px 8px;filter:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+ /* Add 16px for the native PWA blur band; the safe area is reserved by cloud-screen. */
+ .ios-pwa-top-clearance .workspace-header{padding-top:26px}
  /* Clip the mobile fade to the scrolling content, away from the logo and icons. */
  .workspace-header::after{content:none}
  .workspace-scroll{min-height:0;margin:0 -17px;padding:16px 17px 24px;overflow:auto;overscroll-behavior:contain;scroll-padding:16px 0 24px}

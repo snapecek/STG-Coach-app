@@ -277,10 +277,10 @@ html[data-theme="light"] .chat-message p{color:inherit}
 html[data-theme="light"] :is(input,select,textarea){color:#202a38}
 html[data-theme="light"] :is(.primary,.theme-switch button[aria-pressed=true],.chat-badge){color:#101216}
 /* Preserve the shared orange selection pattern in the light palette. */
-html[data-theme="light"] .cloud-dashboard button[role="tab"][aria-selected="true"],
-html[data-theme="light"] .cloud-dashboard :is(.calendar-view-switch,.calendar-filters,.schedule-calendar,.journal-type-pills,.attendance-group-pills,.share-format-tabs,.share-template-tabs,.race-result-switch,.response-buttons,.equipment-picker) button[aria-pressed="true"],
+html[data-theme="light"] :is(.cloud-dashboard,.event-dialog) button[role="tab"][aria-selected="true"],
+html[data-theme="light"] :is(.cloud-dashboard,.event-dialog) :is(.calendar-view-switch,.calendar-filters,.schedule-calendar,.journal-type-pills,.attendance-group-pills,.share-format-tabs,.share-template-tabs,.race-result-switch,.response-buttons,.equipment-picker) button[aria-pressed="true"],
 html[data-theme="light"] .cloud-dashboard :is(.member-filters,.mobile-club-nav) button.active,
-html[data-theme="light"] .cloud-dashboard .kind-switch button.selected{background:var(--orange);color:#10151b;border-color:var(--orange)}
+html[data-theme="light"] :is(.cloud-dashboard,.event-dialog) .kind-switch button.selected{background:var(--orange);color:#10151b;border-color:var(--orange)}
 html[data-theme="light"] .spotlight.overview-event-color .spotlight-meta>b,html[data-theme="light"] .member-featured.overview-event-color .member-featured-top>b{color:color-mix(in srgb,var(--event-color) 45%,#14332e)}
 html[data-theme="light"] .club-sidebar button.active{background:var(--orange);color:#10151b;border-color:var(--orange)}
 html[data-theme="light"] :is(button,a,input,select,textarea,summary):focus-visible{outline-color:#8a5200}

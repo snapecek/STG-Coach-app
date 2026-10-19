@@ -101,18 +101,18 @@
 @media(max-width:700px){.work-queue-row{align-items:flex-start;flex-direction:column;gap:10px}.work-queue-actions{width:100%}.work-queue-actions button{flex:1;justify-content:center}.weekly-volume-compact{align-items:flex-start;flex-direction:column}.simplified-overview .week-strip{max-height:none}.analysis-weekly-goals .weekly-volume{padding:16px}.member-more-events .panel-title h2{font-size:20px}}
 
 /* Shared orange selection state; event palette swatches keep their own colors. */
-.cloud-dashboard button[role="tab"][aria-selected="true"],
-.cloud-dashboard :is(.calendar-view-switch,.calendar-filters,.schedule-calendar,.journal-type-pills,.attendance-group-pills,.share-format-tabs,.share-template-tabs,.race-result-switch,.response-buttons,.equipment-picker) button[aria-pressed="true"],
+:is(.cloud-dashboard,.event-dialog) button[role="tab"][aria-selected="true"],
+:is(.cloud-dashboard,.event-dialog) :is(.calendar-view-switch,.calendar-filters,.schedule-calendar,.journal-type-pills,.attendance-group-pills,.share-format-tabs,.share-template-tabs,.race-result-switch,.response-buttons,.equipment-picker) button[aria-pressed="true"],
 .cloud-dashboard .member-filters button.active,
-.cloud-dashboard .kind-switch button.selected,
+:is(.cloud-dashboard,.event-dialog) .kind-switch button.selected,
 .cloud-dashboard .mobile-club-nav button.active,
 .cloud-dashboard .mobile-club-nav button[aria-current="page"]{background:var(--orange);color:#10151b;border-color:var(--orange);box-shadow:none}
-.cloud-dashboard .kind-switch button.selected small{color:#33301f}
-.cloud-dashboard .type-color-swatches button[aria-pressed="true"]{outline-color:var(--orange)}
-.cloud-dashboard button[role="tab"]:focus-visible,.cloud-dashboard button[aria-pressed]:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+:is(.cloud-dashboard,.event-dialog) .kind-switch button.selected small{color:#33301f}
+:is(.cloud-dashboard,.event-dialog) .type-color-swatches button[aria-pressed="true"]{outline-color:var(--orange)}
+:is(.cloud-dashboard,.event-dialog) button[role="tab"]:focus-visible,:is(.cloud-dashboard,.event-dialog) button[aria-pressed]:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
 .weekly-volume-compact{display:block;min-height:240px;padding:24px}.weekly-volume-compact .weekly-volume-total{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:18px 0}.weekly-volume-total>strong{font-size:34px;line-height:1.3;color:#e8edf3;letter-spacing:-.7px}.weekly-volume-total>span{font-size:13px;color:var(--muted)}.weekly-volume-compact>.text-button{margin-top:22px}.weekly-volume-compact .volume-row{max-width:760px}
 @media(max-width:700px){.weekly-volume-compact{padding:20px;min-height:220px}.weekly-volume-total>strong{font-size:30px}.weekly-volume-compact .volume-row{grid-template-columns:minmax(70px,100px) minmax(40px,1fr) auto;gap:8px}}
-.cloud-dashboard input:is([type="checkbox"],[type="radio"]){accent-color:var(--orange)}
+:is(.cloud-dashboard,.event-dialog) input:is([type="checkbox"],[type="radio"]){accent-color:var(--orange)}
 
 /* Trenomi artwork: the compact symbol is reserved for the narrow app header. */
 .brand-artwork{display:inline-flex;align-items:center;max-width:100%}.brand-wordmark{display:block;width:183px;height:50px;object-fit:contain}.brand-symbol{display:none;object-fit:contain}
@@ -778,3 +778,33 @@ html:has(.workspace-header){scroll-padding-top:calc(var(--workspace-header-heigh
 .app-help-results button{font-size:12px;color:inherit}
 @media(max-width:600px){.app-help-dialog{height:calc(100dvh - 16px);max-height:calc(100dvh - 16px);border-radius:16px}.app-help-heading{padding:10px 14px}.app-help-heading h2{font-size:17px}.app-help-controls{padding:12px 14px}.app-help-controls input{font-size:16px}.app-help-content{padding:12px 14px 20px}}
 html[data-theme="light"] .app-help-roles button[aria-selected=true]{background:var(--orange);color:#101216;border-color:var(--orange)}
+
+/* Event windows have a fixed frame and one bounded vertical scroller. */
+html:has(.event-dialog-overlay),body:has(.event-dialog-overlay){overflow:hidden}
+.event-dialog-overlay{overflow:hidden;padding:max(12px,env(safe-area-inset-top,0px)) 12px max(12px,env(safe-area-inset-bottom,0px));overscroll-behavior:none}
+.event-dialog{display:flex;flex-direction:column;min-width:0;padding:0;overflow:hidden;max-height:calc(100dvh - max(12px,env(safe-area-inset-top,0px)) - max(12px,env(safe-area-inset-bottom,0px)))}
+.event-dialog-toolbar{display:flex;justify-content:flex-end;flex-shrink:0;padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--border)}
+.event-dialog-toolbar .close{position:static;display:flex;align-items:center;justify-content:center;gap:6px;min-width:44px;min-height:44px;padding:8px 10px;font-size:12px}
+.event-dialog-body{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:28px;scroll-padding:12px}
+.member-detail-dialog .event-dialog-body{padding:16px}
+.event-dialog .member-detail-hero{margin-top:0}
+.event-dialog .detail-tabs{margin-left:0;margin-right:0;padding-left:0;padding-right:0}
+.event-dialog .journal-gallery,.event-dialog .member-training-photos,.event-dialog .photo-grid{min-width:0;max-width:100%}
+.event-dialog .journal-gallery .photo-grid{overscroll-behavior-x:contain}
+@media(max-width:760px){.event-dialog{width:100%;max-width:100%}.event-dialog-body{padding:22px 18px}.member-detail-dialog .event-dialog-body{padding:12px}}
+/* A recognisable entry to the sharing studio, before the member photo gallery. */
+button.studio-entry{display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;min-width:0;min-height:64px;padding:12px 14px;border:1px solid var(--orange);border-radius:12px;background:linear-gradient(110deg,var(--orange),color-mix(in srgb,var(--orange) 72%,white));color:#101216;text-align:left;box-shadow:0 4px 18px #ffb31718}
+button.studio-entry:hover{background:var(--orange)}
+button.studio-entry>svg{flex-shrink:0}
+button.studio-entry>span{min-width:0;flex:1}
+button.studio-entry strong{display:block;font-size:15px;font-weight:800;line-height:1.3}
+button.studio-entry small{display:block;font-size:11px;line-height:1.4;margin-top:3px;color:#101216}
+button.studio-entry.compact{width:auto;min-height:50px;padding:8px 10px;gap:7px}
+button.studio-entry.compact strong{font-size:13px;white-space:nowrap}
+button.studio-entry.compact small{font-size:10px}
+.member-training-photos>button.studio-entry{margin:0 0 14px}
+.journal-share-dialog-toolbar{justify-content:space-between;align-items:center;gap:10px}
+.journal-share-dialog-toolbar>strong{color:var(--orange);font-size:14px}
+html[data-theme="light"] button.studio-entry{background:linear-gradient(110deg,var(--orange),color-mix(in srgb,var(--orange) 72%,white));color:#101216}
+
+@media(max-width:900px){.event-dialog-full{height:calc(100dvh - max(12px,env(safe-area-inset-top,0px)) - max(12px,env(safe-area-inset-bottom,0px)))}.event-dialog-full .event-dialog-body{flex:1}}

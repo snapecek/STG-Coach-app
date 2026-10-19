@@ -1,0 +1,11 @@
+/* Capacitor owns native system bars; CSS consumes safe areas exactly once.
+   The Safari home-screen clearance must never apply to the native WebView. */
+.native-app .cloud-screen:has(.workspace-header){padding-top:env(safe-area-inset-top,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.native-app .auth-screen:not(:has(.workspace-header)){padding-top:max(24px,env(safe-area-inset-top,0px));padding-bottom:max(24px,env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.native-app .overlay{padding-top:max(12px,env(safe-area-inset-top,0px));padding-bottom:max(12px,env(safe-area-inset-bottom,0px));padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.native-app :is(.app-help-dialog,.journal-share-dialog){max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px)}
+@media(max-width:900px){.native-app .workspace-header :is(.club-switcher-panel,.user-menu-panel,.notification-panel){max-height:calc(100dvh - var(--workspace-header-height,140px) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 104px)}}
+@media(min-width:901px){
+ .native-app .workspace-header{top:env(safe-area-inset-top,0px)}
+ .native-app::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--workspace-edge-bg);z-index:25;pointer-events:none}
+}

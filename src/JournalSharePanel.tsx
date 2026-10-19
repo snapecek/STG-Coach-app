@@ -1,3 +1,4 @@
+import {exportFile,shareCancelled} from './nativeFiles';
 import type {PhotoCrop} from './sharePhotoTransform';
 import {SharePhotoGesture} from './SharePhotoGesture';
 import {ShareStickerLayer} from './ShareStickerLayer';
@@ -61,7 +62,7 @@ export function JournalSharePanel({team,eventName,photo:defaultPhoto,photos,phot
   else{const {sticker,index}=lastRemoval;setStickers(items=>{const copy=[...items];copy.splice(Math.min(index,copy.length),0,sticker);return copy});setSelected(sticker.id);setTab('stickers')}
   setRemovals(items=>items.filter((_,i)=>i!==index));
  }
- async function output(share:boolean){if(!canExport||!rendered.current||busy)return;setBusy(true);setError('');setNotice('');try{const blob=await canvasPng(rendered.current),file=new File([blob],'trenomi-trenink-'+template+'-'+format.replace(':','x')+'.png',{type:'image/png'});if(share&&navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title,text:caption});setNotice('Grafika předána systémovému sdílení.')}else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setNotice(share?'Grafika byla stažena; text můžete zkopírovat.':'Grafika stažena jako PNG.')}}catch(e){if(!(e instanceof DOMException&&e.name==='AbortError'))setError('Grafiku se nepodařilo sdílet. Zkuste stáhnout PNG.')}finally{setBusy(false)}}
+ async function output(share:boolean){if(!canExport||!rendered.current||busy)return;setBusy(true);setError('');setNotice('');try{const blob=await canvasPng(rendered.current),file=new File([blob],'trenomi-trenink-'+template+'-'+format.replace(':','x')+'.png',{type:'image/png'});const result=await exportFile(file,{share,title,text:caption});setNotice(result==='shared'?'Grafika předána systémovému sdílení.':share?'Grafika byla stažena; text můžete zkopírovat.':'Grafika stažena jako PNG.');}catch(e){if(!shareCancelled(e))setError('Grafiku se nepodařilo sdílet. Zkuste stáhnout PNG.')}finally{setBusy(false)}}
  return <aside className="coach-panel journal-share-panel share-photo-editor">
  <header className="share-editor-heading"><div><small>STUDIO TRENOMI</small><h2>Upravit obrázek</h2></div><button className="text-button" onClick={()=>{exportSection.current?.scrollIntoView({behavior:'smooth',block:'start'});exportSection.current?.focus({preventScroll:true})}}>Další <ArrowRight size={18}/></button></header>
  <div className="share-editor-workspace"><section className="share-editor-preview" aria-label="Náhled a výřez">

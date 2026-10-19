@@ -1,3 +1,4 @@
+import {publicAppOrigin} from './nativePlatform';
 import type {SupabaseClient} from '@supabase/supabase-js';
 export type JoinClub={id:string;name:string;invited:boolean};
 export type JoinRequest={id:string;club_id:string;applicant_id:string;email:string;first_name:string;last_name:string;status:'pending'|'approved'|'rejected';created_at:string};
@@ -9,4 +10,4 @@ export async function sendJoinInvitation(client:SupabaseClient,clubId:string,ema
 
 export type ShareJoinLink={id:string;created_at:string;expires_at:string;revoked_at:string|null};
 export function joinInvitationUrl(token:string,origin:string){if(!/^[a-f0-9]{64}$/.test(token))throw new Error('Pozvánka neobsahuje platný odkaz.');const url=new URL('/',origin);if(!['https:','http:'].includes(url.protocol))throw new Error('Neplatná adresa aplikace.');url.searchParams.set('join-invite',token);return url.href;}
-export async function createJoinLink(client:SupabaseClient,clubId:string){const result=await applicationRpc<{id:string;token:string;expires_at:string}>(client,'issue_join_link',{target_club:clubId});return {id:result.id,expires_at:result.expires_at,link:joinInvitationUrl(result.token,location.origin)};}
+export async function createJoinLink(client:SupabaseClient,clubId:string){const result=await applicationRpc<{id:string;token:string;expires_at:string}>(client,'issue_join_link',{target_club:clubId});return {id:result.id,expires_at:result.expires_at,link:joinInvitationUrl(result.token,publicAppOrigin())};}

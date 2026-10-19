@@ -255,8 +255,8 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     }
     if(role==='coach'){await p.getByRole('navigation',{name:'Hlavní navigace',exact:true}).getByRole('button',{name:'Kalendář',exact:true}).click();await p.getByRole('button',{name:'Nová událost',exact:true}).click();const editor=p.locator('.calendar-editor');await editor.waitFor();await scrollWorkspace(p,200);await p.waitForTimeout(40);const e=await editor.boundingBox(),h=await header.boundingBox();assert(e.y>=h.y+h.height,'Calendar editor must stay below sticky header');assert(e.height<=844-h.height-39,'Calendar editor must fit below header');await p.setViewportSize({width:900,height:650});const submit=editor.getByRole('button',{name:'Vytvořit trénink',exact:true});await submit.scrollIntoViewIfNeeded();const saveBox=await submit.boundingBox(),footer=await p.getByRole('navigation',{name:'Mobilní navigace',exact:true}).boundingBox();assert(saveBox.y+saveBox.height<=footer.y,'Calendar save action must remain reachable above footer');await p.getByRole('button',{name:'Zrušit',exact:true}).click()}
     await p.setViewportSize({width:390,height:844});await p.getByRole('navigation',{name:'Mobilní navigace',exact:true}).getByRole('button',{name:'Přehled',exact:true}).click();await scrollWorkspace(p,0);await p.locator(role==='member'?'.member-featured .member-event-heading':'.spotlight-title').click();const eventDialog=p.getByRole('dialog');await eventDialog.waitFor();for(const control of [header.getByRole('button',{name:'Moje upozornění',exact:true}),p.getByRole('navigation',{name:'Mobilní navigace',exact:true}).getByRole('button',{name:'Přehled',exact:true})])assert(await control.evaluate(el=>{const r=el.getBoundingClientRect();return !!document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.overlay')}),'Event dialog must cover both shell panels');await eventDialog.getByRole('button',{name:'Zavřít',exact:true}).click();
-    // Simulate installed iOS with its frozen OS token and verify the requested
-    // compact header without a spacer above the logo.
+    // Simulate installed iOS with its frozen OS token. Restore the historical
+    // 21px content inset without enlarging the overall default mobile header.
     await p.setViewportSize({width:390,height:844});
     const before=await header.boundingBox(),brandBefore=await header.locator('.workspace-brand').boundingBox();
     await p.addInitScript(()=>Object.defineProperties(navigator,{
@@ -266,9 +266,9 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     await p.reload();await p.locator('.cloud-dashboard').waitFor();await header.getByRole('button',{name:'Moje upozornění',exact:true}).waitFor();
     assert(await p.evaluate(()=>document.documentElement.classList.contains('ios-standalone')),'Installed iOS receives its compact layout');
     const after=await header.boundingBox(),brandAfter=await header.locator('.workspace-brand').boundingBox();
-    assert(Math.abs(after.height-before.height+26)<2,'Installed header removes top and excess row/bottom spacing');
-    assert(Math.abs(brandAfter.y-after.y)<2,'Logo begins at the top of the header without an artificial spacer');
-    assert(Math.abs(brandAfter.y-brandBefore.y+10)<2,'Logo moves above the default 10px header padding');
+    assert(Math.abs(after.height-before.height+5)<2,'Compact rows keep the installed header smaller than the default mobile header');
+    assert(Math.abs(brandAfter.y-after.y-21)<2,'Logo retains the original pre-sticky 21px content inset');
+    assert(Math.abs(brandAfter.y-brandBefore.y-11)<2,'Historical inset replaces the default 10px padding without stacking spacers');
     const icons=header.locator('.header-notifications,.account-actions');
     for(const icon of await icons.all()){const r=await icon.boundingBox();assert(r.y>=brandAfter.y+brandAfter.height&&r.y+r.height<=after.y+after.height+1,'Icon row fits below the logo without overlap');}
     assert.equal(await header.getByRole('button',{name:'Moje upozornění',exact:true}).evaluate(el=>el.getBoundingClientRect().height),44,'Touch controls keep their full size');

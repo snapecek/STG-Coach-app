@@ -251,6 +251,20 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     }
     if(role==='coach'){await p.getByRole('navigation',{name:'Hlavní navigace',exact:true}).getByRole('button',{name:'Kalendář',exact:true}).click();await p.getByRole('button',{name:'Nová událost',exact:true}).click();const editor=p.locator('.calendar-editor');await editor.waitFor();await scrollWorkspace(p,200);await p.waitForTimeout(40);const e=await editor.boundingBox(),h=await header.boundingBox();assert(e.y>=h.y+h.height,'Calendar editor must stay below sticky header');assert(e.height<=844-h.height-39,'Calendar editor must fit below header');await p.setViewportSize({width:900,height:650});const submit=editor.getByRole('button',{name:'Vytvořit trénink',exact:true});await submit.scrollIntoViewIfNeeded();const saveBox=await submit.boundingBox(),footer=await p.getByRole('navigation',{name:'Mobilní navigace',exact:true}).boundingBox();assert(saveBox.y+saveBox.height<=footer.y,'Calendar save action must remain reachable above footer');await p.getByRole('button',{name:'Zrušit',exact:true}).click()}
     await p.setViewportSize({width:390,height:844});await p.getByRole('navigation',{name:'Mobilní navigace',exact:true}).getByRole('button',{name:'Přehled',exact:true}).click();await scrollWorkspace(p,0);await p.locator(role==='member'?'.member-featured .member-event-heading':'.spotlight-title').click();const eventDialog=p.getByRole('dialog');await eventDialog.waitFor();for(const control of [header.getByRole('button',{name:'Moje upozornění',exact:true}),p.getByRole('navigation',{name:'Mobilní navigace',exact:true}).getByRole('button',{name:'Přehled',exact:true})])assert(await control.evaluate(el=>{const r=el.getBoundingClientRect();return !!document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.overlay')}),'Event dialog must cover both shell panels');await eventDialog.getByRole('button',{name:'Zavřít',exact:true}).click();
+    // iOS 27 PWA system blur is outside WebKit's page rendering. Simulate the
+    // reported frozen OS token and verify that layout reserves blank space for it.
+    await p.setViewportSize({width:390,height:844});
+    const before=await header.boundingBox();
+    await p.addInitScript(()=>Object.defineProperties(navigator,{
+     userAgent:{configurable:true,value:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 Version/27.0 Mobile/15E148 Safari/604.1'},
+     platform:{configurable:true,value:'iPhone'},maxTouchPoints:{configurable:true,value:5},standalone:{configurable:true,value:true},
+    }));
+    await p.reload();await p.locator('.cloud-dashboard').waitFor();await header.getByRole('button',{name:'Moje upozornění',exact:true}).waitFor();
+    assert(await p.evaluate(()=>document.documentElement.classList.contains('ios-pwa-top-clearance')),'Installed iOS 27 receives system edge clearance');
+    const after=await header.boundingBox();assert(Math.abs(after.height-before.height-16)<2,'Only 16px of blank space is added above the complete header');
+    const main=await p.getByRole('main',{name:'Obsah klubu',exact:true}).boundingBox();assert(main.y>=after.y+after.height,'Content stays below the expanded header');
+    await scrollWorkspace(p,500);assert.equal(await p.evaluate(()=>scrollY),0,'iOS clearance preserves the fixed app shell');
+    await p.screenshot({path:'/tmp/trenomi-ios27-clearance-'+engine+'-'+role+'.png'});
     await p.waitForLoadState('networkidle');await v.c.close();
    }
    console.log('PASS workspace panels: mobile content really scrolls while document and panels stay still, portrait/landscape, coach/member, safe menus, modal layering and desktop editor, 320–1440');return;

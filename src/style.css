@@ -728,3 +728,11 @@ html:has(.workspace-header){scroll-padding-top:calc(var(--workspace-header-heigh
  .workspace-nav .mobile-club-nav{position:relative;inset:auto;width:100%;max-width:100%;margin:0}
  .workspace-header :is(.club-switcher-panel,.user-menu-panel,.notification-panel){max-height:calc(100dvh - var(--workspace-header-height,140px) - 104px - env(safe-area-inset-bottom,0px))}
 }
+
+.event-participant-group{margin-top:14px;min-width:0}
+.event-participant-group+.event-participant-group{border-top:1px solid var(--border);padding-top:12px}
+.event-participant-group>h4{display:flex;align-items:center;gap:8px;font-size:12px;margin:0 0 4px;color:var(--muted)}
+.event-participant-group>h4>span{font-size:11px;font-weight:500}
+.event-participant-group .member-roster{margin:0}
+.member-detail-dialog .event-participant-group .member-roster li{border-top:0}
+.event-participant-group .attendance-row:last-child{border-bottom:0}

@@ -427,17 +427,25 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     communication.messages=[];communication.reads={};const v=await context(role),p=v.page;p.setDefaultTimeout(10000);
     const add=(event_id,sender,body)=>communication.messages.push({id:communication.next++,event_id,conversation_id:event_id?null:'91000000-0000-4000-8000-000000000001',sender,body,author_name:'Další účastník',created_at:new Date().toISOString()});
     add(events[0].id,'other','První nepřečtená zpráva');add(events[0].id,'other','Druhá nepřečtená zpráva');add(events[0].id,role,'Vlastní zpráva');add(events[1].id,'other','Zpráva jiného závodu');add(null,'other','Soukromá zpráva');
+    const state=v.state();
+    for(const [id,name,response,seat_status] of [['yes','Alena Bílá','yes','confirmed'],['maybe','Zdeněk Černý','maybe',null],['no','Adam Novák','no',null],['unknown','Petr Žák',null,null],['waiting','Jana Čekající','yes','waiting']]){state.people.push({id,club_id:club,name,kind:'member',removed_at:null,purge_after:null});if(response)state.participation.push({club_id:club,event_id:events[0].id,member_id:id,response,seat_status,attended:null});}
     await login(p);await p.locator('.cloud-dashboard').waitFor();
     if(role==='member')await openMemberEvent(p,events[0],'Informace');else{await p.getByRole('navigation').getByRole('button',{name:'Kalendář',exact:true}).filter({visible:true}).first().click();await p.locator('.calendar-event').filter({hasText:events[0].name}).click();}
     const dialog=p.getByRole('dialog',{name:events[0].name,exact:true}),tab=dialog.getByRole('tab',{name:'Chat',exact:true}),badge=tab.locator('.event-chat-unread');await badge.waitFor();assert.equal(await badge.textContent(),'2');assert.equal(await tab.getAttribute('aria-selected'),'false');assert.equal(await dialog.getByRole('region',{name:'Chat události',exact:true}).count(),0);
     await dialog.getByRole('tab',{name:'Účast',exact:true}).click();assert.equal(await badge.textContent(),'2');assert.equal(communication.reads[role+':'+events[0].id],undefined);
+    const groups=dialog.locator('.event-participant-group');
+    assert.deepEqual(await groups.evaluateAll(es=>es.map(e=>e.getAttribute('aria-label'))),['Přijdou','Čekací listina','Možná','Nepřijdou','Bez odpovědi']);
+    assert((await groups.first().textContent()).indexOf('Alena Bílá')<(await groups.first().textContent()).indexOf('Fiktivní člen'),'Confirmed people sorted by surname');
+    if(role==='coach'){await dialog.getByLabel('Přihlášení Zdeněk Černý',{exact:true}).selectOption('yes');await groups.filter({has: p.getByRole('heading',{name:'Přijdou 3',exact:true})}).waitFor();}
+    else state.participation.find(r=>r.event_id===events[0].id&&r.member_id==='maybe').response='yes';
     add(events[0].id,'other','Nová zpráva za běhu');await p.clock.fastForward(10000);await p.waitForFunction(()=>document.querySelector('#tab-chat .event-chat-unread')?.textContent==='3');
-    for(const width of [320,390,1440]){await p.setViewportSize({width,height:1000});assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));const box=await tab.boundingBox();assert(box&&box.x>=0&&box.x+box.width<=width);await p.screenshot({path:'/tmp/trenomi-event-chat-badge-'+role+'-'+width+'.png'});}
+    await dialog.getByRole('heading',{name:'Přijdou 3',exact:true}).waitFor();assert.equal(await groups.filter({has: p.getByRole('heading',{name:'Možná',exact:false})}).count(),0);
+    for(const width of [320,390,1440]){await p.setViewportSize({width,height:1000});for(const theme of ['light','dark']){await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);const divider=await groups.nth(1).evaluate(e=>({width:getComputedStyle(e).borderTopWidth,style:getComputedStyle(e).borderTopStyle}));assert.equal(divider.width,'1px');assert.equal(divider.style,'solid');}assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));const box=await tab.boundingBox();assert(box&&box.x>=0&&box.x+box.width<=width);await p.screenshot({path:'/tmp/trenomi-event-chat-badge-'+role+'-'+width+'.png'});}
     await tab.click();await dialog.getByText('Nová zpráva za běhu',{exact:true}).waitFor();await badge.waitFor({state:'detached'});assert(communication.reads[role+':'+events[0].id]);
     await dialog.getByRole('tab',{name:'Informace',exact:true}).click();add(events[0].id,'other','Další nepřečtená');await p.clock.fastForward(10000);await badge.waitFor();assert.equal(await badge.textContent(),'1');await tab.click();await dialog.getByText('Další nepřečtená',{exact:true}).waitFor();await badge.waitFor({state:'detached'});
     await v.c.close();
    }
-   console.log('PASS event chat unread badge: coach/member, event-only incoming unread count, 10s refresh, other tabs preserve unread, chat marks read, subsequent new messages, 320/390/1440');return;
+   console.log('PASS event response groups and chat unread badge: coach/member, answer priority, live regrouping, empty groups hidden, theme dividers, event-only incoming unread count, 10s refresh, other tabs preserve unread, chat marks read, subsequent new messages, 320/390/1440');return;
   }
   if(process.env.STG_ATTENDANCE_GUESTS_ONLY==='1'){
    const v=await context('coach'),p=v.page,s=v.state();p.setDefaultTimeout(10000);

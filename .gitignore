@@ -9,6 +9,8 @@ dist-native/
 *.jks
 *.keystore
 *.p12
+*.p8
 *.mobileprovision
+native-secrets/
 android/local.properties
 android/keystore.properties

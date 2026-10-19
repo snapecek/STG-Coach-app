@@ -722,9 +722,8 @@ html:has(.workspace-header){scroll-padding-top:calc(var(--workspace-header-heigh
  .cloud-card:has(.workspace-header){display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100%;min-height:0;padding:0 17px;overflow:visible}
  .cloud-card:has(.workspace-header)>.brand{display:none}
  .workspace-header{position:relative;top:auto;margin:0 -17px;padding:10px 17px 8px;filter:none;backdrop-filter:none;-webkit-backdrop-filter:none}
- /* Reuse row/bottom spacing for the native blur clearance, keeping the original
-    header height, logo position below the blur, and full-size touch controls. */
- .ios-pwa-top-clearance .workspace-header{padding-top:26px;row-gap:2px;padding-bottom:0}
+ /* Compact installed iOS layout without an artificial spacer above the logo. */
+ .ios-standalone .workspace-header{padding-top:0;row-gap:2px;padding-bottom:0}
  /* Clip the mobile fade to the scrolling content, away from the logo and icons. */
  .workspace-header::after{content:none}
  .workspace-scroll{min-height:0;margin:0 -17px;padding:16px 17px 24px;overflow:auto;overscroll-behavior:contain;scroll-padding:16px 0 24px}

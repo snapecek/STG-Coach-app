@@ -251,8 +251,8 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     }
     if(role==='coach'){await p.getByRole('navigation',{name:'Hlavní navigace',exact:true}).getByRole('button',{name:'Kalendář',exact:true}).click();await p.getByRole('button',{name:'Nová událost',exact:true}).click();const editor=p.locator('.calendar-editor');await editor.waitFor();await scrollWorkspace(p,200);await p.waitForTimeout(40);const e=await editor.boundingBox(),h=await header.boundingBox();assert(e.y>=h.y+h.height,'Calendar editor must stay below sticky header');assert(e.height<=844-h.height-39,'Calendar editor must fit below header');await p.setViewportSize({width:900,height:650});const submit=editor.getByRole('button',{name:'Vytvořit trénink',exact:true});await submit.scrollIntoViewIfNeeded();const saveBox=await submit.boundingBox(),footer=await p.getByRole('navigation',{name:'Mobilní navigace',exact:true}).boundingBox();assert(saveBox.y+saveBox.height<=footer.y,'Calendar save action must remain reachable above footer');await p.getByRole('button',{name:'Zrušit',exact:true}).click()}
     await p.setViewportSize({width:390,height:844});await p.getByRole('navigation',{name:'Mobilní navigace',exact:true}).getByRole('button',{name:'Přehled',exact:true}).click();await scrollWorkspace(p,0);await p.locator(role==='member'?'.member-featured .member-event-heading':'.spotlight-title').click();const eventDialog=p.getByRole('dialog');await eventDialog.waitFor();for(const control of [header.getByRole('button',{name:'Moje upozornění',exact:true}),p.getByRole('navigation',{name:'Mobilní navigace',exact:true}).getByRole('button',{name:'Přehled',exact:true})])assert(await control.evaluate(el=>{const r=el.getBoundingClientRect();return !!document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.overlay')}),'Event dialog must cover both shell panels');await eventDialog.getByRole('button',{name:'Zavřít',exact:true}).click();
-    // iOS 27 PWA system blur is outside WebKit's page rendering. Simulate the
-    // reported frozen OS token and verify that layout reserves blank space for it.
+    // Simulate installed iOS with its frozen OS token and verify the requested
+    // compact header without a spacer above the logo.
     await p.setViewportSize({width:390,height:844});
     const before=await header.boundingBox(),brandBefore=await header.locator('.workspace-brand').boundingBox();
     await p.addInitScript(()=>Object.defineProperties(navigator,{
@@ -260,15 +260,16 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
      platform:{configurable:true,value:'iPhone'},maxTouchPoints:{configurable:true,value:5},standalone:{configurable:true,value:true},
     }));
     await p.reload();await p.locator('.cloud-dashboard').waitFor();await header.getByRole('button',{name:'Moje upozornění',exact:true}).waitFor();
-    assert(await p.evaluate(()=>document.documentElement.classList.contains('ios-pwa-top-clearance')),'Installed iOS 27 receives system edge clearance');
+    assert(await p.evaluate(()=>document.documentElement.classList.contains('ios-standalone')),'Installed iOS receives its compact layout');
     const after=await header.boundingBox(),brandAfter=await header.locator('.workspace-brand').boundingBox();
-    assert(Math.abs(after.height-before.height)<2,'Native blur clearance must not increase the original header height');
-    assert(Math.abs(brandAfter.y-brandBefore.y-16)<2,'Logo keeps its confirmed clear position below the native blur band');
+    assert(Math.abs(after.height-before.height+26)<2,'Installed header removes top and excess row/bottom spacing');
+    assert(Math.abs(brandAfter.y-after.y)<2,'Logo begins at the top of the header without an artificial spacer');
+    assert(Math.abs(brandAfter.y-brandBefore.y+10)<2,'Logo moves above the default 10px header padding');
     const icons=header.locator('.header-notifications,.account-actions');
     for(const icon of await icons.all()){const r=await icon.boundingBox();assert(r.y>=brandAfter.y+brandAfter.height&&r.y+r.height<=after.y+after.height+1,'Icon row fits below the logo without overlap');}
     assert.equal(await header.getByRole('button',{name:'Moje upozornění',exact:true}).evaluate(el=>el.getBoundingClientRect().height),44,'Touch controls keep their full size');
     const main=await p.getByRole('main',{name:'Obsah klubu',exact:true}).boundingBox();assert(main.y>=after.y+after.height,'Content stays below the compact header');
-    await scrollWorkspace(p,500);assert.equal(await p.evaluate(()=>scrollY),0,'iOS clearance preserves the fixed app shell');
+    await scrollWorkspace(p,500);assert.equal(await p.evaluate(()=>scrollY),0,'Compact iOS header preserves the fixed app shell');
     await p.screenshot({path:'/tmp/trenomi-ios27-clearance-'+engine+'-'+role+'.png'});
     await p.waitForLoadState('networkidle');await v.c.close();
    }

@@ -13,7 +13,7 @@ import {attendanceEvents,attendanceRate,attendanceRoster,attendanceState} from '
 import {pragueDate,participationSummary} from './management';
 import {disciplineColor} from './journal';
 import {EventReminder} from './EventReminder';
-import {AttendanceChoices} from './AttendanceReview';
+import {AttendanceChoices} from './AttendanceReviewPanel';
 import {attendanceUpdate,reviewUpdates,type AttendanceUpdate,type SaveAttendance} from './attendanceReview';
 import {eventEnd} from './management';
 import {requestLeave} from './UnsavedChanges';

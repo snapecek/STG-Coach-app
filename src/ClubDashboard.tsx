@@ -42,7 +42,7 @@ import {pragueDate,pragueTime,reviewMembers,reviewReady,eventEnd,participationSu
 import {TrainingGamesPanel} from './TrainingGamesPanel';
 import {TrainingJournalDetail} from './TrainingJournalDetail';
 import {AttendanceBoard} from './AttendanceBoard';
-import {AttendanceReview,AttendanceChoices} from './AttendanceReview';
+import {AttendanceReview,AttendanceChoices} from './AttendanceReviewPanel';
 import {saveAttendanceBatch} from './clubData';
 import type {SaveAttendance} from './attendanceReview';
 import {JournalList} from './JournalList';

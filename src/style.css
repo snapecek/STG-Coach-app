@@ -828,7 +828,7 @@ html[data-theme="light"] button.studio-entry{background:linear-gradient(110deg,v
 @media(max-width:480px){.journal-detail-status{width:100%}.journal-header-actions{display:grid;grid-template-columns:auto minmax(0,1fr) auto;width:100%;gap:6px}.journal-header-actions>button{min-height:50px}.journal-header-actions button.studio-entry.compact{width:100%;justify-content:center}}
 
 .attendance-toggles{display:flex;gap:4px;align-items:center;justify-content:center;min-width:96px}
-.attendance-toggles>button{flex:1;min-width:29px;min-height:40px;padding:6px 4px;border:1px solid var(--border);border-radius:9px;font-size:14px;font-weight:750;background:var(--panel);color:var(--muted);box-shadow:none}
+.attendance-toggles>button{flex:1;min-width:29px;min-height:40px;padding:6px 4px;border:1px solid var(--border);border-radius:9px;font-size:14px;font-weight:750;background:var(--raised);color:var(--muted);box-shadow:none}
 .attendance-toggles>button.present[aria-pressed="true"]{background:#193d2c;color:#8de9a3;border-color:#64c884}
 .attendance-toggles>button.excused[aria-pressed="true"]{background:#332747;color:#d1b4ff;border-color:#a586d9}
 .attendance-toggles>button.absent[aria-pressed="true"]{background:#48252b;color:#ffacb0;border-color:#dc7b85}

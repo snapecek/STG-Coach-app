@@ -24,7 +24,7 @@
 .workspace-header .club-identity img{border-radius:2px}
 .workspace-header .user-menu-panel,.workspace-header .club-switcher-panel{border-radius:3px;box-shadow:0 14px 40px #0004}
 .workspace-header .user-menu-panel button{border-radius:2px}
-.cloud-card .club-sidebar button{border-radius:0;box-shadow:none;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;border-top:2px solid transparent}
+.cloud-card .club-sidebar button{border:0;border-radius:0;box-shadow:none;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;border-top:2px solid transparent}
 .cloud-card .club-sidebar button.active{color:var(--orange);background:var(--ui-accent-soft);border-top-color:var(--orange)}
 .cloud-card :is(.journal-type-pills,.attendance-kind-tabs,.members-tabs,.preset-tabs,.view-mode-switch) button{border-radius:2px;border:1px solid var(--border);font-size:12px;font-weight:650;box-shadow:none}
 .cloud-card :is(.journal-type-pills,.attendance-kind-tabs,.members-tabs,.preset-tabs,.view-mode-switch) button:is([aria-pressed=true],[aria-selected=true]){background:var(--orange);border-color:var(--orange);color:#101216}
@@ -199,3 +199,18 @@ html[data-theme="light"] .cloud-card :is(.journal-heading p,.journal-rpe b,.temp
 html[data-theme="light"] .cloud-card button:focus-visible,html[data-theme="light"] .event-dialog button:focus-visible{outline-color:var(--ui-accent-ink)}
 html[data-theme="light"] .appearance-name>svg{color:color-mix(in srgb,var(--palette-preview) 38%,#202a38)}
 html[data-theme="light"] .appearance-grid>button[aria-pressed=true]{border-color:color-mix(in srgb,var(--palette-preview) 38%,#202a38)}
+/* Event-type colors are data, not the trainer's decorative UI accent. */
+.cloud-card .coach-panel.overview-event-color,.cloud-card .week-event.overview-event-color,.cloud-card .member-featured.overview-event-color,.cloud-card .member-event-heading.overview-event-color{border-left-color:var(--event-color)}
+.cloud-card .calendar-day.today,.cloud-card .coach-day.today{border-color:var(--orange)}
+.cloud-card .calendar-day.selected{outline:1px solid var(--orange);outline-offset:-1px}
+.cloud-card .preset-library>.panel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px;border:0;background:none;counter-reset:preset}
+.cloud-card .preset-library>.panel>.template-row{display:flex;flex-direction:column;align-items:stretch;gap:18px;padding:20px;min-width:0;border:1px solid var(--border);background:var(--surface);border-radius:2px;counter-increment:preset}
+.cloud-card .preset-library>.panel>.template-row::before{content:counter(preset,decimal-leading-zero) ' / ŠABLONA';font:10px/1.5 var(--ui-mono);letter-spacing:.12em;color:var(--ui-accent-ink)}
+.cloud-card .preset-library>.panel>.template-row b{font-size:18px;font-weight:700;overflow-wrap:anywhere}
+.cloud-card .preset-library>.panel>.template-row small{font:11px/1.6 var(--ui-mono);margin-top:8px;color:var(--muted)}
+.cloud-card .preset-library .row-actions{margin-top:auto;display:flex;gap:8px}
+.cloud-card .preset-library .row-actions>button{flex:1;border:1px solid var(--border);border-radius:2px;background:none}
+.cloud-card .preset-library .row-actions>button:last-child{color:#e49c9f}
+.cloud-card .preset-editor{border:1px solid var(--border);background:var(--surface);padding:20px;border-radius:2px}
+@media(max-width:1100px){.cloud-card .preset-library>.panel{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.cloud-card .preset-library>.panel{grid-template-columns:minmax(0,1fr)}.cloud-card .preset-library>.panel>.template-row{padding:16px}}

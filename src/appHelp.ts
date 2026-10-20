@@ -83,7 +83,8 @@ export const helpTopics:Record<HelpRole,HelpTopic[]>={member:[
  ],note:'Zrušit událost ponechá záznam jako zrušený. Smazat událost odstraňuje její záznamy; před potvrzením si přečtěte upozornění.'},
  {id:'attendance',title:'Odpovědi členů a skutečná docházka',summary:'Přihlášení říká, co člen plánuje. Docházka potvrzuje, co se skutečně stalo.',items:[
   'V záložce Účast jsou nejprve potvrzení účastníci, dále ostatní odpovědi a nakonec lidé bez odpovědi. Doprovod a čekací listina mají vlastní skupinu.',
-  'Po akci nastavte každému skutečnou docházku: Přítomen, Nepřítomen nebo Omluven. Odpověď Přijdu sama přítomnost nepotvrzuje.',
+  'Po akci ověřte seznam tlačítky A (ano), O (omluvil se), N (ne). Přijdu se předvyplní jako A, ostatní odpovědi a lidé bez odpovědi jako N. Omluvení vyberte ručně pomocí O.',
+  'Opravte jen rozdíly a zvolte Uložit docházku. Pokud seznam souhlasí, použijte Schválit docházku bez úprav: ověří se celý seznam najednou. Samotné přepnutí A/O/N nic neukládá; dříve ověřené záznamy zůstávají zachované.',
   'V hromadné Docházce přepínejte Tréninky / Závody a použijte období, skupinu či hledání. Členové a hosté mají vlastní oddíly; na mobilu se tabulka posouvá vodorovně.',
   'U uplynulého tréninku můžete přidat nového hosta nebo vybrat uloženého. Zkontrolujte jeho docházku a nezakládejte stejného člověka opakovaně.',
  ],note:'Čekací listina není potvrzené místo. Omluvení se do procenta skutečné účasti nepočítají.'},

@@ -85,6 +85,15 @@ export async function saveParticipation(client:SupabaseClient,club:ClubAccess,ev
  checked<ParticipationRow>(await client.from('participation').upsert(row,{onConflict:'event_id,member_id'}).select('*').single(),'Účast se nepodařilo uložit.');
  return checked<ParticipationRow>(await client.from('participation').select('*').eq('club_id',club.id).eq('event_id',eventId).eq('member_id',memberId).single(),'Aktuální přihlášení nelze načíst.');
 }
+export async function saveAttendanceBatch(client:SupabaseClient,club:ClubAccess,updates:import('./attendanceReview').AttendanceUpdate[]){
+ staff(club);
+ if(!updates.length||updates.length>500||new Set(updates.map(u=>u.eventId+':'+u.memberId)).size!==updates.length||updates.some(u=>!u.eventId||!u.memberId||typeof u.attended!=='boolean'||typeof u.attendance_excused!=='boolean'||(u.attended&&u.attendance_excused)))throw new Error('Neplatný seznam docházky.');
+ const userId=await verify(client);
+ const rows=updates.map(u=>({club_id:club.id,event_id:u.eventId,member_id:u.memberId,attended:u.attended,attendance_excused:u.attendance_excused,confirmed_by:userId}));
+ // One SQL statement: all choices succeed together. Omitted RSVP fields stay intact.
+ const saved=checked<{event_id:string;member_id:string}[]>(await client.from('participation').upsert(rows,{onConflict:'event_id,member_id'}).select('event_id,member_id'),'Docházku se nepodařilo uložit.');
+ if(saved.length!==rows.length)throw new Error('Server nepotvrdil uložení celé docházky. Obnovte data a ověřte seznam.');
+}
 const eventColumns='*';
 const templateColumns='*';
 export async function archiveMember(client:SupabaseClient,club:ClubAccess,memberId:string,restore=false){

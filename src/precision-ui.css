@@ -57,3 +57,5 @@ body,.cloud-screen,.cloud-screen:has(.cloud-dashboard){background:var(--ui-bg)}
 .cloud-card #member-open-tasks{border-radius:0;box-shadow:none}
 .cloud-card .member-rsvp-badge:not(.yes):not(.no):not(.maybe):not(.waiting):not(.companion){background:var(--raised);color:var(--muted)}
 .cloud-card .member-schedule>.member-event-heading.overview-event-color{border-left-color:var(--event-color)}
+.cloud-card :is(input:not([type=checkbox]):not([type=radio]):not([type=color]),select,textarea),.dialog :is(input:not([type=checkbox]):not([type=radio]):not([type=color]),select,textarea){background-color:var(--ui-bg);border-color:var(--border)}
+.cloud-card .attendance-shortcut{background:var(--raised);border-color:var(--border)}

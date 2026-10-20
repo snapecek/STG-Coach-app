@@ -9,5 +9,14 @@ export async function applicationRpc<T>(client:SupabaseClient,name:string,args:R
 export async function sendJoinInvitation(client:SupabaseClient,clubId:string,email:string){const normalized=email.trim().toLowerCase();if(normalized.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized))throw new Error('Zadejte platný e-mail.');const {data,error}=await client.functions.invoke('invite-member',{body:{mode:'application',clubId,email:normalized}});if(error||data?.error||!data?.link)throw new Error('Pozvánku se nepodařilo odeslat. Pro nový typ pozvánek je potřeba migrace 032 a aktualizovaná funkce invite-member.');return data as {id:string;link:string;delivery:'queued'};}
 
 export type ShareJoinLink={id:string;created_at:string;expires_at:string;revoked_at:string|null};
-export function joinInvitationUrl(token:string,origin:string){if(!/^[a-f0-9]{64}$/.test(token))throw new Error('Pozvánka neobsahuje platný odkaz.');const url=new URL('/',origin);if(!['https:','http:'].includes(url.protocol))throw new Error('Neplatná adresa aplikace.');url.searchParams.set('join-invite',token);return url.href;}
+export function joinInvitationUrl(token:string,origin:string){
+ if(!/^[a-f0-9]{64}$/.test(token))throw new Error('Pozvánka neobsahuje platný odkaz.');
+ const source=new URL('/',origin);
+ if(!['https:','http:'].includes(source.protocol))throw new Error('Neplatná adresa aplikace.');
+ // Old installations can still run on Vercel; invitations must use the public domain.
+ const productionHosts=['project-ym4q2.vercel.app','trenomi.eu','www.trenomi.eu'];
+ const url=new URL(productionHosts.includes(source.hostname)?'https://www.trenomi.eu/':source.href);
+ url.searchParams.set('join-invite',token);
+ return url.href;
+}
 export async function createJoinLink(client:SupabaseClient,clubId:string){const result=await applicationRpc<{id:string;token:string;expires_at:string}>(client,'issue_join_link',{target_club:clubId});return {id:result.id,expires_at:result.expires_at,link:joinInvitationUrl(result.token,publicAppOrigin())};}

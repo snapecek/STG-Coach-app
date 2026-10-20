@@ -119,7 +119,7 @@ export const helpTopics:Record<HelpRole,HelpTopic[]>={member:[
   'Ruční Připomenout e-mailem použijte jen tehdy, pokud je funkce dostupná. Neaktivní tlačítko znamená, že tato možnost zatím není zapnutá.',
  ]},
  {id:'admin',title:'Správa klubu a oprávnění',summary:'Trenér spravuje sportovní provoz, hlavní správce navíc nastavení klubu a trenéry.',items:[
-  'V Nastavení → Vzhled aplikace vyberte jeden z osmi barevných motivů. Jde o osobní volbu uloženou k vašemu účtu; výchozí Trenomi zachovává původní žlutou. Barvy disciplín a logo se tím nemění.',
+  'V Nastavení → Vzhled aplikace vyberte jeden z osmi barevných motivů. Jde o osobní volbu uloženou k vašemu účtu; výchozí Limetka používá ostrou limetkovou, motiv Trenomi nabízí značkovou oranžovou. Barvy disciplín a logo se tím nemění.',
   'Hlavní správce mění název a logo klubu, přidává či odebírá trenérská práva a může založit další klub. Pokud tyto volby nevidíte, obraťte se na hlavního správce.',
   'Před archivací klubu pečlivě ověřte název a nabídku zálohy. Obnova archivovaného klubu je dostupná po dobu 3 měsíců.',
   'Klubovou zálohu uchovávejte bezpečně. Nezaměňujte archivaci celého klubu se zrušením jedné akce nebo odebráním člena.',

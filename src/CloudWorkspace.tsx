@@ -4,7 +4,7 @@ import {WorkspaceHeader} from './WorkspaceHeader';
 import {createPortal} from 'react-dom';
 import {NotificationSettings} from './NotificationSettings';
 import {useExperience} from './Experience';
-import {applyUiPalette} from './appearance';
+import {applyUiPalette,accountUiPalette} from './appearance';
 import {configureDiagnostics} from './clientDiagnostics';
 import {requestLeave} from './UnsavedChanges';
 import {LoadBoundary} from './LoadBoundary';
@@ -80,7 +80,7 @@ function AuthWorkspace({client,onBrandTarget}:{client:SupabaseClient;onBrandTarg
  const [link]=useState(readInitialLink),[pendingInvite,setPendingInvite]=useState(()=>sessionStorage.getItem(invitationKey)||''),[passwordSetup,setPasswordSetup]=useState(link.passwordSetup),[confirmingLink,setConfirmingLink]=useState(!!link.tokenHash&&!link.error),[forgot,setForgot]=useState(false),[notice,setNotice]=useState('');
  const [session,setSession]=useState<Session|null>(null),[initializing,setInitializing]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[clubs,setClubs]=useState<ClubAccess[]>([]),[loadingClubs,setLoadingClubs]=useState(false),[retry,setRetry]=useState(0),[activeClub,setActiveClub]=useState('');
  const experience=useExperience(client,session?.user);
- useEffect(()=>{applyUiPalette(session?experience.metadata.ui_palette:undefined)},[session?.user.id,experience.metadata.ui_palette]);
+ useEffect(()=>{applyUiPalette(accountUiPalette(session?experience.metadata:{}).id)},[session?.user.id,experience.metadata.ui_palette,experience.metadata.ui_palette_revision]);
  useEffect(()=>{setFeedbackOpen(false);setSettingsRequest(null);setChatRequest(null);setChatState({unread:0,active:false})},[activeClub,session?.user.id]);
  useEffect(()=>{setPendingJoin(sessionStorage.getItem(joinInvitationKey)||'')},[]);
  useEffect(()=>{if(!initializing)void reconcilePushIdentity(session?.user.id||null).catch(()=>{})},[initializing,session?.user.id]);

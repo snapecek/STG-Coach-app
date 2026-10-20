@@ -4,8 +4,8 @@
   "lang": "cs",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#101216",
-  "theme_color": "#101216",
+  "background_color": "#090C0A",
+  "theme_color": "#090C0A",
   "icons": [
     {
       "src": "/brand/trenomi-icon-192.png",

@@ -13,6 +13,7 @@ import './style.css';
 import './light-theme.css';
 import './native.css';
 import './technical-ui.css';
+import './precision-ui.css';
 document.documentElement.classList.toggle('native-app',isNativeApp());
 document.documentElement.classList.toggle('native-ios',isNativeApp()&&Capacitor.getPlatform()==='ios');
 document.documentElement.classList.toggle('native-android',isNativeApp()&&Capacitor.getPlatform()==='android');

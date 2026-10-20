@@ -19,6 +19,7 @@ async function run(args,extra={}){
   let ready=false;for(let i=0;i<100;i++){if(server?.exitCode!=null)throw new Error('Vite failed to start');try{const response=await fetch('http://127.0.0.1:5173');if(response.ok){ready=true;break}}catch{}await new Promise(resolve=>setTimeout(resolve,100))}
   if(!ready)throw new Error('Vite did not start');
   for(const flag of flags)await run(['scripts/check-member-ui.cjs'],{flag});
+  await run(['scripts/check-member-ui.cjs'],{flag:'STG_TECHNICAL_UI_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_ATTENDANCE_REVIEW_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_ANALYSIS_LAYOUT_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_COMPACT_MOBILE_ONLY',engine:'webkit'});

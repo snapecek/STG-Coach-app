@@ -1,0 +1,201 @@
+/* Trenomi technical visual system. Layout, safe areas and scroll ownership stay in style.css. */
+:root{--ui-mono:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;--ui-line:color-mix(in srgb,var(--border) 80%,transparent);--ui-accent-soft:color-mix(in srgb,var(--orange) 9%,var(--surface));--radius:4px}
+.cloud-card{font-feature-settings:'ss01' on;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.cloud-card:not(:has(.workspace-header)){border-radius:4px;box-shadow:none;border:1px solid var(--border)}
+.cloud-card :is(h1,h2,h3),.event-dialog :is(h1,h2,h3){font-weight:750;letter-spacing:-.025em}
+.cloud-dashboard>.page-title h1{font-size:clamp(24px,2.5vw,34px);letter-spacing:-.04em}
+.technical-label{display:block}
+.technical-label,.cloud-card .eyebrow{font:10px/1.5 var(--ui-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.cloud-card :is(input,select,textarea),.event-dialog :is(input,select,textarea){border-radius:2px;border-color:var(--border);box-shadow:none}
+.cloud-card :is(button,.user-menu>summary),.event-dialog button{border-radius:3px;box-shadow:none}
+.cloud-card button.primary,.event-dialog button.primary{background:var(--orange);color:#101216;font-weight:750;border:1px solid transparent;box-shadow:none}
+.cloud-card button.primary:hover,.event-dialog button.primary:hover{background:color-mix(in srgb,var(--orange) 86%,white)}
+.cloud-card button:focus-visible,.event-dialog button:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+.cloud-card :is(.coach-panel,.panel,.settings-panel,.first-steps,.attendance-panel,.attendance-insights,.admission-panel,.members-panel,.analysis-card,.calendar-panel,.journal-detail-kpis article,.journal-detail-kpis,.weekly-goals,.club-chat,.conversation-list){border-radius:3px;box-shadow:none;border-color:var(--ui-line)}
+.cloud-card :is(.coach-panel,.settings-panel,.attendance-panel,.first-steps){background:var(--surface)}
+.cloud-card .panel-title h2,.cloud-card .settings-panel>h2{font-size:18px;text-transform:uppercase;letter-spacing:-.015em}
+.cloud-card .panel-title{gap:14px;align-items:center}
+.cloud-card .text-button{font-weight:600}
+.cloud-card :is(.page-title,.panel-title) .primary{white-space:nowrap}
+.cloud-card .page-title .eyebrow{margin-bottom:5px}
+.workspace-header .current-club-identity{font-weight:750}
+.workspace-header :is(.account-actions>button,.account-actions>details>summary,.club-switcher>summary,.header-notifications>button){border-radius:3px;box-shadow:none;border-color:var(--border)}
+.workspace-header .account-actions button,.workspace-header .account-actions summary{font-weight:700}
+.workspace-header .club-identity img{border-radius:2px}
+.workspace-header .user-menu-panel,.workspace-header .club-switcher-panel{border-radius:3px;box-shadow:0 14px 40px #0004}
+.workspace-header .user-menu-panel button{border-radius:2px}
+.cloud-card .club-sidebar button{border-radius:0;box-shadow:none;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;border-top:2px solid transparent}
+.cloud-card .club-sidebar button.active{color:var(--orange);background:var(--ui-accent-soft);border-top-color:var(--orange)}
+.cloud-card :is(.journal-type-pills,.attendance-kind-tabs,.members-tabs,.preset-tabs,.view-mode-switch) button{border-radius:2px;border:1px solid var(--border);font-size:12px;font-weight:650;box-shadow:none}
+.cloud-card :is(.journal-type-pills,.attendance-kind-tabs,.members-tabs,.preset-tabs,.view-mode-switch) button:is([aria-pressed=true],[aria-selected=true]){background:var(--orange);border-color:var(--orange);color:#101216}
+.cloud-card :is(.attendance-kind-tabs,.members-tabs,.preset-tabs){gap:7px}
+.cloud-card :is(.attendance-help,.attendance-insights) summary{font-size:13px;font-weight:700;letter-spacing:.015em}
+.cloud-card :is(.attendance-help,.attendance-insights) summary::marker{color:var(--orange)}
+.cloud-card .attendance-section th{font:600 11px/1.5 var(--ui-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--orange);border-bottom:1px solid var(--border)}
+.cloud-card .attendance-matrix thead th{border-radius:0;background:var(--raised)}
+.cloud-card .attendance-matrix th button{font-size:12px;font-weight:700}
+.cloud-card .attendance-matrix th small{font:10px/1.4 var(--ui-mono)}
+.cloud-card .attendance-choice,.cloud-card .race-attendance-cell{border-radius:0}
+.cloud-card .attendance-toggles>button{border-radius:2px;font:700 12px var(--ui-mono)}
+.cloud-card .attendance-percent{font:700 15px var(--ui-mono)}
+.cloud-card .attendance-stats article{border-radius:2px;padding:14px;border-color:var(--ui-line);box-shadow:none}
+.cloud-card .attendance-stats article>small{font:10px/1.5 var(--ui-mono);letter-spacing:.08em;text-transform:uppercase}
+.cloud-card .attendance-stats article>strong{font-variant-numeric:tabular-nums}
+.cloud-card .attendance-review-toolbar,.event-dialog .attendance-review-toolbar{border-radius:2px;background:var(--surface)}
+.cloud-card .attendance-person-name{font-weight:650}
+.training-journal .journal-heading{align-items:end;margin-bottom:24px;gap:16px}
+.training-journal .journal-heading p{font:700 clamp(16px,1.65vw,23px)/1.6 var(--ui-mono);color:var(--orange);letter-spacing:-.04em;margin-top:6px}
+.training-journal .journal-heading label,.training-journal .journal-controls>label{width:240px;max-width:100%}
+.training-journal label{font:10px/1.6 var(--ui-mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.training-journal label :is(input,select){font:13px/1.5 var(--ui-mono);text-transform:none;letter-spacing:0;min-height:46px;margin-top:6px}
+.training-journal .journal-controls{align-items:end;margin-bottom:24px}
+.training-journal .journal-records{padding:28px 30px;border:1px solid var(--border);position:relative;overflow:visible}
+.training-journal .journal-records>.panel-title{margin-bottom:25px}
+.training-journal .journal-records h2{font-size:clamp(20px,2.1vw,30px);font-weight:750}
+.training-journal .journal-records .panel-title>button{border:1px solid var(--border);padding:11px 15px;border-radius:0;color:inherit;font-size:12px}
+.training-journal .journal-filters{grid-template-columns:minmax(0,1fr) 240px;gap:16px;margin-bottom:26px}
+.training-journal .journal-record-table{width:100%;border-collapse:collapse}
+.training-journal .journal-record-table th{font:10px/1.6 var(--ui-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:12px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
+.training-journal .journal-record-table td{font:12px/1.6 var(--ui-mono);padding:16px 14px;border-bottom:1px solid var(--ui-line)}
+.training-journal .journal-record-table td:first-child{font-weight:700;white-space:nowrap}
+.training-journal .journal-record-link,.training-journal .journal-discipline{font-family:inherit;font-weight:700}
+.training-journal .journal-record-link{font-size:14px;text-align:left}
+.training-journal .journal-record-link svg{color:var(--orange);flex-shrink:0}
+.training-journal .journal-record-table small{font:10px/1.5 var(--ui-mono);letter-spacing:.08em;text-transform:uppercase;margin-top:5px}
+.training-journal .journal-status{display:flex;align-items:center;gap:5px}
+.training-journal .journal-status::before{content:'';width:6px;height:6px;background:var(--orange)}
+.training-journal .journal-status.done::before{background:#79df8b}
+.training-journal .journal-rpe{min-width:104px;gap:8px}
+.training-journal .journal-rpe .journal-rpe-segments{display:flex;gap:3px;width:92px;height:15px;border-radius:0;background:none;overflow:visible}
+.training-journal .journal-rpe .journal-rpe-segments i{position:static;width:auto;flex:1;height:100%;background:var(--border);border-radius:0}
+.training-journal .journal-rpe .journal-rpe-segments i.filled{background:var(--orange)}
+.training-journal .journal-rpe b{color:var(--orange);font-family:var(--ui-mono)}
+.training-journal .journal-note{min-width:160px;max-width:260px;color:var(--muted);white-space:normal}
+.cloud-card :is(.journal-records,.attendance-panel,.training-template-library)::before{content:'';position:absolute;inset:-5px;pointer-events:none;background:linear-gradient(var(--muted),var(--muted)) left 4px top/9px 1px no-repeat,linear-gradient(var(--muted),var(--muted)) left top 4px/1px 9px no-repeat,linear-gradient(var(--muted),var(--muted)) right 4px top/9px 1px no-repeat,linear-gradient(var(--muted),var(--muted)) right top 4px/1px 9px no-repeat,linear-gradient(var(--muted),var(--muted)) left 4px bottom/9px 1px no-repeat,linear-gradient(var(--muted),var(--muted)) left bottom 4px/1px 9px no-repeat,linear-gradient(var(--muted),var(--muted)) right 4px bottom/9px 1px no-repeat,linear-gradient(var(--muted),var(--muted)) right bottom 4px/1px 9px no-repeat;opacity:.55}
+.cloud-card .attendance-panel{position:relative}
+.training-template-library{position:relative;border:1px solid var(--border);background:var(--surface);padding:26px;margin-top:20px}
+.template-library-intro{display:flex;justify-content:space-between;gap:25px;align-items:start;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.template-library-intro h2{margin:8px 0;font-size:26px;letter-spacing:-.04em}
+.template-library-intro p{max-width:660px}
+.template-library-total{font:700 42px/1 var(--ui-mono);color:var(--orange);text-align:right}
+.template-library-total small{display:block;font:10px/1.5 var(--ui-mono);text-transform:uppercase;letter-spacing:.12em;margin-top:7px;color:var(--muted)}
+.template-library-toolbar{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:16px;align-items:end;margin:24px 0}
+.template-library-toolbar input,.template-library-toolbar select{margin:6px 0 0;width:100%;min-height:46px}
+.template-search>span:last-child{display:flex;position:relative;align-items:center}
+.template-search svg{position:absolute;left:12px;top:21px;color:var(--muted)}
+.template-search input{padding-left:38px}
+.cloud-card .template-list.template-catalog{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;border:0;background:none;overflow:visible;box-shadow:none}
+.cloud-card .template-card{display:flex;flex-direction:column;align-items:stretch;gap:16px;min-width:0;border:1px solid var(--border);border-radius:2px;padding:20px;background:color-mix(in srgb,var(--raised) 35%,var(--surface));position:relative}
+.cloud-card .template-card:hover{border-color:color-mix(in srgb,var(--orange) 55%,var(--border))}
+.template-card-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.template-discipline{display:flex;align-items:center;gap:6px;font:10px var(--ui-mono);text-transform:uppercase}
+.template-discipline i{width:6px;height:6px;flex-shrink:0}
+.template-card-name{display:flex;gap:10px;align-items:start}
+.template-card-name>svg{color:var(--orange);flex-shrink:0;margin-top:2px}
+.cloud-card .template-card-name h3{font-size:18px;overflow-wrap:anywhere;line-height:1.3}
+.template-plan-preview{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:12px;line-height:1.65;min-height:59px}
+.template-card-details{display:grid;gap:8px;margin-top:auto;padding-top:14px;border-top:1px solid var(--border)}
+.template-card-details span{display:flex;gap:8px;align-items:center;color:var(--muted);font:11px/1.5 var(--ui-mono);overflow-wrap:anywhere}
+.template-card-details svg{flex-shrink:0;color:var(--orange)}
+.cloud-card .template-card .row-actions{display:flex;gap:8px;justify-content:space-between;width:100%;margin:0}
+.cloud-card .template-card .row-actions>button{display:flex;gap:8px;align-items:center;justify-content:center;border:1px solid var(--border);background:none;min-height:40px;border-radius:2px;font-size:12px}
+.cloud-card .template-card .row-actions>button:first-child{flex:1}
+.cloud-card .template-card .row-actions>.template-delete{width:40px;color:#f3a09f}
+.coach-appearance{margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+.coach-appearance>.panel-title{margin-bottom:8px}
+.appearance-count{font:10px var(--ui-mono);color:var(--orange);border:1px solid var(--border);padding:5px 7px;white-space:nowrap}
+.appearance-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
+.appearance-grid>button{min-width:0;text-align:left;border:1px solid var(--border);background:var(--surface);padding:10px;border-radius:2px}
+.appearance-grid>button[aria-pressed=true]{border-color:var(--palette-preview);box-shadow:inset 0 -2px var(--palette-preview)}
+.appearance-preview{display:flex;flex-direction:column;gap:9px;border:1px solid #38404b;background:#101216;padding:10px;height:78px;margin-bottom:10px}
+.appearance-preview>i{display:block;height:5px;width:28%;background:var(--palette-preview)}
+.appearance-preview>span{display:flex;gap:4px;flex:1}
+.appearance-preview b{display:block;flex:1;background:#20252d;border-top:2px solid var(--palette-preview)}
+.appearance-preview>em{display:block;width:40%;height:7px;background:var(--palette-preview)}
+.appearance-name{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700}
+.appearance-name>i{width:7px;height:7px;background:var(--palette-preview);flex-shrink:0}
+.appearance-name>svg{margin-left:auto;color:var(--palette-preview);flex-shrink:0}
+.appearance-grid>button>small{display:block;font-size:10px;color:var(--muted);margin-top:4px}
+@media(min-width:901px){.workspace-tabs{position:relative;border-bottom:1px solid var(--border)}.workspace-tabs::after{content:'';position:absolute;left:0;right:0;bottom:-7px;height:6px;background:repeating-linear-gradient(90deg,var(--border) 0 1px,transparent 1px 10px);pointer-events:none}.workspace-header .account-actions>button span,.workspace-header .account-actions>details>summary span{font-size:12px;text-transform:uppercase}.cloud-card .club-sidebar{gap:0}.cloud-card .club-sidebar>button{padding:17px 15px}.cloud-dashboard>.page-title{margin:10px 0 25px}.cloud-card .club-sidebar>button:last-child{margin-left:auto}.cloud-card .attendance-panel{padding:28px}.cloud-card .journal-records{margin-top:24px}}
+@media(max-width:1100px){.cloud-card .template-list.template-catalog{grid-template-columns:repeat(2,minmax(0,1fr))}.appearance-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.training-journal .journal-heading{gap:12px;margin-bottom:16px}.training-journal .journal-heading label,.training-journal .journal-controls>label{width:auto;min-width:0}.training-journal .journal-records{padding:16px 14px}.training-journal .journal-records>.panel-title{margin-bottom:18px;gap:10px}.training-journal .journal-records h2{font-size:19px}.training-journal .journal-records .panel-title>button{padding:9px;font-size:10px}.training-journal .journal-filters{grid-template-columns:minmax(0,1fr);gap:12px}.training-journal .journal-record-table th,.training-journal .journal-record-table td{padding:12px 9px}.training-template-library{padding:16px 14px;margin-top:16px}.template-library-intro{gap:14px}.template-library-intro h2{font-size:22px}.template-library-total{font-size:30px}.template-library-toolbar{grid-template-columns:minmax(0,1fr);gap:12px;margin:18px 0}.cloud-card .template-list.template-catalog{grid-template-columns:minmax(0,1fr)}.cloud-card .template-card{padding:16px;gap:13px}.template-plan-preview{min-height:0;-webkit-line-clamp:2}.cloud-card .attendance-stats article{padding:10px}.cloud-card .attendance-stats article>small{font-size:8px;letter-spacing:.03em}.appearance-grid{gap:8px}.appearance-grid>button{padding:8px}.appearance-name{font-size:11px}.cloud-card .page-title .eyebrow{font-size:9px}.cloud-card .panel-title h2{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.cloud-card button{transition:none}}
+
+/* Shared treatments for every workspace, with semantic sport/attendance colors preserved. */
+.cloud-card :is(.coach-top,.coach-bottom,.overview-kpis,.analysis-stats,.journal-detail-kpis){gap:16px}
+.cloud-card :is(.coach-overview,.club-analysis) :is(article,.coach-panel){box-shadow:none;border-radius:3px}
+.cloud-card :is(.coach-day,.calendar-day,.calendar-week,.calendar-week-view,.calendar-agenda-list,.calendar-help,.calendar-filters){border-radius:2px;box-shadow:none}
+.cloud-card :is(.calendar-event,.event-card,.member-event-heading,.member-next-event,.overview-next-event,.review-list>div,.review-list>button){border-radius:2px;box-shadow:none}
+.cloud-card :is(.coach-day,.calendar-day){border-color:var(--ui-line)}
+.cloud-card :is(.calendar-heading,.calendar-filters) label,.cloud-card .analysis-filters>label{font:10px/1.5 var(--ui-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cloud-card :is(.calendar-heading,.calendar-filters,.analysis-filters) :is(input,select){font-family:inherit;font-size:13px;text-transform:none;letter-spacing:0}
+.cloud-card :is(.calendar-view-switch,.conversation-archive-tabs,.member-kind-tabs,.journal-tabs) button{border:1px solid var(--border);border-radius:2px;background:none;font-size:12px;font-weight:650}
+.cloud-card :is(.calendar-view-switch,.conversation-archive-tabs,.member-kind-tabs) button:is([aria-pressed=true],[aria-selected=true]){background:var(--ui-accent-soft);border-color:var(--orange);color:var(--ui-accent-ink,var(--orange))}
+.cloud-card :is(.review-list,.member-list,.members-list,.preset-list,.settings-people,.chat-threads){border-radius:2px;box-shadow:none}
+.cloud-card .member-row{padding-top:15px;padding-bottom:15px;border-color:var(--ui-line)}
+.cloud-card .member-row .avatar,.cloud-card .settings-person .avatar{border-radius:2px;border:1px solid var(--border);background:var(--raised)}
+.cloud-card :is(.member-row,.settings-person) :is(small,time){font-family:var(--ui-mono);font-size:10px}
+.cloud-card :is(.member-row,.preset-row) .row-actions>button{border:1px solid var(--border);border-radius:2px}
+.cloud-card :is(.analysis-stats,.journal-detail-kpis) article{border:1px solid var(--border);border-top:2px solid var(--orange);border-radius:2px;box-shadow:none;background:var(--surface)}
+.cloud-card :is(.analysis-stats,.journal-detail-kpis) article>small{font:10px/1.6 var(--ui-mono);letter-spacing:.1em;text-transform:uppercase}
+.cloud-card :is(.analysis-stats,.journal-detail-kpis) article>strong{font-family:var(--ui-mono);font-weight:700;letter-spacing:-.05em}
+.cloud-card :is(.journal-chart-scroll,.journal-charts,.journal-heatmap-scroll,.analysis-training-trend,.analysis-weekly-goals){border-radius:2px;box-shadow:none}
+.cloud-card :is(.chat-message,.conversation-picker button,.conversation-group,.chat-composer,.chat-compose-footer,.feedback-card){border-radius:3px;box-shadow:none}
+.cloud-card .chat-message{border-left:2px solid var(--border)}
+.cloud-card .chat-message.own{border-left-color:var(--orange);background:var(--ui-accent-soft)}
+.cloud-card .chat-message :is(time,small){font:10px/1.5 var(--ui-mono)}
+.cloud-card :is(.chat-threads button,.conversation-picker>button){border:1px solid var(--border)}
+.cloud-card :is(.chat-threads button,.conversation-picker>button)[aria-pressed=true]{border-color:var(--orange);background:var(--ui-accent-soft)}
+.cloud-card .settings-panel{padding:22px}
+.cloud-card .settings-panel>h2{padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:18px}
+.cloud-card .settings-panel .theme-switch button{border:1px solid var(--border);border-radius:2px}
+.cloud-card .settings-panel .theme-switch button[aria-pressed=true]{border-color:var(--orange);background:var(--ui-accent-soft);color:inherit}
+.cloud-card .settings-panel :is(form,fieldset){min-width:0}
+.cloud-card .settings-panel label{font-size:12px}
+.cloud-card :is(.preset-library,.preset-row,.preset-card,.group-card,.training-group,.admission-created-link,.admission-share-links,.first-steps){border-radius:2px;box-shadow:none}
+.cloud-card .preset-row{padding:18px;border:1px solid var(--border);background:var(--surface)}
+.cloud-card :is(.preset-row,.group-card,.training-group)>h3{font-size:18px}
+.cloud-card :is(.pending-record,.closed-record,.event-group-label,.waiting-label,.confirmed-label,.member-kind){border-radius:2px;font:10px/1.5 var(--ui-mono);letter-spacing:.035em}
+.dialog:not(.journal-share-dialog):not(.share-editor) {border-radius:4px;box-shadow:0 18px 70px #0005}
+.dialog:not(.journal-share-dialog):not(.share-editor) :is(input,select,textarea){border-radius:2px}
+.dialog:not(.journal-share-dialog):not(.share-editor)>h2{letter-spacing:-.03em;font-weight:750}
+.event-dialog .detail-hero{background:var(--surface);border-bottom:1px solid var(--border)}
+.event-dialog .detail-date{border-radius:2px;background:var(--raised)}
+.event-dialog .detail-date strong{font-family:var(--ui-mono)}
+.event-dialog .detail-tabs{background:var(--surface)}
+.event-dialog .detail-tabs button[aria-selected=true]{color:var(--ui-accent-ink,var(--orange));border-bottom-color:var(--orange)}
+.event-dialog :is(.detail-block,.detail-facts>div,.event-location,.attendance-review-toolbar,.attendance-toggles>button,.journal-coach-notes){border-radius:2px}
+.event-dialog .attendance-toggles>button{font-family:var(--ui-mono)}
+.mobile-club-nav button{border-radius:3px;box-shadow:none}
+.mobile-club-nav button.active{background:var(--orange);color:#101216}
+:root{--ui-accent-ink:var(--orange)}
+html[data-theme="light"]{--ui-accent-ink:color-mix(in srgb,var(--orange) 38%,#202a38)}
+html[data-theme="light"] .appearance-preview{color:#f0f2f5}
+html[data-theme="light"] .cloud-card :is(.technical-label,.eyebrow){color:var(--muted)}
+html[data-theme="light"] .cloud-card :is(.journal-heading p,.journal-rpe b,.template-library-total,.appearance-count,.club-sidebar button.active,.attendance-section th){color:var(--ui-accent-ink)}
+@media(max-width:760px){.cloud-card .settings-panel{padding:16px}.cloud-card .settings-panel>h2{font-size:17px}.cloud-card :is(.coach-top,.coach-bottom,.overview-kpis,.analysis-stats,.journal-detail-kpis){gap:10px}.cloud-card .member-row{padding-top:12px;padding-bottom:12px}.cloud-card .calendar-event{border-radius:2px}.cloud-card .preset-row{padding:14px}}
+.cloud-card :is(.attendance-batch-actions,.attendance-review-toolbar,.attendance-shortcut,.week-strip>button,.coach-week>button,.coach-week>div,.coach-day-card){border-radius:2px;box-shadow:none}
+.cloud-card .attendance-batch-actions{padding:12px;background:transparent;border-color:var(--ui-line)}
+.cloud-card .attendance-batch-actions p{font-size:12px}
+.journal-share-dialog{border-radius:4px;border:1px solid var(--border)}
+.journal-share-dialog .journal-share-dialog-toolbar{background:var(--surface);border-bottom:1px solid var(--border)}
+.journal-share-dialog .journal-share-dialog-toolbar>strong{font-family:var(--ui-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.journal-share-dialog :is(button,input,select,textarea,.share-template-picker,.share-data-chips button,.share-template-card,.share-template-cards>button,.share-preset){border-radius:3px}
+.journal-share-dialog .share-editor-heading small,.journal-share-dialog legend{font-family:var(--ui-mono);letter-spacing:.08em}
+.journal-share-dialog .share-editor-tabs button[aria-selected=true]{color:var(--ui-accent-ink);border-bottom-color:var(--orange)}
+.journal-share-dialog .share-editor-tools{border-color:var(--border)}
+@media(min-width:901px){.cloud-card .attendance-matrix{min-width:100%;width:max-content}.cloud-card .attendance-matrix thead th:not(:first-child):not(:last-child){max-width:none;width:180px}.cloud-card .attendance-matrix .attendance-choice,.cloud-card .attendance-matrix .attendance-toggles{width:100%;max-width:none}.cloud-card .attendance-matrix td:last-child,.cloud-card .attendance-matrix thead th:last-child{width:90px;min-width:90px}.cloud-card .attendance-matrix td{padding:3px 0}.cloud-card .attendance-matrix thead button{text-align:left;padding:12px}.cloud-card .attendance-matrix th:last-child{color:var(--ui-accent-ink);border-top:2px solid var(--orange)}.cloud-card .attendance-stats{gap:14px}.cloud-card .attendance-matrix .attendance-toggles>button{min-height:44px}}
+.cloud-card .week-strip .coach-day,.cloud-card :is(.member-featured,.member-attendance-card,.member-more-events,.member-schedule>button,.own-attendance,.own-response){border-radius:3px;box-shadow:none}
+.cloud-card .member-date{font-family:var(--ui-mono);border-radius:2px}
+.cloud-card .member-rsvp-badge{border-radius:2px;font-size:11px}
+.cloud-card .member-response-bar button{border-radius:2px;box-shadow:none}
+.overlay .dialog:not(.journal-share-dialog) button{border-radius:2px;box-shadow:none}
+.overlay .dialog:not(.journal-share-dialog) button.primary{background:var(--orange);color:#101216}
+.fees-dialog :is(.fee-row,.fee-plan,.fee-editor,.fee-detail,.fee-help,.fee-help-grid>div,.fees-totals>div){border-radius:2px;box-shadow:none}
+.fees-dialog .fees-heading h2{font-weight:750;letter-spacing:-.03em}
+.fees-dialog .fees-tabs button{font-size:12px;border:1px solid var(--border)}
+.fees-dialog .fees-tabs button[aria-selected=true]{background:var(--orange);color:#101216;border-color:var(--orange)}
+.fees-dialog :is(.fee-row-money,.fees-totals strong){font-family:var(--ui-mono)}
+html[data-theme="light"] .cloud-card button:focus-visible,html[data-theme="light"] .event-dialog button:focus-visible{outline-color:var(--ui-accent-ink)}
+html[data-theme="light"] .appearance-name>svg{color:color-mix(in srgb,var(--palette-preview) 38%,#202a38)}
+html[data-theme="light"] .appearance-grid>button[aria-pressed=true]{border-color:color-mix(in srgb,var(--palette-preview) 38%,#202a38)}

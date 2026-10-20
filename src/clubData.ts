@@ -91,7 +91,8 @@ export async function saveAttendanceBatch(client:SupabaseClient,club:ClubAccess,
  const userId=await verify(client);
  const rows=updates.map(u=>({club_id:club.id,event_id:u.eventId,member_id:u.memberId,attended:u.attended,attendance_excused:u.attendance_excused,confirmed_by:userId}));
  // One SQL statement: all choices succeed together. Omitted RSVP fields stay intact.
- checked(await client.from('participation').upsert(rows,{onConflict:'event_id,member_id'}),'Docházku se nepodařilo uložit.');
+ const saved=checked<{event_id:string;member_id:string}[]>(await client.from('participation').upsert(rows,{onConflict:'event_id,member_id'}).select('event_id,member_id'),'Docházku se nepodařilo uložit.');
+ if(saved.length!==rows.length)throw new Error('Server nepotvrdil uložení celé docházky. Obnovte data a ověřte seznam.');
 }
 const eventColumns='*';
 const templateColumns='*';

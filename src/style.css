@@ -826,3 +826,18 @@ html[data-theme="light"] button.studio-entry{background:linear-gradient(110deg,v
 @media(max-width:900px){.event-dialog-full{height:calc(100dvh - max(12px,env(safe-area-inset-top,0px)) - max(12px,env(safe-area-inset-bottom,0px)))}.event-dialog-full .event-dialog-body{flex:1}}
 
 @media(max-width:480px){.journal-detail-status{width:100%}.journal-header-actions{display:grid;grid-template-columns:auto minmax(0,1fr) auto;width:100%;gap:6px}.journal-header-actions>button{min-height:50px}.journal-header-actions button.studio-entry.compact{width:100%;justify-content:center}}
+
+.attendance-toggles{display:flex;gap:4px;align-items:center;justify-content:center;min-width:96px}
+.attendance-toggles>button{flex:1;min-width:29px;min-height:40px;padding:6px 4px;border:1px solid var(--border);border-radius:9px;font-size:14px;font-weight:750;background:var(--panel);color:var(--muted);box-shadow:none}
+.attendance-toggles>button.present[aria-pressed="true"]{background:#193d2c;color:#8de9a3;border-color:#64c884}
+.attendance-toggles>button.excused[aria-pressed="true"]{background:#332747;color:#d1b4ff;border-color:#a586d9}
+.attendance-toggles>button.absent[aria-pressed="true"]{background:#48252b;color:#ffacb0;border-color:#dc7b85}
+.attendance-toggles>button:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.attendance-review-toolbar,.attendance-batch-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0 18px;padding:14px;border:1px solid var(--border);border-radius:12px}
+.attendance-review-toolbar>p,.attendance-batch-actions>p{flex-basis:100%;margin:0;font-size:13px;line-height:1.5}
+.attendance-row .attendance-toggles{width:150px;flex-shrink:0}
+.attendance-matrix .attendance-toggles{width:100%;max-width:130px}
+.attendance-review-actions{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;background:var(--surface,#171d25);border-bottom:1px solid var(--border)}
+.attendance-rsvp-note{color:var(--muted);font-size:11px}
+@media(max-width:600px){.attendance-row .attendance-toggles{width:112px}.attendance-review-toolbar>button.primary{width:100%}.attendance-row:has(.attendance-toggles){display:grid;gap:8px;grid-template-columns:minmax(0,1fr) 112px}.attendance-row:has(.attendance-toggles)>.attendance-name{min-width:0;overflow-wrap:anywhere}.attendance-row:has(.attendance-toggles)>select{grid-column:1;font-size:12px;min-width:0;width:100%}.attendance-row:has(.attendance-toggles)>.attendance-toggles{grid-column:2;grid-row:1 / span 2}}
+@media(max-width:600px){.attendance-review-actions>button.primary{flex:1}.attendance-row:has(.attendance-rsvp-note){padding:9px 0;row-gap:3px}.attendance-row>.attendance-rsvp-note{grid-column:1;grid-row:2}}

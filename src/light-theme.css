@@ -131,9 +131,7 @@ html[data-theme="light"] .weekly-goal-editor{border-top:1px solid #bbc6d2}
 html[data-theme="light"] .spotlight-title:hover{color:#765719}
 html[data-theme="light"] .calendar-view-switch{background:#e6eaef}
 html[data-theme="light"] .calendar-view-switch button[aria-pressed=true]{background:#e6eaef;color:#765719}
-html[data-theme="light"] .email-reminder>button{color:#765719;border:1px solid #d5cbb9}
-html[data-theme="light"] .reminder-preview{background:#eff2f6}
-html[data-theme="light"] .email-reminder [role=alert]{color:#763819}
+
 html[data-theme="light"] .members-tabs{background:#e6eaef}
 html[data-theme="light"] .members-tabs button{color:#3a4555}
 html[data-theme="light"] .members-tabs button[aria-selected=true]{background:#e6eaef;color:#765719}

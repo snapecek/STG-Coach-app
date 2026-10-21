@@ -37,6 +37,7 @@ export function suggestedTrainingIcon(type:string):TrainingIconId{
  if(/serm|fenc/.test(t))return 'fencing';
  if(/svihad|skipping/.test(t))return 'skipping';
  if(/vzp|weightlift/.test(t))return 'weightlifting';
+ if(/zavod|\brace\b/.test(t))return 'podium';
  return 'dumbbell';
 }
 export function resolveTrainingIcon(source:{type:string;training_icon?:string|null}):TrainingIconId|null{
@@ -50,4 +51,13 @@ export async function requireTrainingIconMigration(client:import('@supabase/supa
  if(icon==null)return;
  const {error}=await client.from('events').select('training_icon').eq('club_id',clubId).limit(1);
  if(error)throw new Error(['42703','PGRST204'].includes(error.code)?'Pro uložení sportovní ikony nejdříve nahrajte migraci 046 v Supabase.':'Sportovní ikonu nelze ověřit. Zkontrolujte připojení.');
+}
+
+/** Migration 046 deliberately clears race icons. Check 047 before any custom
+ * race choice so an older database cannot report success while losing it. */
+export async function requireRaceIconMigration(client:import('@supabase/supabase-js').SupabaseClient,icon:TrainingIconChoice|undefined){
+ if(icon==null)return;
+ const {data,error}=await client.rpc('race_icons_ready');
+ if(error&&!['PGRST202','42883'].includes(error.code))throw new Error('Ikonu závodu nelze ověřit. Zkontrolujte připojení a zkuste to znovu.');
+ if(error||data!==true)throw new Error('Pro uložení ikony závodu nejdříve nahrajte migraci 047 v Supabase.');
 }

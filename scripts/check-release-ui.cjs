@@ -26,6 +26,7 @@ async function run(args,extra={}){
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_COMPACT_MOBILE_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_STICKY_HEADER_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_FLUID_WORKSPACE_ONLY',engine:'webkit'});
+  await run(['scripts/check-member-ui.cjs'],{flag:'STG_UNIFIED_UI_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_EVENT_WINDOW_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_EXPERIENCE_ONLY',engine:'webkit'});
   for(const file of ['check-auth-persistence.cjs','check-share-editor.cjs','check-share-touch-ui.cjs','check-journal-share-dialog.cjs','check-release-runtime.cjs'])await run(['scripts/'+file]);

@@ -1,3 +1,4 @@
+import {useAutoRefresh} from './useAutoRefresh';
 import {useState,useEffect} from 'react';
 import type {SupabaseClient} from '@supabase/supabase-js';
 import type {ClubAccess} from './supabase';
@@ -6,6 +7,7 @@ const hours=(minutes:number)=>(minutes/60).toLocaleString('cs-CZ',{maximumFracti
 export function WeeklyVolume({client,club,volume,types,compact=false,onDetails}:{compact?:boolean;onDetails?:()=>void;client:SupabaseClient;club:ClubAccess;volume:[string,number][];types:string[]}){
  const [goals,setGoals]=useState<WeeklyGoal[]>([]),[error,setError]=useState(''),[ready,setReady]=useState(false),[editing,setEditing]=useState(false),[busy,setBusy]=useState(false),[draft,setDraft]=useState<{type:string;hours:string}[]>([]),[notice,setNotice]=useState('');
  useEffect(()=>{let alive=true;setReady(false);loadWeeklyGoals(client,club).then(g=>{if(alive){setGoals(g);setReady(true);setError('')}}).catch(e=>{if(alive)setError(e.message)});return()=>{alive=false}},[client,club.id,club.role]);
+ useAutoRefresh(client,club.id,{canRefresh:()=>ready&&!editing&&!busy,load:()=>loadWeeklyGoals(client,club),apply:g=>{setGoals(g);setError('')},onError:e=>setError((e as Error).message)});
  const rows=[...new Set([...goals.map(g=>g.training_type),...volume.map(v=>v[0])])];
  async function save(){setBusy(true);setError('');try{const next=draft.map(g=>({training_type:g.type,target_minutes:Math.round(Number(g.hours)*60)}));await saveWeeklyGoals(client,club,next);setGoals(next.map(g=>({...g,training_type:g.training_type.trim()})));setEditing(false);setNotice('Týdenní cíle uloženy.')}catch(e){setError(e instanceof Error?e.message:'Cíle nelze uložit.')}finally{setBusy(false)}}
  const volumeRows=rows.map(type=>{const minutes=volume.find(v=>v[0]===type)?.[1]||0,target=goals.find(g=>g.training_type===type)?.target_minutes;return <div className="volume-row" key={type}><b>{type}</b><div role="meter" aria-label={'Objem '+type} aria-valuenow={minutes} aria-valuemin={0} aria-valuemax={Math.max(target||minutes,minutes,1)}><span style={{width:Math.min(100,minutes/(target||Math.max(...volume.map(v=>v[1]),1))*100)+'%'}}/></div><strong>{hours(minutes)}{target?' / '+hours(target):''}</strong></div>});

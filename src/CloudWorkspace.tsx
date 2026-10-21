@@ -9,6 +9,7 @@ import {configureDiagnostics} from './clientDiagnostics';
 import {requestLeave} from './UnsavedChanges';
 import {LoadBoundary} from './LoadBoundary';
 import {ClubFeesButton} from './ClubFeesEntry';
+import {useClubLiveSync} from './clubLiveSync';
 import {useAutoRefresh} from './useAutoRefresh';
 import {disableCoachPush,reconcilePushIdentity,readPushTarget} from './coachPush';
 import {ClubSwitcher} from './ClubSwitcher';
@@ -101,6 +102,7 @@ function AuthWorkspace({client,onBrandTarget}:{client:SupabaseClient;onBrandTarg
    Promise.all([loadClubAccess(client),client.auth.getUser()]).then(([result,identity])=>{if(identity.error||!identity.data.user)throw new Error('Přihlášení nelze ověřit.');if(alive){setSession(current=>current?.user.id===identity.data.user.id?{...current,user:identity.data.user}:current);setClubs(result);if(preferredClub.current&&result.some(c=>c.id===preferredClub.current)){setActiveClub(preferredClub.current);preferredClub.current=''}else if(pushTarget&&result.some(c=>c.id===pushTarget.clubId)){setActiveClub(pushTarget.clubId)}else {const primary=identity.data.user.user_metadata?.primary_club_id;if(typeof primary==='string'&&result.some(c=>c.id===primary))setActiveClub(primary);else if(result.length===1)setActiveClub(result[0].id);}}}).catch(err=>{if(alive)setError(err instanceof Error?err.message:'Klub se nepodařilo načíst.');}).finally(()=>{if(alive)setLoadingClubs(false);});
    return ()=>{alive=false;};
  },[session?.user.id,client,retry,passwordSetup,pendingInvite,confirmingLink]);
+ useClubLiveSync(client,session&&clubs.some(c=>c.id===activeClub)?activeClub:'');
  useAutoRefresh(client,session?.user.id||'',{
   canRefresh:()=>!!session&&!initializing&&!loadingClubs&&!busy&&!passwordSetup&&!pendingInvite&&!confirmingLink,
   load:()=>loadClubAccess(client),

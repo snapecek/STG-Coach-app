@@ -39,3 +39,8 @@
 .calendar-event .calendar-sport-icon>.sport-outline-icon--special{width:20px}
 .calendar .calendar-event>.training-watermark,.calendar .agenda-entry>.training-watermark{color:inherit}
 @media(max-width:760px){.calendar-event .calendar-sport-icon>.sport-outline-icon{width:18px}.calendar-event .calendar-sport-icon>.sport-outline-icon--special{width:16px}.calendar .agenda-entry .calendar-sport-icon>.sport-outline-icon{width:24px}}
+
+/* Shared overview tint, readable text and category-coloured outline watermark. */
+.calendar .calendar-event,.calendar .agenda-entry{color:var(--text,#e8edf3);border-left-color:var(--event-color)}
+.calendar .calendar-event>.training-watermark,.calendar .agenda-entry>.training-watermark{color:var(--event-color)}
+html[data-theme="light"] .calendar .calendar-event,html[data-theme="light"] .calendar .agenda-entry{color:#202a33}

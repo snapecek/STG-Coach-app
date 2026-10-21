@@ -32,7 +32,7 @@
 .calendar-event .training-watermark>.sport-outline-icon--special,.week-event .training-watermark>.sport-outline-icon--special{width:52px;bottom:-5px}
 
 /* Calendar foreground icons stay legible on the club's category colours. */
-.calendar .calendar-sport-icon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;color:inherit;pointer-events:none}
+.calendar .calendar-sport-icon,.calendar .agenda-entry>.calendar-sport-icon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;color:inherit;pointer-events:none}
 .calendar .calendar-sport-icon>.sport-outline-icon{display:inline-block;width:28px}
 .calendar .calendar-event-meta{display:flex;align-items:center;flex-wrap:wrap;gap:3px;line-height:1.3;margin-bottom:3px}
 .calendar-event .calendar-sport-icon>.sport-outline-icon{width:22px}

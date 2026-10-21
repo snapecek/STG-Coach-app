@@ -244,6 +244,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
        const disabled=entries.filter({hasText:'Závod bez přihlášení'});assert.equal(await disabled.locator('.calendar-sport-icon,.training-watermark').count(),0);
        const icon=training.locator('.calendar-sport-icon>.sport-outline-icon');assert(await icon.isVisible());
        assert((await icon.boundingBox()).width>=16);
+       if(view==='Seznam')assert.equal(await training.locator('.calendar-sport-icon').evaluate(e=>getComputedStyle(e).flexGrow),'0','Agenda icon does not consume space for the title');
        assert.equal(await training.locator('.training-watermark').evaluate(e=>getComputedStyle(e).opacity),'0.15');
        assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'No page overflow');
        assert(await calendar.evaluate(e=>e.scrollWidth<=e.clientWidth+1),'No calendar overflow');

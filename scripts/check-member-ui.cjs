@@ -216,6 +216,29 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    }
    console.log('PASS app help: member/coach/owner defaults, both guides, accent-insensitive search, empty results, keyboard tabs, accordion, native modal and focus return, desktop/mobile light/dark, no data changes and preserved draft');return;
   }
+  if(process.env.STG_UNIFIED_UI_ONLY==='1'){
+   fees.enabled=true;
+   for(const role of ['coach','member']){
+    const v=await context(role,false,false,true),p=v.page;await login(p);await p.locator('.cloud-dashboard').waitFor();await p.evaluate(()=>document.fonts.ready);
+    const nav=async name=>{if(name==='Nastavení'){await p.getByLabel('Uživatelské menu',{exact:true}).click();await p.getByRole('button',{name,exact:true}).click()}else await p.getByRole('navigation').getByRole('button',{name,exact:true}).filter({visible:true}).first().click()};
+    const check=async label=>{
+     const issues=await p.evaluate(()=>[...document.querySelectorAll('.cloud-card *,.dialog *,.app-help-dialog *')].filter(e=>!(e instanceof SVGElement)&&e.getClientRects().length&&getComputedStyle(e).visibility==='visible').flatMap(e=>{
+      const s=getComputedStyle(e),issues=[];if(parseFloat(s.borderTopLeftRadius)>0)issues.push({type:'rounded',class:e.className,radius:s.borderTopLeftRadius});
+      if(e.matches('.page-title h1')&&(s.fontFamily.indexOf('Chakra Petch')<0||s.textTransform!=='uppercase'))issues.push({type:'heading',font:s.fontFamily,transform:s.textTransform});return issues;
+     }));assert.deepEqual(issues,[],label);assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),label+' page overflow');
+    };
+    for(const width of [320,390,900,901,1440,2560]){
+     await p.setViewportSize({width,height:900});for(const name of role==='coach'?['Přehled','Kalendář','Docházka','Členové','Analýza','Deník','Šablony','Nastavení']:['Přehled','Kalendář','Deník','Nastavení']){await nav(name);await check(role+' '+name+' '+width);const title=p.locator('.page-title h1');if(await title.count())assert.equal(await title.evaluate(e=>getComputedStyle(e).fontSize),width<=760?'26px':'32px')}
+     const header=p.getByRole('banner',{name:'Klub a účet',exact:true});
+     for(const [trigger,panel] of [[header.getByRole('button',{name:'Moje upozornění',exact:true}),p.getByRole('region',{name:'Moje upozornění',exact:true})],[header.getByRole('button',{name:'Moje kluby',exact:true}),p.getByRole('region',{name:'Moje kluby',exact:true})],[header.getByLabel('Uživatelské menu',{exact:true}),p.locator('.user-menu-panel')]]){
+      await trigger.click();await panel.waitFor();const t=await trigger.boundingBox(),r=await panel.boundingBox();assert(Math.abs(r.y-t.y-t.height-8)<2,'Every popup follows trigger bottom');assert(r.x>=0&&r.x+r.width<=width+1,'Popup fits viewport');if(t.x+t.width/2<width/2&&t.x+r.width<=width-12)assert(Math.abs(r.x-t.x)<2,'Left trigger expands right '+JSON.stringify({role,width,t,r}));else if(t.x+t.width/2>=width/2&&t.x+t.width-r.width>=12)assert(Math.abs(r.x+r.width-t.x-t.width)<2,'Right trigger expands left '+JSON.stringify({role,width,t,r}));await check('Popup '+role+' '+width);await trigger.press('Escape');
+     }
+     if(width<=900){const bad=await p.getByRole('navigation',{name:'Mobilní navigace',exact:true}).getByRole('button').evaluateAll(bs=>bs.flatMap(b=>{const text=[...b.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.trim());if(!text)return [];const range=document.createRange();range.selectNode(text);const t=range.getBoundingClientRect(),r=b.getBoundingClientRect();return t.width>r.width+1?[{text:text.textContent,width:t.width,button:r.width}]:[]}));assert.deepEqual(bad,[],'Mobile navigation labels fit')}
+    }
+    await v.c.close();
+   }
+   console.log('PASS unified UI: coach/member screens, capital headings, shared title scale, rectangular frames, all popup anchors left/right, mobile navigation text, 320–2560 px');return;
+  }
   if(process.env.STG_FLUID_WORKSPACE_ONLY==='1'){
    for(const role of ['coach','member']){
     const v=await context(role,false,false,true),p=v.page;
@@ -232,7 +255,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
      for(const scroll of [0,100000]){
       await scrollWorkspace(p,scroll);await bell.click();const panel=p.getByRole('region',{name:'Moje upozornění',exact:true});await panel.getByText('Trenér s delším jménem',{exact:false}).first().waitFor();
       const b=await bell.boundingBox(),r=await panel.boundingBox(),h=await header.boundingBox();assert(r.x>=0&&r.x+r.width<=width+1&&r.y+r.height<=900,'Popup stays in viewport');
-      if(width>900){assert(Math.abs(r.y-b.y-b.height-8)<2,'Popup follows the bell vertically');assert(Math.abs(r.x+r.width-b.x-b.width)<2,'Popup follows the bell horizontally')}else assert(r.y>=h.y+h.height,'Mobile popup stays below header');
+      if(width>900){assert(Math.abs(r.y-b.y-b.height-8)<2,'Popup follows the bell vertically');if(b.x+b.width/2<width/2)assert(Math.abs(r.x-b.x)<2,'Left-side popup follows left edge');else assert(Math.abs(r.x+r.width-b.x-b.width)<2,'Right-side popup follows right edge')}else assert(r.y>=h.y+h.height,'Mobile popup stays below header');
       assert(await panel.evaluate(e=>{e.scrollTop=e.scrollHeight;return e.scrollTop>0}),'Long notifications scroll inside popup');await panel.evaluate(e=>e.scrollTop=0);
       if([390,1920,3440].includes(width)&&scroll===0)await p.screenshot({path:'/tmp/trenomi-fluid-'+engine+'-'+role+'-'+width+'.png'});
       await bell.press('Escape');assert(!(await panel.isVisible()));
@@ -267,8 +290,8 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
 
      const originalScroll=await workspaceScrollTop(p);const tap=async locator=>{const r=await locator.boundingBox();await p.mouse.click(r.x+r.width/2,r.y+r.height/2);assert(Math.abs(await workspaceScrollTop(p)-originalScroll)<2,'Using sticky icons must preserve scroll position')};
      await tap(clubs);const clubMenu=p.getByRole('region',{name:'Moje kluby',exact:true});await clubMenu.getByRole('button',{name:'Druhý sportovní klub s delším názvem',exact:false}).waitFor();
-     const below=async panel=>{const h=await header.boundingBox(),r=await panel.boundingBox();assert(r.x>=0&&r.x+r.width<=width,'Menu must remain on screen');assert(r.y>=h.y+h.height,'Menu must open below all header icons');assert(r.y+r.height<=844-(width<=900?64:0),'Menu must stay above bottom navigation')};
-     await below(clubMenu);await tap(account);await clubMenu.waitFor({state:'detached'});const accountMenu=p.locator('.user-menu-panel');await below(accountMenu);await tap(bell);assert(!(await accountMenu.isVisible()));const notifications=p.getByRole('region',{name:'Moje upozornění',exact:true});if(width>900){const r=await notifications.boundingBox(),b=await bell.boundingBox();assert(Math.abs(r.y-b.y-b.height-8)<2,'Desktop notifications open directly below the bell');assert(Math.abs(r.x+r.width-b.x-b.width)<2,'Desktop notifications align with the bell');assert(r.x>=0&&r.y+r.height<=844,'Notification bounds')}else await below(notifications);await p.screenshot({path:'/tmp/trenomi-sticky-'+engine+'-'+role+'-'+width+'.png'});await bell.press('Escape');assert(!(await notifications.isVisible()));const feeButton=header.getByRole('button',{name:'Klubové příspěvky',exact:true});await feeButton.click();const dialog=p.getByRole('dialog',{name:'Klubové příspěvky',exact:true});await dialog.waitFor();assert(await bell.evaluate(el=>{const r=el.getBoundingClientRect();return !!document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.fees-overlay')}),'Modal must cover sticky header');await dialog.getByRole('button',{name:'Zavřít příspěvky',exact:true}).click();await dialog.waitFor({state:'detached'});
+     const below=async(panel,trigger)=>{const h=await header.boundingBox(),r=await panel.boundingBox(),t=await trigger.boundingBox();assert(r.x>=0&&r.x+r.width<=width,'Menu must remain on screen');if(width>900)assert(Math.abs(r.y-t.y-t.height-8)<2,'Menu must follow its trigger');else assert(r.y>=h.y+h.height-1,'Menu stays below mobile icons');assert(r.y+r.height<=844-(width<=900?64:0),'Menu must stay above bottom navigation')};
+     await below(clubMenu,clubs);await tap(account);await clubMenu.waitFor({state:'detached'});const accountMenu=p.locator('.user-menu-panel');await below(accountMenu,account);await tap(bell);assert(!(await accountMenu.isVisible()));const notifications=p.getByRole('region',{name:'Moje upozornění',exact:true});if(width>900){const r=await notifications.boundingBox(),b=await bell.boundingBox();assert(Math.abs(r.y-b.y-b.height-8)<2,'Desktop notifications open directly below the bell');if(b.x+b.width/2<width/2)assert(Math.abs(r.x-b.x)<2,'Left-side notification trigger aligns left');else assert(Math.abs(r.x+r.width-b.x-b.width)<2,'Right-side notification trigger aligns right');assert(r.x>=0&&r.y+r.height<=844,'Notification bounds')}else await below(notifications,bell);await p.screenshot({path:'/tmp/trenomi-sticky-'+engine+'-'+role+'-'+width+'.png'});await bell.press('Escape');assert(!(await notifications.isVisible()));const feeButton=header.getByRole('button',{name:'Klubové příspěvky',exact:true});await feeButton.click();const dialog=p.getByRole('dialog',{name:'Klubové příspěvky',exact:true});await dialog.waitFor();assert(await bell.evaluate(el=>{const r=el.getBoundingClientRect();return !!document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.fees-overlay')}),'Modal must cover sticky header');await dialog.getByRole('button',{name:'Zavřít příspěvky',exact:true}).click();await dialog.waitFor({state:'detached'});
      for(const theme of ['dark','light']){
       await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);
       const mobile=width<=900,fadeRoot=mobile?p.getByRole('main',{name:'Obsah klubu',exact:true}):header;

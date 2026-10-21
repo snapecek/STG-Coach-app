@@ -1,0 +1,37 @@
+/* Shared type scale and rectangular UI; user-entered content keeps its case. */
+:root{--ui-font:'Chakra Petch',system-ui,sans-serif;--ui-title:32px;--ui-section:24px;--ui-subtitle:18px;--ui-body:14px;--ui-control:12px;--ui-label:10px;--ui-data:12px}
+:is(.cloud-card,.dialog,.app-help-dialog,.release-notice){font-family:var(--ui-font);font-size:var(--ui-body);line-height:1.5}
+:is(.cloud-card,.dialog,.app-help-dialog) :is(button,input,select,textarea,summary){font-family:var(--ui-font)}
+:is(.cloud-card,.dialog,.app-help-dialog) :is(button,summary){font-size:var(--ui-control);font-weight:600;text-transform:uppercase;letter-spacing:.025em}
+:is(.cloud-card,.dialog,.app-help-dialog) :is(input,select,textarea){font-size:var(--ui-body);letter-spacing:normal;text-transform:none}
+:is(.cloud-card,.dialog,.app-help-dialog) p{font-family:var(--ui-font);font-size:var(--ui-body);line-height:1.65}
+:is(.cloud-card,.dialog,.app-help-dialog) :is(h1,h2,h3,h4){font-family:var(--ui-font);font-weight:700;text-transform:uppercase;letter-spacing:-.025em;line-height:1.25}
+.cloud-card .page-title h1,.cloud-card h1{font-size:var(--ui-title)}
+.cloud-card :is(.panel-title,.settings-panel,.member-featured,.member-alerts,.member-attendance-card,.first-steps) h2,.cloud-card h2,.dialog h2,.app-help-dialog h2{font-size:var(--ui-section)}
+.cloud-card h3,.dialog h3,.app-help-dialog h3{font-size:var(--ui-subtitle)}
+:is(.cloud-card,.dialog,.app-help-dialog) :is(label,.eyebrow,.technical-label,thead th){font:500 var(--ui-label)/1.5 var(--ui-mono);letter-spacing:.1em;text-transform:uppercase}
+:is(.cloud-card,.dialog,.app-help-dialog) label :is(input,select,textarea,button){font-family:var(--ui-font);letter-spacing:normal;text-transform:none}
+:is(.cloud-card,.dialog,.app-help-dialog) :is(small,.muted){font-size:var(--ui-label)}
+.cloud-card .journal-record-table :is(td,th),.cloud-card .journal-record-table button{font:500 var(--ui-data)/1.6 var(--ui-mono);text-transform:none;letter-spacing:normal}
+:is(.cloud-card,.dialog) :is(.week-event,.calendar-event,.agenda-entry,.member-event-heading,.spotlight-title,.journal-entry,.notification-panel>button,.club-switcher-panel>button,.conversation-picker>button,.journal-record-table tbody button){text-transform:none;letter-spacing:normal}
+:is(.cloud-card,.dialog) :is(.week-event,.calendar-event,.agenda-entry,.member-event-heading,.spotlight-title,.journal-entry) :is(b,strong,span,small){text-transform:none}
+/* Geometry is an invariant even for legacy component selectors. SVG artwork and
+   canvas exports are unaffected; native checkbox/radio semantics remain native. */
+:is(.cloud-card,.dialog,.app-help-dialog,.release-notice),:is(.cloud-card,.dialog,.app-help-dialog,.release-notice) :not(svg):not(svg *){border-radius:0!important}
+.workspace-header :is(.club-switcher,.user-menu,.notification-bell){position:relative;inset:auto}
+.workspace-header :is(.club-switcher,.user-menu,.notification-bell)>:is(.club-switcher-panel,.user-menu-panel,.notification-panel){position:absolute;inset:auto;left:var(--popup-left,0px);top:var(--popup-top,52px);width:var(--popup-width,320px);max-width:none;max-height:var(--popup-max-height,60dvh);margin:0;overflow:auto;overscroll-behavior:contain;z-index:30}
+.workspace-header .club-switcher-panel{--popup-preferred-width:320px}
+.workspace-header .user-menu-panel{--popup-preferred-width:280px}
+.workspace-header .notification-panel{--popup-preferred-width:360px}
+@media(max-width:760px){:root{--ui-title:26px;--ui-section:20px;--ui-subtitle:16px}.cloud-card :is(input,select,textarea),.dialog :is(input,select,textarea),.app-help-dialog :is(input,select,textarea){font-size:16px}}
+/* Compact mobile labels keep their own shared navigation size, avoiding overlap. */
+@media(max-width:900px){.cloud-card .mobile-club-nav button{font-size:10px;letter-spacing:-.02em;font-weight:600;min-width:0;gap:5px}}
+@media(max-width:360px){.cloud-card .mobile-club-nav button{font-size:9px}}
+/* Data headings use capitals; the values below remain in their original case. */
+.cloud-card .journal-record-table thead th{font:500 var(--ui-label)/1.5 var(--ui-mono);text-transform:uppercase;letter-spacing:.1em}
+.cloud-card .journal-record-table .journal-status{font-size:var(--ui-label);text-transform:uppercase}
+/* One heading scale takes precedence over historical section-specific sizes. */
+:is(.cloud-card,.dialog,.app-help-dialog) :is(h1,h2,h3,h4){font-family:var(--ui-font)!important;font-weight:700!important}
+:is(.cloud-card,.dialog,.app-help-dialog) h1{font-size:var(--ui-title)!important}
+:is(.cloud-card,.dialog,.app-help-dialog) h2{font-size:var(--ui-section)!important}
+:is(.cloud-card,.dialog,.app-help-dialog) h3{font-size:var(--ui-subtitle)!important}

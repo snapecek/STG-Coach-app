@@ -48,9 +48,9 @@
 .weekly-volume .volume-row{grid-template-columns:80px minmax(35px,1fr) 72px;gap:8px}.weekly-volume>.text-button{font-size:11px;color:var(--orange);margin-top:20px}.weekly-goal-editor{margin-top:18px;border-top:1px solid #303b49;padding-top:14px}.goal-editor-row{display:flex;gap:8px;align-items:end;margin:12px 0}.goal-editor-row label{min-width:0;flex:1;font-size:10px}.goal-editor-row input{width:100%;padding:9px;font-size:12px}.goal-editor-row button{padding:9px}.goal-actions{display:flex;gap:6px;flex-wrap:wrap}.goal-actions button{font-size:10px;padding:9px}.week-cell{max-height:340px;overflow-y:auto}.club-sidebar{align-items:center}.club-sidebar>button:last-child{border-top:0;padding-top:11px;margin-top:0}.spotlight-title:hover{background:transparent;color:var(--orange)}
 .calendar-view-switch{display:flex;gap:3px;margin-left:auto;padding:4px;border-radius:12px;background:#202934}.calendar-view-switch button{border:0;background:transparent;font-size:12px;padding:10px 14px;border-radius:9px}.calendar-view-switch button[aria-pressed=true]{background:#364353;color:var(--orange)}.calendar-agenda-list{margin-top:20px}.calendar-agenda-list .agenda-entry{width:100%;text-align:left}.calendar-agenda-list strong>small{display:block;font-size:11px;color:var(--muted);margin-top:5px}.calendar-week-view .calendar-day{min-height:280px}.calendar-heading h2{text-transform:capitalize}.calendar-event small{color:inherit;opacity:.85;font-size:10px}.calendar-agenda-list .agenda-entry.cancelled{opacity:.55}
 @media(max-width:640px){.calendar-heading{flex-wrap:wrap}.calendar-view-switch{width:100%;margin-top:10px}.calendar-view-switch button{flex:1;font-size:11px}.calendar-week-view{grid-template-columns:1fr}.calendar-week-view .calendar-day{min-height:85px;display:flex;align-items:start;gap:8px;padding:10px}.calendar-week-view .calendar-event{flex:1}.calendar-week-view .calendar-event b{font-size:12px}.calendar-week-view .calendar-event small{display:block}.calendar-week-view .day-number{flex-shrink:0}}
-.email-reminder{margin-left:auto;max-width:100%;font-size:11px}.email-reminder>button{color:var(--orange);background:color-mix(in srgb,var(--orange) 5.098%,transparent);border:1px solid #705624;border-radius:9px;padding:10px;font-size:11px}.email-reminder p{line-height:1.7;overflow-wrap:anywhere}.reminder-preview{padding:12px;margin-top:10px;background:var(--ui-bg,#090C0A);border-radius:10px}.reminder-preview>button{padding:9px;font-size:10px;margin:4px}.email-reminder [role=alert]{color:#ffad83}
+
 @media(max-width:640px){.is-week .calendar-week{display:none}}
-.email-reminder>small{display:block;font-size:10px;margin-top:5px}.email-reminder>button:disabled{opacity:.5;cursor:default}
+
 /* Calendar planning stays sharp at every viewport size. */
 .members-tabs{display:flex;gap:5px;padding:5px;background:#202934;border-radius:12px;margin:0 0 22px;width:fit-content}.members-tabs button{background:transparent;color:#aeb9c8;padding:11px 17px;font-size:12px;border-radius:8px}.members-tabs button[aria-selected=true]{background:#364353;color:var(--orange)}
 
@@ -331,7 +331,6 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 @media(max-width:760px){.admission-email-form{display:block}.admission-email-form button{width:100%;margin-top:10px}.admission-request{align-items:start;flex-direction:column}.admission-request .row-actions{width:100%}.admission-requests .panel-title{flex-wrap:wrap}.membership-admissions{padding:12px}.cloud-card:has(.account-actions)>.applicant-panel{padding-top:16px}}
 .user-menu-panel>a.text-button{display:block;margin-top:14px}
 
-
 .member-row{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center}
 .member-row .member-info{min-width:0}.member-row>.row-actions{margin-left:0;justify-content:flex-end;align-items:center;flex-wrap:wrap}
 .member-row>.row-actions>button:last-child{min-width:78px}.member-row .member-info>b{display:block}
@@ -495,7 +494,6 @@ html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-ar
 
 .account-actions .header-chat,.account-actions .user-menu>summary{min-height:44px;display:flex;align-items:center;justify-content:center}
 .account-actions .header-chat>svg,.account-actions .user-menu>summary>svg{display:block;flex-shrink:0;width:20px;height:20px}
-
 
 .auth-card .remember-login{display:flex;align-items:center;gap:10px;min-height:44px;margin:10px 0 0;cursor:pointer}.auth-card .remember-login input{flex-shrink:0;width:18px;height:18px;margin:0;padding:0;accent-color:var(--orange)}.auth-card .remember-login-hint{margin:0 0 16px;font-size:11px}
 

@@ -19,3 +19,5 @@ Motiv mění akcent rozhraní, nikoli logo, barvy disciplín, významy docházky
 - `npm run test:release-ui` zahrnuje tento scénář i pro WebKit a stávající funkční regrese. Testy neposílají skutečné e-maily a nezapisují produkční docházku.
 
 Písma Chakra Petch (400/500/600/700) a JetBrains Mono (variabilní) se načítají z místních WOFF souborů s licencemi OFL v public/fonts. Starší zkušební volby bez revize 2 přejdou jednou na nový limetkový základ; další vědomý výběr motivu se již zachová.
+
+Vyplněné akcentové záložky a hlavní tlačítka používají tmavý text `--on-accent`; akcentový text patří na obrysové nebo jemně tónované ovládání. Neaktivní hlavní akce mají neutrální povrch bez snížení opacity popisku. Scénář `STG_BUTTON_CONTRAST_ONLY=1` měří vykreslený kontrast alespoň 4,5 : 1 napříč osmi motivy, oběma režimy a hlavními obrazovkami, detailními záložkami tréninků/závodů i členskými odpověďmi; ověřuje také nepřítomnost ruční e-mailové připomínky.

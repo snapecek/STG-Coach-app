@@ -20,6 +20,7 @@ async function run(args,extra={}){
   if(!ready)throw new Error('Vite did not start');
   for(const flag of flags)await run(['scripts/check-member-ui.cjs'],{flag});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_TECHNICAL_UI_ONLY',engine:'webkit'});
+  await run(['scripts/check-member-ui.cjs'],{flag:'STG_BUTTON_CONTRAST_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_ATTENDANCE_REVIEW_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_ANALYSIS_LAYOUT_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_COMPACT_MOBILE_ONLY',engine:'webkit'});

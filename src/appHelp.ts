@@ -116,7 +116,6 @@ export const helpTopics:Record<HelpRole,HelpTopic[]>={member:[
   'V Nastavení → Mobilní oznámení povolte na daném zařízení upozornění na odpovědi členů. Obsahují jméno, odpověď a počet přihlášených.',
   'Na iPhonu je pro tato oznámení potřeba podporovaný iOS a aplikace přidaná na plochu. Povolte oznámení také v systému; Nerušit či úspora energie mohou doručení ovlivnit.',
   'Je-li odesílání zprovozněné, členům bez odpovědi se přibližně 24 hodin před akcí posílá e-mailová připomínka. Stav odesílání ověřte v Nastavení → Oznámení a e-maily.',
-  'Ruční Připomenout e-mailem použijte jen tehdy, pokud je funkce dostupná. Neaktivní tlačítko znamená, že tato možnost zatím není zapnutá.',
  ]},
  {id:'admin',title:'Správa klubu a oprávnění',summary:'Trenér spravuje sportovní provoz, hlavní správce navíc nastavení klubu a trenéry.',items:[
   'V Nastavení → Vzhled aplikace vyberte jeden z osmi barevných motivů. Jde o osobní volbu uloženou k vašemu účtu; výchozí Limetka používá ostrou limetkovou, motiv Trenomi nabízí značkovou oranžovou. Barvy disciplín a logo se tím nemění.',

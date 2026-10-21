@@ -28,7 +28,7 @@ body,.cloud-screen,.cloud-screen:has(.cloud-dashboard){background:var(--ui-bg)}
 .cloud-card .week-cell .week-event b{font-family:var(--ui-mono)}
 .cloud-card :is(.panel-title .text-button,.weekly-volume>.text-button,.journal-detail-main .journal-back,.game-kind-label,.game-results-table .game-leading,.race-team-rank){color:var(--ui-accent-ink)}
 .cloud-card .coach-panel :is(.weekly-volume-total>strong,.volume-row>strong){font-family:var(--ui-mono)}
-.cloud-card :is(.unanswered>button,.email-reminder>button){color:var(--ui-accent-ink);border-color:var(--orange);background:var(--ui-accent-soft);border-radius:0}
+.cloud-card .unanswered>button{color:var(--ui-accent-ink);border-color:var(--orange);background:var(--ui-accent-soft);border-radius:0}
 .workspace-header :is(.user-menu-panel,.club-switcher-panel,.notification-panel),.workspace-header :is(button,summary){background-color:var(--surface);border-radius:0;box-shadow:none}
 .mobile-club-nav :is(button.active,button[aria-current=page]){background:var(--orange);color:#090C0A;border-color:var(--orange);border-radius:0}
 .mobile-club-nav button:not(.active):not([aria-current=page]){background:transparent;color:var(--muted)}
@@ -59,3 +59,15 @@ body,.cloud-screen,.cloud-screen:has(.cloud-dashboard){background:var(--ui-bg)}
 .cloud-card .member-schedule>.member-event-heading.overview-event-color{border-left-color:var(--event-color)}
 .cloud-card :is(input:not([type=checkbox]):not([type=radio]):not([type=color]),select,textarea),.dialog :is(input:not([type=checkbox]):not([type=radio]):not([type=color]),select,textarea){background-color:var(--ui-bg);border-color:var(--border)}
 .cloud-card .attendance-shortcut{background:var(--raised);border-color:var(--border)}
+
+/* Filled accent controls always use dark ink, independently of the palette/theme.
+   Accent-coloured text is reserved for outlined or softly tinted controls. */
+:root{--on-accent:#090C0A}
+:is(.cloud-card,.event-dialog,.dialog,.journal-share-dialog) button.primary,
+:is(.cloud-card,.event-dialog,.dialog,.journal-share-dialog) button[role=tab][aria-selected=true]{background:var(--orange);color:var(--on-accent);border-color:var(--orange)}
+:is(.cloud-card,.event-dialog,.dialog,.journal-share-dialog) button[role=tab][aria-selected=true]:hover{background:color-mix(in srgb,var(--orange) 88%,white);color:var(--on-accent)}
+/* The desktop navigation remains softly tinted in both themes. */
+html[data-theme=light] .cloud-card .club-sidebar button.active{background:var(--ui-accent-soft);color:var(--ui-accent-ink)}
+/* Disabled primary actions stay visibly unavailable without fading their labels. */
+:is(.cloud-card,.event-dialog,.dialog,.journal-share-dialog) button.primary:disabled,
+.overlay .dialog button.primary:disabled{background:var(--raised);color:var(--muted);border-color:var(--border);opacity:1;cursor:not-allowed}

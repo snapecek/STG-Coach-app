@@ -3,7 +3,7 @@ import {trainingIcons,suggestedTrainingIcon,resolveTrainingIcon,trainingIconFiel
 import {buildEventRows} from './clubData';
 import type {SupabaseClient} from '@supabase/supabase-js';
 describe('Ikony tréninků',()=>{
- it.each([['Běh','running'],['Silniční běh','running'],['Plavání','swimming'],['Kolo','cycling'],['Kondice','dumbbell'],['Síla','dumbbell'],['Mobilita','gymnastics'],['Judo','martial-arts'],['OCR','hurdles'],['Stolní tenis','table-tennis'],['Turistika','hiking']])('přiřadí %s odpovídající sport', (type,id)=>expect(suggestedTrainingIcon(type)).toBe(id));
+ it.each([['Běh','running'],['Silniční běh','running'],['Plavání','swimming'],['Kolo','cycling'],['Kondice','dumbbell'],['Síla','dumbbell'],['Mobilita','gymnastics'],['Judo','wrestling'],['OCR','hurdles'],['Stolní tenis','table-tennis'],['Turistika','hiking']])('přiřadí %s odpovídající sport', (type,id)=>expect(suggestedTrainingIcon(type)).toBe(id));
  it('upřednostní výběr trenéra, respektuje vypnutí a bezpečně zobrazí stará data',()=>{
   expect(resolveTrainingIcon({type:'Běh',training_icon:'stopwatch'})).toBe('stopwatch');
   expect(resolveTrainingIcon({type:'Běh',training_icon:'none'})).toBeNull();

@@ -24,8 +24,8 @@ export function suggestedTrainingIcon(type:string):TrainingIconId{
  if(/ocr|prekaz|steeple/.test(t))return 'hurdles';
  if(/beh|run|sprint|trail|atlet/.test(t))return 'running';
  if(/mobil|gymnast|joga|yoga|pilates|stretch/.test(t))return 'gymnastics';
- if(/judo|karate|kick|box|boj|taekwondo/.test(t))return 'martial-arts';
- if(/zapas|wrest/.test(t))return 'wrestling';
+ if(/judo|zapas|wrest/.test(t))return 'wrestling';
+ if(/karate|kick|box|boj|taekwondo/.test(t))return 'martial-arts';
  if(/veslo|rowing/.test(t))return 'rowing';
  if(/tenis|tennis/.test(t))return 'tennis';
  if(/fotbal|football/.test(t))return 'football';

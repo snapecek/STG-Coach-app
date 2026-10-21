@@ -26,7 +26,7 @@
 @media(max-width:760px){:root{--ui-title:26px;--ui-section:20px;--ui-subtitle:16px}.cloud-card :is(input,select,textarea),.dialog :is(input,select,textarea),.app-help-dialog :is(input,select,textarea){font-size:16px}}
 /* Compact mobile labels keep their own shared navigation size, avoiding overlap. */
 @media(max-width:900px){.cloud-card .mobile-club-nav button{font-size:10px;letter-spacing:-.02em;font-weight:600;min-width:0;gap:5px}}
-@media(max-width:360px){.cloud-card .mobile-club-nav button{font-size:9px}}
+@media(max-width:360px){.cloud-card .mobile-club-nav button{font-size:9px;letter-spacing:-.075em}}
 /* Data headings use capitals; the values below remain in their original case. */
 .cloud-card .journal-record-table thead th{font:500 var(--ui-label)/1.5 var(--ui-mono);text-transform:uppercase;letter-spacing:.1em}
 .cloud-card .journal-record-table .journal-status{font-size:var(--ui-label);text-transform:uppercase}

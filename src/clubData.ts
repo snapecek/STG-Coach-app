@@ -1,4 +1,4 @@
-import {requireRaceIconMigration,requireTrainingIconMigration,trainingIconFields,type TrainingIconChoice} from './trainingIcons';
+import {requireSelectedSportIconMigration,requireRaceIconMigration,requireTrainingIconMigration,trainingIconFields,type TrainingIconChoice} from './trainingIcons';
 import {locationFields,requireLocationMigration,type EventLocation} from './eventLocation';
 import type {EventTypeColor} from './eventTypeColors';
 import {removeAllEventPhotos} from './photos';
@@ -70,11 +70,12 @@ export async function addMember(client:SupabaseClient,club:ClubAccess,name:strin
 }
 export async function addTemplate(client:SupabaseClient,club:ClubAccess,input:Pick<TemplateRow,'name'|'type'|'place'|'minutes'|'plan'|'event_location'|'training_icon'>){
  staff(club);if(!Number.isInteger(input.minutes)||input.minutes<5||input.minutes>480)throw new Error('Délka musí být 5 až 480 minut.');if(input.plan.length>5000)throw new Error('Plán je příliš dlouhý.');await verify(client);
+ await requireSelectedSportIconMigration(client,input.training_icon);
  if(input.event_location!==undefined)await requireLocationMigration(client,club.id,'templates');
  return checked<TemplateRow>(await client.from('templates').insert({id:crypto.randomUUID(),club_id:club.id,name:text(input.name,'Název',80),type:text(input.type,'Typ',40),place:text(input.place,'Místo'),minutes:input.minutes,plan:input.plan.trim(),...trainingIconFields(input.training_icon),...locationFields(input.event_location)}).select('*').single(),'Šablonu se nepodařilo uložit.');
 }
 export async function addEvents(client:SupabaseClient,club:ClubAccess,template:TemplateRow,date:string,time:string,count:number,options:{kind?:'training'|'race';name?:string}={}){
- staff(club);const rows=buildEventRows(club.id,template,date,time,count).map(row=>({...row,event_kind:options.kind||'training',name:options.name?.trim()?text(options.name,'Název',80):row.name}));await verify(client);
+ staff(club);const rows=buildEventRows(club.id,template,date,time,count).map(row=>({...row,event_kind:options.kind||'training',name:options.name?.trim()?text(options.name,'Název',80):row.name}));await verify(client);await requireSelectedSportIconMigration(client,template.training_icon);
  // One insert statement: the whole repeated series succeeds or fails together.
  return checked<EventRow[]>(await client.from('events').insert(rows).select(eventColumns),'Tréninky se nepodařilo uložit.');
 }
@@ -102,6 +103,7 @@ export async function archiveMember(client:SupabaseClient,club:ClubAccess,member
 }
 export async function editTemplate(client:SupabaseClient,club:ClubAccess,id:string,input:Pick<TemplateRow,'name'|'type'|'place'|'minutes'|'plan'|'event_location'|'training_icon'>){
  staff(club);if(!Number.isInteger(input.minutes)||input.minutes<5||input.minutes>480||input.plan.length>5000)throw new Error('Zkontrolujte délku a plán.');await verify(client);
+ await requireSelectedSportIconMigration(client,input.training_icon);
  if(input.event_location!==undefined)await requireLocationMigration(client,club.id,'templates');
  return checked<TemplateRow>(await client.from('templates').update({name:text(input.name,'Název',80),type:text(input.type,'Typ',40),place:text(input.place,'Místo'),minutes:input.minutes,plan:input.plan.trim(),...trainingIconFields(input.training_icon),...locationFields(input.event_location)}).eq('club_id',club.id).eq('id',id).select(templateColumns).single(),'Šablonu se nepodařilo změnit.');
 }
@@ -115,7 +117,7 @@ export async function updateEvent(client:SupabaseClient,club:ClubAccess,id:strin
  if(patch.equipment!==undefined&&(patch.equipment.length>30||patch.equipment.some(tag=>!tag.trim()||tag.length>40)))throw new Error('Zadejte nejvýše 30 pomůcek, každou do 40 znaků.');
  if(patch.name!==undefined)patch={...patch,name:text(patch.name,'Název',80)};
  if(patch.actual_notes!==undefined&&patch.actual_notes.length>5000)throw new Error('Skutečný průběh je příliš dlouhý.');
- await verify(client);if(patch.event_kind==='race')await requireRaceIconMigration(client,patch.training_icon);const result=await client.from('events').update(patch).eq('club_id',club.id).eq('id',id).select(eventColumns).single();if(result.error?.code==='PGRST204'&&patch.event_location!==undefined)throw new Error('Pro uložení mapy nejdříve nahrajte migraci 038 v Supabase.');if(result.error?.code==='PGRST204'&&patch.cover_photo_path!==undefined)throw new Error('Pro uložení titulní fotografie nejdříve nahrajte migraci 036 v Supabase.');if(result.error?.message.includes('Capacity below confirmed'))throw new Error('Kapacitu nelze snížit pod počet potvrzených míst. Nejprve upravte přihlášení účastníků.');if(result.error?.message.includes('Capacity is closed'))throw new Error('Po zahájení tréninku nelze kapacitu měnit.');if(result.error?.message.includes('Remove race results'))throw new Error('Před změnou závodu na trénink odeberte jeho výsledky.');return checked<EventRow>(result,'Událost se nepodařilo změnit.');
+ await verify(client);if(patch.event_kind==='race')await requireRaceIconMigration(client,patch.training_icon);else await requireSelectedSportIconMigration(client,patch.training_icon);const result=await client.from('events').update(patch).eq('club_id',club.id).eq('id',id).select(eventColumns).single();if(result.error?.code==='PGRST204'&&patch.event_location!==undefined)throw new Error('Pro uložení mapy nejdříve nahrajte migraci 038 v Supabase.');if(result.error?.code==='PGRST204'&&patch.cover_photo_path!==undefined)throw new Error('Pro uložení titulní fotografie nejdříve nahrajte migraci 036 v Supabase.');if(result.error?.message.includes('Capacity below confirmed'))throw new Error('Kapacitu nelze snížit pod počet potvrzených míst. Nejprve upravte přihlášení účastníků.');if(result.error?.message.includes('Capacity is closed'))throw new Error('Po zahájení tréninku nelze kapacitu měnit.');if(result.error?.message.includes('Remove race results'))throw new Error('Před změnou závodu na trénink odeberte jeho výsledky.');return checked<EventRow>(result,'Událost se nepodařilo změnit.');
 }
 export async function completeEvent(client:SupabaseClient,club:ClubAccess,id:string){
  staff(club);await verify(client);const row=checked<EventRow>(await client.from('events').update({completed_at:new Date().toISOString()}).eq('club_id',club.id).eq('id',id).select(eventColumns).single(),'Událost nelze dokončit. Doplňte průběh a docházku po skončení.');

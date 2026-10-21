@@ -1,3 +1,4 @@
+import {TrainingWatermark} from './TrainingIcon';
 import {EventLocationSection} from './EventLocationSection';
 import {useState,type ReactNode} from 'react';
 import {CalendarDays,MapPin,Trophy,Dumbbell,CheckCircle2,Users,ClipboardList,MessageCircle} from 'lucide-react';
@@ -9,7 +10,8 @@ export function EventDetail({event,actions,attendance,record,footer,tasks,games,
  const active=tabs.some(t=>t.id===tab)?tab:'info';
  const unread=Math.max(0,Math.floor(chatUnread)||0),unreadDescription='event-chat-unread-'+event.id;
  return <>
-  {hero||<div className={'detail-hero '+(race?'race':'training')}><div className="detail-date"><strong>{day}</strong><span>{month}</span></div><div><span className="detail-kind">{race?<Trophy size={14}/>:<Dumbbell size={14}/>} {race?'Závod':event.type} · {event.status==='cancelled'?'Zrušeno':event.completed_at?'Dokončeno':'Naplánováno'}</span><h2>{event.name}</h2>{event.group_name&&<span className="event-group-label">{event.group_name}</span>}<p>{date.toLocaleString('cs-CZ',{timeZone:clubTimeZone,weekday:'long',hour:'2-digit',minute:'2-digit'})}</p></div></div>}
+  <div className="training-hero-watermark watermark-surface"><TrainingWatermark source={event}/>{hero||<div className={'detail-hero '+(race?'race':'training')}><div className="detail-date"><strong>{day}</strong><span>{month}</span></div><div><span className="detail-kind">{race?<Trophy size={14}/>:<Dumbbell size={14}/>} {race?'Závod':event.type} · {event.status==='cancelled'?'Zrušeno':event.completed_at?'Dokončeno':'Naplánováno'}</span><h2>{event.name}</h2>{event.group_name&&<span className="event-group-label">{event.group_name}</span>}<p>{date.toLocaleString('cs-CZ',{timeZone:clubTimeZone,weekday:'long',hour:'2-digit',minute:'2-digit'})}</p></div></div>}
+  </div>
   <div className="detail-tabs" role="tablist" aria-label="Detail události">{tabs.map(t=><button role="tab" className={t.id==='chat'&&unread?'has-unread':undefined} aria-describedby={t.id==='chat'&&unread?unreadDescription:undefined} aria-selected={active===t.id} aria-controls={'event-'+t.id} id={'tab-'+t.id} key={t.id} onClick={()=>setTab(t.id)}><t.icon size={16}/>{t.label}{t.id==='chat'&&unread>0&&<span className="chat-badge event-chat-unread" aria-hidden="true">{unread>99?'99+':unread}</span>}</button>)}</div>
   {chat&&unread>0&&<span id={unreadDescription} className="sr-only" role="status">Nepřečtené zprávy v chatu události: {unread}</span>}
   <div id="event-info" role="tabpanel" aria-labelledby="tab-info" hidden={active!=='info'}>

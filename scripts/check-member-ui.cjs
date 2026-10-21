@@ -216,6 +216,36 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    }
    console.log('PASS app help: member/coach/owner defaults, both guides, accent-insensitive search, empty results, keyboard tabs, accordion, native modal and focus return, desktop/mobile light/dark, no data changes and preserved draft');return;
   }
+  if(process.env.STG_TRAINING_WATERMARKS_ONLY==='1'){
+   const v=await context('coach'),p=v.page;await login(p);await p.locator('.cloud-dashboard').waitFor();
+   const nav=async name=>p.getByRole('navigation').getByRole('button',{name,exact:true}).filter({visible:true}).first().click();
+   await nav('Šablony');await p.getByRole('button',{name:'Přidat šablonu',exact:true}).click();
+   await p.getByLabel('Název',{exact:true}).fill('Fiktivní plavecká šablona');await p.getByLabel('Místo',{exact:true}).fill('Bazén');await p.getByLabel('Zaměření',{exact:true}).selectOption('Plavání');
+   const picker=p.locator('.training-icon-picker');assert.equal(await picker.locator('.training-watermark').getAttribute('data-training-icon'),'swimming');
+   await picker.locator('summary').click();assert.equal(await picker.locator('.training-icon-grid>button').count(),40);
+   await picker.getByRole('button',{name:'Ikona Stopky',exact:true}).click();assert.equal(await picker.locator('.training-watermark').getAttribute('data-training-icon'),'stopwatch');
+   for(const width of [320,390,1440])for(const theme of ['dark','light']){
+    await p.setViewportSize({width,height:900});await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);await picker.scrollIntoViewIfNeeded();
+    assert(await picker.evaluate(e=>e.scrollWidth<=e.clientWidth+1));assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+    assert.equal(await picker.locator('.training-watermark').evaluate(e=>getComputedStyle(e).opacity),'0.15');
+    assert.equal(await picker.locator('.training-watermark').evaluate(e=>getComputedStyle(e).pointerEvents),'none');
+    const atlas=await p.evaluate(async()=>{const i=new Image();i.src='/icons/sports-outline-atlas.png';await i.decode();return [i.naturalWidth,i.naturalHeight]});assert(atlas[0]>1000&&atlas[1]>500);
+    await p.screenshot({path:'/tmp/trenomi-icon-picker-'+engine+'-'+theme+'-'+width+'.png'});
+   }
+   await picker.getByRole('button',{name:'Ikona Plavání',exact:true}).click();await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await picker.waitFor({state:'detached'});
+   assert.equal(v.state().templates[0].training_icon,'swimming');assert.equal(await p.locator('.template-card .training-watermark').getAttribute('data-training-icon'),'swimming');
+   await p.getByRole('button',{name:'Upravit šablonu Fiktivní plavecká šablona',exact:true}).click();await picker.waitFor();assert.equal(await picker.getByRole('button',{name:'Ikona Plavání',exact:true}).getAttribute('aria-pressed'),'true');
+   await picker.getByRole('button',{name:'Bez vodoznaku',exact:true}).click();assert.equal(await picker.locator('.training-watermark').count(),0);await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await picker.waitFor({state:'detached'});assert.equal(v.state().templates[0].training_icon,'none');assert.equal(await p.locator('.template-card .training-watermark').count(),0);
+   await v.c.close();
+   for(const role of ['coach','member']){
+    const v=await context(role),p=v.page;v.state().events[0].training_icon='swimming';await login(p);await p.locator('.cloud-dashboard').waitFor();
+    const featured=p.locator(role==='coach'?'.spotlight':'.member-featured');assert.equal(await featured.locator('.training-watermark').getAttribute('data-training-icon'),'swimming');
+    for(const width of [320,390,1440]){await p.setViewportSize({width,height:900});await p.screenshot({path:'/tmp/trenomi-watermark-'+engine+'-'+role+'-'+width+'.png'});assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1))}
+    await featured.locator(role==='coach'?'.spotlight-title':'.member-event-heading').click();const hero=p.locator('.training-hero-watermark');await hero.waitFor();assert.equal(await hero.locator('.training-watermark').getAttribute('data-training-icon'),'swimming');await p.keyboard.press('Escape');
+    await p.getByRole('navigation').getByRole('button',{name:'Kalendář',exact:true}).filter({visible:true}).first().click();await p.locator('.calendar-event .training-watermark[data-training-icon=swimming]').first().waitFor();assert.equal(await p.locator('.calendar-event.race .training-watermark').count(),0);await v.c.close();
+   }
+   console.log('PASS training watermarks: 40 icons, automatic discipline, persisted template selection and disable, 15% alpha, nonblocking backgrounds, coach/member overview/detail/calendar, mobile/desktop light/dark');return;
+  }
   if(process.env.STG_UNIFIED_UI_ONLY==='1'){
    fees.enabled=true;
    for(const role of ['coach','member']){

@@ -393,3 +393,5 @@ Rozšíření [042](supabase/migrations/202610170042_fee_deletion_recurring.sql)
 ## Automatická e-mailová připomínka účasti (044)
 
 Člen bez vyplněné odpovědi obdrží přibližně 24 hodin před tréninkem či závodem e-mail ve vzhledu Trenomi s názvem události, místem, časem a odkazem přímo na Účast. Každá uložená odpověď připomínku potlačí. Vyžaduje [migraci 044](supabase/migrations/202610180044_member_rsvp_email.sql), Edge Function `remind-rsvp`, Resend a vlastní úlohu Cron. Kompletní [postup aktivace a pravidla odesílání](docs/RSVP_EMAIL_REMINDERS.md). Samotné nasazení frontendu e-maily nezapíná.
+
+Sportovní ikonografie tréninků: výběr ze 40 ikon v šabloně, automatické přiřazení podle zaměření a velký obrysový vodoznak s intenzitou 15 %. Sdílený výběr vyžaduje [migraci 046](supabase/migrations/202610210046_training_icons.sql); pravidla kopírování a [postup aktivace](docs/TRAINING_WATERMARKS.md).

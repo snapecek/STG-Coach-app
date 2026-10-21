@@ -1,3 +1,4 @@
+import {requireTrainingIconMigration,trainingIconFields,type TrainingIconChoice} from './trainingIcons';
 import {locationFields,requireLocationMigration,type EventLocation} from './eventLocation';
 import type {SupabaseClient} from '@supabase/supabase-js';
 import type {ClubAccess} from './supabase';
@@ -14,9 +15,10 @@ export async function loadTrainingGroups(client:SupabaseClient,club:ClubAccess,s
 }
 export async function saveTrainingGroup(client:SupabaseClient,club:ClubAccess,id:string,draft:GroupDraft){validateGroup(draft);await verify(client,club);const {error}=await client.rpc('save_training_group',{target_club:club.id,target_group:id,label:draft.name.trim(),details:draft.description.trim(),entrants:draft.member_ids});if(error)throw new Error('Skupinu nelze uložit. Vyberte aktivní členy tohoto klubu; archivovanou skupinu nejprve obnovte.');}
 export async function archiveTrainingGroup(client:SupabaseClient,club:ClubAccess,id:string,restore=false){await verify(client,club);const {error}=await client.rpc('archive_training_group',{target_club:club.id,target_group:id,restore});if(error)throw new Error('Skupinu nelze archivovat nebo obnovit.');}
-export async function createGroupTrainings(client:SupabaseClient,club:ClubAccess,groupId:string,input:{event_location?:EventLocation|null;name:string;place:string;type:string;plan:string;date:string;time:string;count:number;selectedDates?:string[];template_id:string|null;duration_minutes:number;capacity:number|null}){
+export async function createGroupTrainings(client:SupabaseClient,club:ClubAccess,groupId:string,input:{training_icon?:TrainingIconChoice;event_location?:EventLocation|null;name:string;place:string;type:string;plan:string;date:string;time:string;count:number;selectedDates?:string[];template_id:string|null;duration_minutes:number;capacity:number|null}){
  if(!input.name.trim()||input.name.trim().length>80||!input.place.trim()||input.place.trim().length>200||!input.type.trim()||input.type.trim().length>40||input.plan.length>5000||!Number.isInteger(input.duration_minutes)||input.duration_minutes<5||input.duration_minutes>480||!Number.isInteger(input.count)||input.count<1||input.count>12)throw new Error('Zkontrolujte údaje tréninku a počet opakování (1–12).');validateCapacity(input.capacity);await verify(client,club);
+ await requireTrainingIconMigration(client,club.id,input.training_icon);
  const mapFields=locationFields(input.event_location);if(input.event_location)await requireLocationMigration(client,club.id);
- const sessions=trainingDates(input.date,input.count,input.selectedDates).map(date=>({...mapFields,id:crypto.randomUUID(),name:input.name.trim(),place:input.place.trim(),type:input.type.trim(),plan:input.plan.trim(),starts_at:pragueTimestamp(date,input.time),template_id:input.template_id,duration_minutes:input.duration_minutes,capacity:input.capacity}));
+ const sessions=trainingDates(input.date,input.count,input.selectedDates).map(date=>({...mapFields,...trainingIconFields(input.training_icon),id:crypto.randomUUID(),name:input.name.trim(),place:input.place.trim(),type:input.type.trim(),plan:input.plan.trim(),starts_at:pragueTimestamp(date,input.time),template_id:input.template_id,duration_minutes:input.duration_minutes,capacity:input.capacity}));
  const {data,error}=await client.rpc('create_group_trainings',{target_club:club.id,target_group:groupId,sessions});if(error||!data)throw new Error('Tréninky nelze vytvořit. Skupina musí být aktivní a mít alespoň jednoho aktivního člena.');return data as EventRow[];
 }

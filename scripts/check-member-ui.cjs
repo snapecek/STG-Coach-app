@@ -223,6 +223,41 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    }
    console.log('PASS app help: member/coach/owner defaults, both guides, accent-insensitive search, empty results, keyboard tabs, accordion, native modal and focus return, desktop/mobile light/dark, no data changes and preserved draft');return;
   }
+  if(process.env.STG_CALENDAR_ICONS_ONLY==='1'){
+   for(const role of ['coach','member']){
+    const v=await context(role),p=v.page;
+    v.state().events[0].training_icon='trail';v.state().events[1].training_icon=null;v.state().events[2].training_icon='none';
+    await login(p);await p.locator('.cloud-dashboard').waitFor();
+    await p.getByRole('navigation').getByRole('button',{name:'Kalendář',exact:true}).filter({visible:true}).first().click();
+    const calendar=p.locator('.calendar');await calendar.locator('.calendar-event').first().waitFor();
+    for(const theme of ['dark','light']){
+     await p.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
+     for(const width of [320,390,760,1440]){
+      await p.setViewportSize({width,height:900});
+      for(const view of ['Měsíc','Týden','Seznam']){
+       await calendar.getByRole('group',{name:'Zobrazení kalendáře',exact:true}).getByRole('button',{name:view,exact:true}).click();
+       const entries=calendar.locator(view==='Seznam'?'.calendar-agenda-list .agenda-entry':'.calendar-event');
+       const training=entries.filter({hasText:'Fiktivní společný trénink'}).first();
+       const race=entries.filter({hasText:'Fiktivní pozvaný závod'}).first();
+       await training.waitFor();assert.equal(await training.locator('.calendar-sport-icon').getAttribute('data-training-icon'),'trail');
+       assert.equal(await race.locator('.calendar-sport-icon').getAttribute('data-training-icon'),'ocr');
+       const disabled=entries.filter({hasText:'Závod bez přihlášení'});assert.equal(await disabled.locator('.calendar-sport-icon,.training-watermark').count(),0);
+       const icon=training.locator('.calendar-sport-icon>.sport-outline-icon');assert(await icon.isVisible());
+       assert((await icon.boundingBox()).width>=16);
+       assert.equal(await training.locator('.training-watermark').evaluate(e=>getComputedStyle(e).opacity),'0.15');
+       assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'No page overflow');
+       assert(await calendar.evaluate(e=>e.scrollWidth<=e.clientWidth+1),'No calendar overflow');
+       const rect=await training.boundingBox(),badge=await icon.boundingBox();assert(badge.x>=rect.x&&badge.x+badge.width<=rect.x+rect.width+1,'Icon fits event');
+      }
+     }
+    }
+    assert.equal(await calendar.locator('.day-agenda .calendar-sport-icon[data-training-icon=trail]').count(),1);
+    await p.setViewportSize({width:390,height:900});await calendar.getByRole('button',{name:'Měsíc',exact:true}).click();await calendar.screenshot({path:'/tmp/trenomi-calendar-icons-'+engine+'-'+role+'.png'});
+    await calendar.locator('.calendar-event').filter({hasText:'Fiktivní společný trénink'}).click();await p.locator('.training-hero-watermark').waitFor();
+    await v.c.close();
+   }
+   console.log('PASS calendar sport icons: coach/member month/week/list/day, explicit Trail overrides type, automatic OCR, none, 15% watermarks, 320–1440px light/dark, no overflow, event opening');return;
+  }
   if(process.env.STG_TRAINING_WATERMARKS_ONLY==='1'){
    const v=await context('coach'),p=v.page;await login(p);await p.locator('.cloud-dashboard').waitFor();
    const nav=async name=>p.getByRole('navigation').getByRole('button',{name,exact:true}).filter({visible:true}).first().click();

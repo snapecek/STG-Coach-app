@@ -216,6 +216,35 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    }
    console.log('PASS app help: member/coach/owner defaults, both guides, accent-insensitive search, empty results, keyboard tabs, accordion, native modal and focus return, desktop/mobile light/dark, no data changes and preserved draft');return;
   }
+  if(process.env.STG_FLUID_WORKSPACE_ONLY==='1'){
+   for(const role of ['coach','member']){
+    const v=await context(role,false,false,true),p=v.page;
+    await v.c.route('**/rest/v1/rpc/list_chat_mentions',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(Array.from({length:30},(_,i)=>({message_id:'fluid-message-'+i,event_id:events[0].id,event_name:events[0].name,author_name:'Trenér s delším jménem',body:'Ukázkové upozornění s delším textem, které musí zůstat čitelné a rolovat uvnitř nabídky. '+i,created_at:'2026-10-14T09:00:00Z'})))}));
+    await login(p);const header=p.getByRole('banner',{name:'Klub a účet',exact:true}),bell=header.getByRole('button',{name:'Moje upozornění',exact:true});await bell.waitFor();await p.evaluate(()=>document.fonts.ready);
+    const fits=async width=>{
+     const available=await p.evaluate(()=>document.documentElement.clientWidth);const shell=await p.locator('.cloud-card:has(.workspace-header)').boundingBox();assert(Math.abs(shell.x)<1&&Math.abs(shell.width-available)<2,'Shell uses viewport width '+role+' '+width);
+     const content=await p.locator('.club-content').boundingBox(),h=await header.boundingBox();assert(content.width>=available-(width>900?132:36),'Content uses available width '+role+' '+width);assert(content.x>=0&&content.x+content.width<=width+1);assert(h.x>=-1&&h.x+h.width<=width+1);
+     assert(await p.evaluate(w=>document.documentElement.scrollWidth<=w+1,width),'No page overflow '+role+' '+width);
+     const overflow=await p.locator('.workspace-scroll').evaluate(el=>({width:el.clientWidth,scroll:el.scrollWidth,page:el.querySelector('h1')?.textContent,items:[...el.querySelectorAll('*')].filter(e=>e.getBoundingClientRect().right>el.getBoundingClientRect().right+1).slice(0,10).map(e=>({class:e.className,width:e.getBoundingClientRect().width,right:e.getBoundingClientRect().right}))}));assert(overflow.scroll<=overflow.width+1,'No content-scroller overflow '+role+' '+width+' '+JSON.stringify(overflow));
+    };
+    for(const width of [320,375,390,430,760,844,900,901,1024,1280,1440,1920,2560,3440]){
+     await p.setViewportSize({width,height:900});await fits(width);
+     for(const scroll of [0,100000]){
+      await scrollWorkspace(p,scroll);await bell.click();const panel=p.getByRole('region',{name:'Moje upozornění',exact:true});await panel.getByText('Trenér s delším jménem',{exact:false}).first().waitFor();
+      const b=await bell.boundingBox(),r=await panel.boundingBox(),h=await header.boundingBox();assert(r.x>=0&&r.x+r.width<=width+1&&r.y+r.height<=900,'Popup stays in viewport');
+      if(width>900){assert(Math.abs(r.y-b.y-b.height-8)<2,'Popup follows the bell vertically');assert(Math.abs(r.x+r.width-b.x-b.width)<2,'Popup follows the bell horizontally')}else assert(r.y>=h.y+h.height,'Mobile popup stays below header');
+      assert(await panel.evaluate(e=>{e.scrollTop=e.scrollHeight;return e.scrollTop>0}),'Long notifications scroll inside popup');await panel.evaluate(e=>e.scrollTop=0);
+      if([390,1920,3440].includes(width)&&scroll===0)await p.screenshot({path:'/tmp/trenomi-fluid-'+engine+'-'+role+'-'+width+'.png'});
+      await bell.press('Escape');assert(!(await panel.isVisible()));
+     }
+     await scrollWorkspace(p,0);
+    }
+    const names=role==='coach'?['Přehled','Kalendář','Docházka','Členové','Analýza','Deník','Šablony']:['Přehled','Kalendář','Deník'];
+    for(const width of [390,1920,3440]){await p.setViewportSize({width,height:900});for(const name of names){await p.getByRole('navigation').getByRole('button',{name,exact:true}).filter({visible:true}).first().click();await fits(width)}}
+    await v.c.close();
+   }
+   console.log('PASS fluid workspace: coach/member, 320–3440 px, all main screens, bell-anchored desktop popup before/after scrolling, safe mobile popup, long notifications scroll internally');return;
+  }
   if(process.env.STG_STICKY_HEADER_ONLY==='1'){
    fees.enabled=true;
    for(const role of ['coach','member']){
@@ -239,7 +268,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
      const originalScroll=await workspaceScrollTop(p);const tap=async locator=>{const r=await locator.boundingBox();await p.mouse.click(r.x+r.width/2,r.y+r.height/2);assert(Math.abs(await workspaceScrollTop(p)-originalScroll)<2,'Using sticky icons must preserve scroll position')};
      await tap(clubs);const clubMenu=p.getByRole('region',{name:'Moje kluby',exact:true});await clubMenu.getByRole('button',{name:'Druhý sportovní klub s delším názvem',exact:false}).waitFor();
      const below=async panel=>{const h=await header.boundingBox(),r=await panel.boundingBox();assert(r.x>=0&&r.x+r.width<=width,'Menu must remain on screen');assert(r.y>=h.y+h.height,'Menu must open below all header icons');assert(r.y+r.height<=844-(width<=900?64:0),'Menu must stay above bottom navigation')};
-     await below(clubMenu);await tap(account);await clubMenu.waitFor({state:'detached'});const accountMenu=p.locator('.user-menu-panel');await below(accountMenu);await tap(bell);assert(!(await accountMenu.isVisible()));const notifications=p.getByRole('region',{name:'Moje upozornění',exact:true});await below(notifications);await p.screenshot({path:'/tmp/trenomi-sticky-'+engine+'-'+role+'-'+width+'.png'});await bell.press('Escape');assert(!(await notifications.isVisible()));const feeButton=header.getByRole('button',{name:'Klubové příspěvky',exact:true});await feeButton.click();const dialog=p.getByRole('dialog',{name:'Klubové příspěvky',exact:true});await dialog.waitFor();assert(await bell.evaluate(el=>{const r=el.getBoundingClientRect();return !!document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.fees-overlay')}),'Modal must cover sticky header');await dialog.getByRole('button',{name:'Zavřít příspěvky',exact:true}).click();await dialog.waitFor({state:'detached'});
+     await below(clubMenu);await tap(account);await clubMenu.waitFor({state:'detached'});const accountMenu=p.locator('.user-menu-panel');await below(accountMenu);await tap(bell);assert(!(await accountMenu.isVisible()));const notifications=p.getByRole('region',{name:'Moje upozornění',exact:true});if(width>900){const r=await notifications.boundingBox(),b=await bell.boundingBox();assert(Math.abs(r.y-b.y-b.height-8)<2,'Desktop notifications open directly below the bell');assert(Math.abs(r.x+r.width-b.x-b.width)<2,'Desktop notifications align with the bell');assert(r.x>=0&&r.y+r.height<=844,'Notification bounds')}else await below(notifications);await p.screenshot({path:'/tmp/trenomi-sticky-'+engine+'-'+role+'-'+width+'.png'});await bell.press('Escape');assert(!(await notifications.isVisible()));const feeButton=header.getByRole('button',{name:'Klubové příspěvky',exact:true});await feeButton.click();const dialog=p.getByRole('dialog',{name:'Klubové příspěvky',exact:true});await dialog.waitFor();assert(await bell.evaluate(el=>{const r=el.getBoundingClientRect();return !!document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.fees-overlay')}),'Modal must cover sticky header');await dialog.getByRole('button',{name:'Zavřít příspěvky',exact:true}).click();await dialog.waitFor({state:'detached'});
      for(const theme of ['dark','light']){
       await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);
       const mobile=width<=900,fadeRoot=mobile?p.getByRole('main',{name:'Obsah klubu',exact:true}):header;

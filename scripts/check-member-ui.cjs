@@ -951,7 +951,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     await nav('Kalendář');await p.locator('.calendar-event').filter({hasText:event.name}).first().click();const dialog=p.getByRole('dialog');await dialog.waitFor();
     for(const width of [390,1440])for(const theme of ['dark','light'])for(const color of palettes){
      await p.setViewportSize({width,height:1000});await appearance(p,theme,color);
-     for(const tab of await dialog.getByRole('tab').all()){await tab.click();await check(p,event.event_kind+' '+theme+' '+color+' '+width);assert.equal(await dialog.getByRole('button',{name:'Připomenout e-mailem',exact:true}).count(),0)}
+     for(const tab of await dialog.getByRole('tab').all()){try{await tab.click()}catch(error){await p.screenshot({path:'/tmp/trenomi-contrast-failure-'+engine+'.png'});console.error('Contrast tab click:',event.event_kind,theme,color,width,'dialogs:',await p.getByRole('dialog').count());throw error}await check(p,event.event_kind+' '+theme+' '+color+' '+width);assert.equal(await dialog.getByRole('button',{name:'Připomenout e-mailem',exact:true}).count(),0)}
     }
     await appearance(p,'dark',palettes[0]);await dialog.getByRole('tab',{name:'Informace',exact:true}).click();await p.setViewportSize({width:390,height:1000});await p.screenshot({path:'/tmp/trenomi-button-contrast-'+event.event_kind+'-'+engine+'.png'});await dialog.getByRole('button',{name:'Zavřít',exact:true}).click();
    }

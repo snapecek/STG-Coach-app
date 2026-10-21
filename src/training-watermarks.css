@@ -10,8 +10,8 @@
 .training-hero-watermark :is(.detail-hero,.member-detail-hero){background:transparent}
 .training-icon-picker{border:1px solid var(--border,#30372e);padding:14px;min-width:0;margin:16px 0;display:grid;gap:12px}
 .training-icon-picker legend{font:600 12px var(--ui-font);text-transform:uppercase;padding:0 6px}
-.training-icon-preview{min-height:112px;display:flex;flex-direction:column;justify-content:center;gap:6px;border:1px solid var(--border,#30372e);padding:16px}
-.training-icon-preview .training-watermark>.sport-outline-icon{width:150px;right:4px;bottom:0}
+.training-icon-preview{min-height:80px;display:flex;flex-direction:column;justify-content:center;gap:6px;border:1px solid var(--border,#30372e);padding:16px}
+.training-icon-preview .training-watermark>.sport-outline-icon{width:110px;right:4px;bottom:0}
 .training-icon-modes{display:flex;flex-wrap:wrap;gap:8px}
 .training-icon-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(85px,1fr));gap:6px;margin-top:12px;max-width:100%}
 .training-icon-grid>button{min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;padding:9px 4px;min-height:95px}
@@ -22,3 +22,5 @@
 .template-card-name>.sport-outline-icon{width:30px;color:var(--accent)}
 .calendar-event .training-watermark>.sport-outline-icon,.week-event .training-watermark>.sport-outline-icon{width:75px;bottom:-8px;right:-4px}
 .agenda-entry .training-watermark>.sport-outline-icon,.member-event-heading>.training-watermark>.sport-outline-icon{width:110px;bottom:-18px}
+.training-icon-picker>label{display:block;margin:0}
+.training-icon-picker>label>select{display:block;width:100%;margin:6px 0 0}

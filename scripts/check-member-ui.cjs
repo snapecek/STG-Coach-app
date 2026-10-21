@@ -226,6 +226,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    const v=await context('coach'),p=v.page;await login(p);await p.locator('.cloud-dashboard').waitFor();
    const nav=async name=>p.getByRole('navigation').getByRole('button',{name,exact:true}).filter({visible:true}).first().click();
    await nav('Šablony');await p.getByRole('button',{name:'Přidat šablonu',exact:true}).click();
+   const visibleIconSelect=p.getByLabel('Ikona tréninku',{exact:true});await visibleIconSelect.waitFor();assert((await visibleIconSelect.boundingBox()).y<(await p.getByLabel('Místo',{exact:true}).boundingBox()).y,'Template icon choice precedes location/map');
    await p.getByLabel('Název',{exact:true}).fill('Fiktivní plavecká šablona');await p.getByLabel('Místo',{exact:true}).fill('Bazén');await p.getByLabel('Zaměření',{exact:true}).selectOption('Plavání');
    const picker=p.locator('.training-icon-picker');assert.equal(await picker.locator('.training-watermark').getAttribute('data-training-icon'),'swimming');
    await picker.locator('summary').click();assert.equal(await picker.locator('.training-icon-grid>button').count(),40);
@@ -243,8 +244,17 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    await p.setViewportSize({width:1440,height:900});await nav('Kalendář');await p.getByRole('button',{name:'Nová událost',exact:true}).click();
    await p.getByLabel('Šablona',{exact:true}).selectOption(v.state().templates[0].id);await p.getByLabel('Datum',{exact:true}).fill('2026-10-21');await p.getByRole('button',{name:'Vytvořit trénink',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});
    const created=v.state().events.find(e=>e.name==='Fiktivní plavecká šablona');assert(created);assert.equal(created.training_icon,'swimming');
+   // An explicit automatic choice can override a template's custom sport.
+   await p.getByRole('button',{name:'Nová událost',exact:true}).click();await p.getByLabel('Šablona',{exact:true}).selectOption(v.state().templates[0].id);await p.getByLabel('Název',{exact:true}).fill('Fiktivní automatické přiřazení');await p.getByLabel('Datum',{exact:true}).fill('2026-10-23');await p.getByLabel('Zaměření',{exact:true}).selectOption('Běh');await p.getByLabel('Ikona tréninku',{exact:true}).selectOption('');assert.equal(await p.locator('.event-editor .training-watermark').getAttribute('data-training-icon'),'running');await p.getByRole('button',{name:'Vytvořit trénink',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});assert.equal(v.state().events.find(e=>e.name==='Fiktivní automatické přiřazení').training_icon,'running');
+   // A standalone training exposes the same control and stores its own choice.
+   await p.getByRole('button',{name:'Nová událost',exact:true}).click();await p.getByLabel('Název',{exact:true}).fill('Fiktivní přímý trénink');await p.getByLabel('Místo',{exact:true}).fill('Park');await p.getByLabel('Datum',{exact:true}).fill('2026-10-22');await p.getByLabel('Zaměření',{exact:true}).selectOption('Běh');
+   const eventPicker=p.locator('.event-editor .training-icon-picker');await eventPicker.getByLabel('Ikona tréninku',{exact:true}).selectOption('hurdles');assert.equal(await eventPicker.locator('.training-watermark').getAttribute('data-training-icon'),'hurdles');await p.getByRole('button',{name:'Vytvořit trénink',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});
+   const direct=v.state().events.find(e=>e.name==='Fiktivní přímý trénink');assert.equal(direct.training_icon,'hurdles');
+   const editDirect=async()=>{await p.locator('.calendar-event').filter({hasText:'Fiktivní přímý trénink'}).click();await p.getByRole('button',{name:'Upravit',exact:true}).click();await eventPicker.waitFor()};
+   await editDirect();assert.equal(await eventPicker.getByLabel('Ikona tréninku',{exact:true}).inputValue(),'hurdles');await eventPicker.getByLabel('Ikona tréninku',{exact:true}).selectOption('none');await p.getByRole('button',{name:'Uložit změny',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});assert.equal(direct.training_icon,'none');
+   await editDirect();await eventPicker.getByLabel('Ikona tréninku',{exact:true}).selectOption('');assert.equal(await eventPicker.locator('.training-watermark').getAttribute('data-training-icon'),'running');await p.getByRole('button',{name:'Uložit změny',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});assert.equal(direct.training_icon,null);
    await nav('Šablony');
-   await p.getByRole('button',{name:'Upravit šablonu Fiktivní plavecká šablona',exact:true}).click();await picker.waitFor();assert.equal(await picker.getByRole('button',{name:'Ikona Plavání',exact:true}).getAttribute('aria-pressed'),'true');
+   await p.getByRole('button',{name:'Upravit šablonu Fiktivní plavecká šablona',exact:true}).click();await picker.waitFor();assert.equal(await picker.getByLabel('Ikona tréninku',{exact:true}).inputValue(),'swimming');
    await picker.getByRole('button',{name:'Bez vodoznaku',exact:true}).click();assert.equal(await picker.locator('.training-watermark').count(),0);await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await picker.waitFor({state:'detached'});assert.equal(v.state().templates[0].training_icon,'none');assert.equal(created.training_icon,'swimming');assert.equal(await p.locator('.template-card .training-watermark').count(),0);
    await v.c.close();
    for(const role of ['coach','member']){
@@ -254,7 +264,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     await featured.locator(role==='coach'?'.spotlight-title':'.member-event-heading').click();const hero=p.locator('.training-hero-watermark');await hero.waitFor();assert.equal(await hero.locator('.training-watermark').getAttribute('data-training-icon'),'swimming');await p.keyboard.press('Escape');
     await p.getByRole('navigation').getByRole('button',{name:'Kalendář',exact:true}).filter({visible:true}).first().click();await p.locator('.calendar-event .training-watermark[data-training-icon=swimming]').first().waitFor();assert.equal(await p.locator('.calendar-event.race .training-watermark').count(),0);await v.c.close();
    }
-   console.log('PASS training watermarks: 40 icons, automatic discipline, persisted template selection, creation and preserved snapshot after disable, 15% alpha, nonblocking backgrounds, coach/member overview/detail/calendar, mobile/desktop light/dark');return;
+   console.log('PASS training watermarks: 40 icons, automatic discipline, visible template selector, standalone create/edit/disable/reset, creation and preserved snapshot after disable, 15% alpha, nonblocking backgrounds, coach/member overview/detail/calendar, mobile/desktop light/dark');return;
   }
   if(process.env.STG_UNIFIED_UI_ONLY==='1'){
    fees.enabled=true;

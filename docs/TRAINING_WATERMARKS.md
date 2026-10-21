@@ -1,5 +1,7 @@
 # Sportovní ikony a vodoznaky
 
+Výběr je v šabloně hned pod názvem: stále viditelný seznam **Ikona tréninku**, náhled a volitelná obrázková mřížka všech 40 ikon. Stejný výběr je také v **Nová událost → Trénink** a **Upravit trénink** hned pod názvem, včetně tréninků bez šablony. Změna u existujícího tréninku se ukládá pouze k této události. Při změně zvolené šablony se načte její ikona; při nové sérii se vybraná ikona předá všem termínům. Automatický výběr při vytváření ze šablony s vlastní ikonou se uloží jako konkrétní ikona odpovídající novému zaměření. Další migrace není potřeba.
+
 Trenér v **Šablony → Tréninky → Přidat/Upravit šablonu → Ikona tréninku** vybere jednu ze 40 obrysových ikon. Výchozí režim **Automaticky dle zaměření** přiřadí běh, plavání, kolo, sílu, mobilitu a další sporty podle názvu zaměření. Vlastní výběr má přednost; **Bez vodoznaku** dekoraci vypne.
 
 Použit je schválený motiv **velký obrys**, neprůhlednost **15 %**, barva aktuální UI palety. Ikony jsou dekorativní (`aria-hidden`, `pointer-events:none`), nemění rozměry karet ani ovládání. Nová sada je rastrový průhledný atlas PNG, nikoliv SVG. Prohlížeč používá alfa masku, takže ikony lze obarvit bez bílého pozadí; jeden soubor se sdílí napříč kartami a ukládá do běžné HTTP cache. Umístění ikon v atlasu je stabilní, výřezy mají vlastní řádkové souřadnice, aby nebyly vidět sousední piktogramy.

@@ -234,8 +234,12 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    }
    await picker.getByRole('button',{name:'Ikona Plavání',exact:true}).click();await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await picker.waitFor({state:'detached'});
    assert.equal(v.state().templates[0].training_icon,'swimming');assert.equal(await p.locator('.template-card .training-watermark').getAttribute('data-training-icon'),'swimming');
+   await p.setViewportSize({width:1440,height:900});await nav('Kalendář');await p.getByRole('button',{name:'Nová událost',exact:true}).click();
+   await p.getByLabel('Šablona',{exact:true}).selectOption(v.state().templates[0].id);await p.getByLabel('Datum',{exact:true}).fill('2026-10-21');await p.getByRole('button',{name:'Vytvořit trénink',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});
+   const created=v.state().events.find(e=>e.name==='Fiktivní plavecká šablona');assert(created);assert.equal(created.training_icon,'swimming');
+   await nav('Šablony');
    await p.getByRole('button',{name:'Upravit šablonu Fiktivní plavecká šablona',exact:true}).click();await picker.waitFor();assert.equal(await picker.getByRole('button',{name:'Ikona Plavání',exact:true}).getAttribute('aria-pressed'),'true');
-   await picker.getByRole('button',{name:'Bez vodoznaku',exact:true}).click();assert.equal(await picker.locator('.training-watermark').count(),0);await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await picker.waitFor({state:'detached'});assert.equal(v.state().templates[0].training_icon,'none');assert.equal(await p.locator('.template-card .training-watermark').count(),0);
+   await picker.getByRole('button',{name:'Bez vodoznaku',exact:true}).click();assert.equal(await picker.locator('.training-watermark').count(),0);await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await picker.waitFor({state:'detached'});assert.equal(v.state().templates[0].training_icon,'none');assert.equal(created.training_icon,'swimming');assert.equal(await p.locator('.template-card .training-watermark').count(),0);
    await v.c.close();
    for(const role of ['coach','member']){
     const v=await context(role),p=v.page;v.state().events[0].training_icon='swimming';await login(p);await p.locator('.cloud-dashboard').waitFor();
@@ -244,7 +248,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     await featured.locator(role==='coach'?'.spotlight-title':'.member-event-heading').click();const hero=p.locator('.training-hero-watermark');await hero.waitFor();assert.equal(await hero.locator('.training-watermark').getAttribute('data-training-icon'),'swimming');await p.keyboard.press('Escape');
     await p.getByRole('navigation').getByRole('button',{name:'Kalendář',exact:true}).filter({visible:true}).first().click();await p.locator('.calendar-event .training-watermark[data-training-icon=swimming]').first().waitFor();assert.equal(await p.locator('.calendar-event.race .training-watermark').count(),0);await v.c.close();
    }
-   console.log('PASS training watermarks: 40 icons, automatic discipline, persisted template selection and disable, 15% alpha, nonblocking backgrounds, coach/member overview/detail/calendar, mobile/desktop light/dark');return;
+   console.log('PASS training watermarks: 40 icons, automatic discipline, persisted template selection, creation and preserved snapshot after disable, 15% alpha, nonblocking backgrounds, coach/member overview/detail/calendar, mobile/desktop light/dark');return;
   }
   if(process.env.STG_UNIFIED_UI_ONLY==='1'){
    fees.enabled=true;

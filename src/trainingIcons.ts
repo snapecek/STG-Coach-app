@@ -1,10 +1,11 @@
-/** Stable atlas ordering: 8 columns × 5 rows. Never reorder persisted IDs. */
+/** First 40 IDs keep the original atlas order; additional icons have separate masks. */
 export const trainingIcons=[
  ['running','Běh'],['medal','Medaile'],['fencing','Šerm'],['stopwatch','Stopky'],['swimming','Plavání'],['dumbbell','Činka'],['archery','Lukostřelba'],['wrestling','Zápas'],
  ['nutrition','Sportovní výživa'],['bench-press','Bench press'],['cycling','Cyklistika'],['hurdles','Překážkový běh'],['throwing','Hod'],['tennis','Tenis'],['rowing-pair','Párové veslování'],['football','Fotbal'],
  ['high-jump','Skok do výšky'],['hurdle-jump','Skok přes překážku'],['shot-put','Vrh koulí'],['track','Atletická dráha'],['pool','Bazén'],['stadium','Stadion'],['martial-arts','Bojová umění'],['weightlifting','Vzpírání'],
  ['skipping','Švihadlo'],['road-cycling','Silniční cyklistika'],['diving','Skoky do vody'],['rowing','Veslování'],['gym-bag','Sportovní taška'],['whistle','Píšťalka'],['rugby','Ragby'],['water-polo','Vodní pólo'],
  ['gymnastics','Gymnastika'],['bench','Posilovací lavice'],['golf','Golf'],['table-tennis','Stolní tenis'],['steeplechase','Steeplechase'],['hiking','Turistika'],['podium','Stupně vítězů'],['equestrian','Jezdectví'],
+ ['ocr','OCR – ručkování'],['trail','Trail – běh do kopce'],
 ] as const;
 export type TrainingIconId=typeof trainingIcons[number][0];
 export type TrainingIconChoice=TrainingIconId|'none'|null;
@@ -21,7 +22,9 @@ export function suggestedTrainingIcon(type:string):TrainingIconId{
  if(/skok.*vod|potap/.test(t))return 'diving';
  if(/plav|swim|bazen/.test(t))return 'swimming';
  if(/cykl|kolo|bike|spinning/.test(t))return 'cycling';
- if(/ocr|prekaz|steeple/.test(t))return 'hurdles';
+ if(/\bocr\b|obstacle/.test(t))return 'ocr';
+ if(/trail|terenni beh|horsky beh/.test(t))return 'trail';
+ if(/prekaz|steeple/.test(t))return 'hurdles';
  if(/beh|run|sprint|trail|atlet/.test(t))return 'running';
  if(/mobil|gymnast|joga|yoga|pilates|stretch/.test(t))return 'gymnastics';
  if(/judo|zapas|wrest/.test(t))return 'wrestling';
@@ -49,6 +52,7 @@ export function trainingIconFields(value:unknown){return value===undefined?{}:{t
 
 export async function requireTrainingIconMigration(client:import('@supabase/supabase-js').SupabaseClient,clubId:string,icon:TrainingIconChoice|undefined){
  if(icon==null)return;
+ await requireSelectedSportIconMigration(client,icon);
  const {error}=await client.from('events').select('training_icon').eq('club_id',clubId).limit(1);
  if(error)throw new Error(['42703','PGRST204'].includes(error.code)?'Pro uložení sportovní ikony nejdříve nahrajte migraci 046 v Supabase.':'Sportovní ikonu nelze ověřit. Zkontrolujte připojení.');
 }
@@ -57,7 +61,16 @@ export async function requireTrainingIconMigration(client:import('@supabase/supa
  * race choice so an older database cannot report success while losing it. */
 export async function requireRaceIconMigration(client:import('@supabase/supabase-js').SupabaseClient,icon:TrainingIconChoice|undefined){
  if(icon==null)return;
+ await requireSelectedSportIconMigration(client,icon);
  const {data,error}=await client.rpc('race_icons_ready');
  if(error&&!['PGRST202','42883'].includes(error.code))throw new Error('Ikonu závodu nelze ověřit. Zkontrolujte připojení a zkuste to znovu.');
  if(error||data!==true)throw new Error('Pro uložení ikony závodu nejdříve nahrajte migraci 047 v Supabase.');
+}
+
+/** New choices need the extended whitelist; automatic rendering needs no write. */
+export async function requireSelectedSportIconMigration(client:import('@supabase/supabase-js').SupabaseClient,icon:TrainingIconChoice|undefined){
+ if(icon!=='ocr'&&icon!=='trail')return;
+ const {data,error}=await client.rpc('special_sport_icons_ready');
+ if(error&&!['PGRST202','42883'].includes(error.code))throw new Error('Ikonu nelze ověřit. Zkontrolujte připojení a zkuste to znovu.');
+ if(error||data!==true)throw new Error('Pro uložení ikony OCR nebo trailu nejdříve nahrajte migraci 048 v Supabase.');
 }

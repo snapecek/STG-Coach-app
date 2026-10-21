@@ -397,3 +397,5 @@ Rozšíření [042](supabase/migrations/202610170042_fee_deletion_recurring.sql)
 Sportovní ikonografie tréninků: výběr ze 40 ikon v šabloně, automatické přiřazení podle zaměření a velký obrysový vodoznak s intenzitou 15 %. Sdílený výběr vyžaduje [migraci 046](supabase/migrations/202610210046_training_icons.sql); pravidla kopírování a [postup aktivace](docs/TRAINING_WATERMARKS.md).
 
 Výběr sportovní ikony také u závodu (vytvoření, úprava a kopírování) vyžaduje [migraci 047](supabase/migrations/202610210047_race_icons.sql). Používá stejnou sadu 40 ikon a velký obrys s intenzitou 15 %; [postup aktivace](docs/TRAINING_WATERMARKS.md#závody--migrace-047).
+
+Schválené ikony **OCR 2 – ručkování** a **Trail 1 – běh do kopce** rozšiřují výběr na 42 motivů. Automaticky se přiřazují podle zaměření; ruční uložení nových voleb vyžaduje [migraci 048](supabase/migrations/202610210048_ocr_trail_icons.sql). [Pravidla a aktivace](docs/TRAINING_WATERMARKS.md).

@@ -24,3 +24,9 @@
 .agenda-entry .training-watermark>.sport-outline-icon,.member-event-heading>.training-watermark>.sport-outline-icon{width:110px;bottom:-18px}
 .training-icon-picker>label{display:block;margin:0}
 .training-icon-picker>label>select{display:block;width:100%;margin:6px 0 0}
+/* Approved OCR 2 and Trail 1; the original 40 atlas cells stay unchanged. */
+.sport-outline-icon--special{mask-image:url('/icons/ocr-trail-outline.png');-webkit-mask-image:url('/icons/ocr-trail-outline.png');mask-size:200% 100%;-webkit-mask-size:200% 100%;aspect-ratio:1;clip-path:inset(10% 4% 6%)}
+.training-watermark>.sport-outline-icon--special{width:clamp(120px,30%,180px)}
+.training-icon-preview .training-watermark>.sport-outline-icon--special{width:90px}
+.training-hero-watermark>.training-watermark>.sport-outline-icon--special{width:140px;bottom:-12px}
+.calendar-event .training-watermark>.sport-outline-icon--special,.week-event .training-watermark>.sport-outline-icon--special{width:52px;bottom:-5px}

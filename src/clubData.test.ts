@@ -66,3 +66,10 @@ it('uloží výběr ikony šablony a výslovně obnoví automatický režim',asy
 it('neznámou ikonu šablony odmítne bez zápisu',async()=>{
  const m=mock();await expect(addTemplate(m.client,club,{...template,training_icon:'unknown' as never})).rejects.toThrow('ikonu');expect(m.writes).toEqual([]);
 });
+
+it('před migrací 048 neuloží novou sportovní ikonu se zavádějící chybou constraintu',async()=>{
+ const m=mock();m.rpc.mockResolvedValueOnce({data:null,error:{code:'PGRST202'}} as never);await expect(addTemplate(m.client,club,{...template,training_icon:'ocr'})).rejects.toThrow('048');expect(m.writes).toEqual([]);
+});
+it('po migraci 048 uloží do šablony samostatnou trailovou ikonu',async()=>{
+ const m=mock();m.rpc.mockResolvedValueOnce({data:true,error:null} as never);await addTemplate(m.client,club,{...template,training_icon:'trail'});expect(m.writes[0]).toMatchObject({training_icon:'trail'});
+});

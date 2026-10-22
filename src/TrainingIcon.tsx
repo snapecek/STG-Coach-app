@@ -6,8 +6,9 @@ import {trainingIcons,atlasTrainingIcons,normalizeTrainingIcon,resolveTrainingIc
 
 export function TrainingIcon({id,className=''}:{id:TrainingIconId;className?:string}){
  const index=atlasTrainingIcons.findIndex(([key])=>key===id),special=id==='ocr'||id==='trail';
- const position=id==='triathlon'||id==='run-workout'?{}:special?{'--sport-x':id==='ocr'?'0%':'100%','--sport-y':'0%'}:{'--sport-x':`${index%8/7*100}%`,'--sport-y':`${[35,220,395,560,720][Math.floor(index/8)]/(901-160)*100}%`};
- return <span aria-hidden="true" className={'sport-outline-icon '+(special?'sport-outline-icon--special ':id==='triathlon'?'sport-outline-icon--triathlon ':id==='run-workout'?'sport-outline-icon--run-workout ':'')+className} style={position as CSSProperties}/>;
+ const standalone=['triathlon','run-workout','hiit','kettlebell'].includes(id);
+ const position=standalone?{}:special?{'--sport-x':id==='ocr'?'0%':'100%','--sport-y':'0%'}:{'--sport-x':`${index%8/7*100}%`,'--sport-y':`${[35,220,395,560,720][Math.floor(index/8)]/(901-160)*100}%`};
+ return <span aria-hidden="true" className={'sport-outline-icon '+(special?'sport-outline-icon--special ':standalone?'sport-outline-icon--'+id+' ':'')+className} style={position as CSSProperties}/>;
 }
 export function TrainingWatermark({source}:{source:{type:string;training_icon?:string|null;event_kind?:string}}){
  const id=resolveTrainingIcon(source);

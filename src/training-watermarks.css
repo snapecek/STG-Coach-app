@@ -4,7 +4,9 @@
 .training-watermark{position:absolute;inset:0;overflow:hidden;pointer-events:none;user-select:none;z-index:-1;color:var(--accent,#c8f031);opacity:.15}
 .training-watermark>.sport-outline-icon{position:absolute;right:8px;bottom:-12px;width:clamp(130px,35%,240px);max-height:100%;height:auto}
 .watermark-surface:has(>.training-watermark){isolation:isolate}
-.template-card .training-watermark>.sport-outline-icon{width:190px;right:-6px;bottom:25px}
+.template-plan-surface{min-height:96px;overflow:hidden}
+.template-plan-surface .template-plan-preview{margin:0;padding-right:min(40%,150px)}
+.template-plan-surface>.training-watermark>.sport-outline-icon{width:140px;max-width:38%;right:0;bottom:0}
 .training-hero-watermark{margin:0;display:flow-root}
 .training-hero-watermark>.training-watermark>.sport-outline-icon{width:200px;bottom:-25px;right:12px}
 .training-hero-watermark :is(.detail-hero,.member-detail-hero){background:transparent}

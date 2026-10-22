@@ -73,3 +73,6 @@ html[data-theme="light"] .watermark-surface>.training-watermark{color:#4b4b4b;op
 .template-icon-dialog-body{padding:16px;overflow:auto;overscroll-behavior:contain;min-height:0}
 .template-icon-dialog .training-icon-modes>button{padding:10px 14px;text-transform:uppercase;font-size:12px}
 .template-icon-dialog :is(.training-icon-grid,.training-icon-modes)>button[aria-pressed=true]{background:var(--accent,#c8f031);color:var(--on-accent,#090c0a);border-color:var(--accent,#c8f031)}
+
+/* Approved BC4: running and pull-ups, kept as a separate alpha mask. */
+.sport-outline-icon--run-workout{mask-image:url('/icons/run-workout-outline.png');-webkit-mask-image:url('/icons/run-workout-outline.png');mask-size:contain;-webkit-mask-size:contain;mask-position:center;-webkit-mask-position:center;aspect-ratio:1.5}

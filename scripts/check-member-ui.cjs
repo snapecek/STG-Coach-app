@@ -377,6 +377,32 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    }
    console.log('PASS training watermarks: 23 curated icons with OCR, Trail and Triathlon, automatic discipline, visible template selector, standalone create/edit/disable/reset, creation and preserved snapshot after disable, race create/edit/copy/disable, 15% dark / 35% light alpha, nonblocking backgrounds, coach/member overview/detail/calendar, mobile/desktop light/dark');return;
   }
+  if(process.env.STG_HEADER_POPUPS_ONLY==='1'){
+   for(const role of ['coach','member']){
+    const v=await context(role),p=v.page;await login(p);await p.locator('.cloud-dashboard').waitFor();await p.evaluate(()=>document.fonts.ready);
+    const header=p.getByRole('banner',{name:'Klub a účet',exact:true});
+    const items=[['notifications',header.getByRole('button',{name:'Moje upozornění',exact:true}),p.getByRole('region',{name:'Moje upozornění',exact:true})],['clubs',header.getByRole('button',{name:'Moje kluby',exact:true}),p.getByRole('region',{name:'Moje kluby',exact:true})],['account',header.getByLabel('Uživatelské menu',{exact:true}),p.locator('.user-menu-panel')]];
+    for(const theme of ['dark','light'])for(const width of [390,901,1280,1440,1920,2560]){
+     await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);await p.setViewportSize({width,height:900});
+     for(const scroll of [0,100000]){
+      await scrollWorkspace(p,scroll);
+      for(const [name,trigger,panel] of items){
+       await trigger.click();await panel.waitFor();const t=await trigger.boundingBox(),r=await panel.boundingBox();
+       assert(Math.abs(r.y-t.y-t.height-8)<2,'Popup starts below its own trigger');assert(r.x>=0&&r.x+r.width<=width+1,'Popup fits viewport');
+       if(width>900){
+        if(name==='clubs'){assert(Math.abs(r.x-t.x)<2,'Clubs start at club button, not bell');assert.equal(await panel.getAttribute('data-anchor-side'),'left');}
+        else{assert(Math.abs(r.x+r.width-t.x-t.width)<2,name+' ends at its own right edge');assert.equal(await panel.getAttribute('data-anchor-side'),'right');}
+       }
+       assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+       if(width===1920&&theme==='light'&&scroll===0)await p.screenshot({path:'/tmp/trenomi-popup-'+role+'-'+name+'-'+engine+'.png'});
+       await trigger.press('Escape');assert(!(await panel.isVisible()));
+      }
+     }
+    }
+    await v.c.close();
+   }
+   console.log('PASS header popups: clubs use own left edge; bell/account own right edge; coach/member dark/light 390–2560px before/after scroll, viewport containment and Escape');return;
+  }
   if(process.env.STG_UNIFIED_UI_ONLY==='1'){
    fees.enabled=true;
    for(const role of ['coach','member']){
@@ -392,7 +418,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
      await p.setViewportSize({width,height:900});for(const name of role==='coach'?['Přehled','Kalendář','Docházka','Členové','Analýza','Deník','Šablony','Nastavení']:['Přehled','Kalendář','Deník','Nastavení']){await nav(name);await check(role+' '+name+' '+width);const title=p.locator('.page-title h1');if(await title.count())assert.equal(await title.evaluate(e=>getComputedStyle(e).fontSize),width<=760?'26px':'32px')}
      const header=p.getByRole('banner',{name:'Klub a účet',exact:true});
      for(const [trigger,panel] of [[header.getByRole('button',{name:'Moje upozornění',exact:true}),p.getByRole('region',{name:'Moje upozornění',exact:true})],[header.getByRole('button',{name:'Moje kluby',exact:true}),p.getByRole('region',{name:'Moje kluby',exact:true})],[header.getByLabel('Uživatelské menu',{exact:true}),p.locator('.user-menu-panel')]]){
-      await trigger.click();await panel.waitFor();const t=await trigger.boundingBox(),r=await panel.boundingBox();assert(Math.abs(r.y-t.y-t.height-8)<2,'Every popup follows trigger bottom');assert(r.x>=0&&r.x+r.width<=width+1,'Popup fits viewport');if(t.x+t.width/2<width/2&&t.x+r.width<=width-12)assert(Math.abs(r.x-t.x)<2,'Left trigger expands right '+JSON.stringify({role,width,t,r}));else if(t.x+t.width/2>=width/2&&t.x+t.width-r.width>=12)assert(Math.abs(r.x+r.width-t.x-t.width)<2,'Right trigger expands left '+JSON.stringify({role,width,t,r}));await check('Popup '+role+' '+width);await trigger.press('Escape');
+      await trigger.click();await panel.waitFor();const t=await trigger.boundingBox(),r=await panel.boundingBox();assert(Math.abs(r.y-t.y-t.height-8)<2,'Every popup follows trigger bottom');assert(r.x>=0&&r.x+r.width<=width+1,'Popup fits viewport');if(width>900){if(await trigger.evaluate(e=>!!e.closest('.club-switcher')))assert(Math.abs(r.x-t.x)<2,'Clubs follow their own left edge');else assert(Math.abs(r.x+r.width-t.x-t.width)<2,'Account and bell follow their own right edge');}else if(t.x+t.width/2<width/2&&t.x+r.width<=width-12)assert(Math.abs(r.x-t.x)<2,'Left trigger expands right '+JSON.stringify({role,width,t,r}));else if(t.x+t.width/2>=width/2&&t.x+t.width-r.width>=12)assert(Math.abs(r.x+r.width-t.x-t.width)<2,'Right trigger expands left '+JSON.stringify({role,width,t,r}));await check('Popup '+role+' '+width);await trigger.press('Escape');
      }
      if(width<=900){const bad=await p.getByRole('navigation',{name:'Mobilní navigace',exact:true}).getByRole('button').evaluateAll(bs=>bs.flatMap(b=>{const text=[...b.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.trim());if(!text)return [];const range=document.createRange();range.selectNode(text);const t=range.getBoundingClientRect(),r=b.getBoundingClientRect();return t.width>r.width+1?[{text:text.textContent,width:t.width,button:r.width}]:[]}));assert.deepEqual(bad,[],'Mobile navigation labels fit')}
     }
@@ -424,7 +450,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
      for(const scroll of [0,100000]){
       await scrollWorkspace(p,scroll);await bell.click();const panel=p.getByRole('region',{name:'Moje upozornění',exact:true});await panel.getByText('Trenér s delším jménem',{exact:false}).first().waitFor();
       const b=await bell.boundingBox(),r=await panel.boundingBox(),h=await header.boundingBox();assert(r.x>=0&&r.x+r.width<=width+1&&r.y+r.height<=900,'Popup stays in viewport');
-      if(width>900){assert(Math.abs(r.y-b.y-b.height-8)<2,'Popup follows the bell vertically');if(b.x+b.width/2<width/2)assert(Math.abs(r.x-b.x)<2,'Left-side popup follows left edge');else assert(Math.abs(r.x+r.width-b.x-b.width)<2,'Right-side popup follows right edge')}else assert(r.y>=h.y+h.height,'Mobile popup stays below header');
+      if(width>900){assert(Math.abs(r.y-b.y-b.height-8)<2,'Popup follows the bell vertically');assert(Math.abs(r.x+r.width-b.x-b.width)<2,'Desktop popup follows the bell right edge')}else assert(r.y>=h.y+h.height,'Mobile popup stays below header');
       assert(await panel.evaluate(e=>{e.scrollTop=e.scrollHeight;return e.scrollTop>0}),'Long notifications scroll inside popup');await panel.evaluate(e=>e.scrollTop=0);
       if([390,1920,3440].includes(width)&&scroll===0)await p.screenshot({path:'/tmp/trenomi-fluid-'+engine+'-'+role+'-'+width+'.png'});
       await bell.press('Escape');assert(!(await panel.isVisible()));

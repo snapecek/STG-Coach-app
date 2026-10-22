@@ -1,4 +1,9 @@
 import {it,expect} from 'vitest';
 import {validatePreset} from './clubPresets';
+it('accepts race template icons, automatic and disabled watermarks but rejects unknown or unrelated choices',()=>{
+ for(const training_icon of ['ocr','trail','triathlon','none',null] as const)expect(()=>validatePreset('race','Závod',{discipline:'OCR',minutes:180,training_icon})).not.toThrow();
+ expect(()=>validatePreset('race','Závod',{discipline:'OCR',minutes:180,training_icon:'unknown' as never})).toThrow('Vyberte platnou sportovní ikonu.');
+ expect(()=>validatePreset('game','Minihra',{scoring:'points',mode:'teams',training_icon:'ocr'})).toThrow('Sportovní ikona patří k závodní šabloně.');
+});
 it('rejects malformed race and game defaults',()=>{expect(()=>validatePreset('race','Závod',{discipline:'OCR',minutes:180,distance_km:-1})).toThrow();expect(()=>validatePreset('game','Minihra',{})).toThrow();expect(()=>validatePreset('equipment','x'.repeat(41),{})).toThrow();expect(()=>validatePreset('race','Závod',{discipline:'OCR',minutes:180,distance_km:5})).not.toThrow();});
 it('validates race map geometry and keeps maps out of equipment and minigames',()=>{const event_location={point:{lat:49,lng:18},arrows:[],note:''};expect(()=>validatePreset('race','Závod',{discipline:'OCR',minutes:180,event_location})).not.toThrow();expect(()=>validatePreset('race','Závod',{discipline:'OCR',minutes:180,event_location:{...event_location,point:{lat:99,lng:18}}})).toThrow();expect(()=>validatePreset('equipment','Lano',{event_location})).toThrow()});

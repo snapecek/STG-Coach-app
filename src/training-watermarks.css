@@ -60,3 +60,16 @@ html[data-theme="light"] .watermark-surface>.training-watermark{color:#4b4b4b;op
 .training-icon-preview .training-watermark>.sport-outline-icon--triathlon{width:85px}
 .training-hero-watermark>.training-watermark>.sport-outline-icon--triathlon{width:120px;bottom:0}
 .calendar-event .training-watermark>.sport-outline-icon--triathlon{width:48px;bottom:-5px}
+
+/* Template choices stay out of the form; the native top layer handles focus. */
+.template-icon-trigger{justify-self:start}
+.template-icon-dialog{box-sizing:border-box;width:min(900px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px);margin:auto;padding:0;border:1px solid var(--border,#30372e);border-radius:0;background:var(--surface,#10140f);color:inherit;font-family:var(--ui-font);overflow:hidden}
+.template-icon-dialog[open]{display:flex;flex-direction:column}
+.template-icon-dialog::backdrop{background:#0009}
+.template-icon-dialog>header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;border-bottom:1px solid var(--border,#30372e);flex:none}
+.template-icon-dialog h2{font-size:20px;margin:0;text-transform:uppercase}
+.template-icon-dialog button{border:1px solid var(--border,#30372e);border-radius:0;background:var(--raised,var(--surface));color:inherit;font-family:var(--ui-font);min-height:44px;text-transform:uppercase}
+.template-icon-dialog>header>button{display:flex;align-items:center;justify-content:center;width:44px;flex:none}
+.template-icon-dialog-body{padding:16px;overflow:auto;overscroll-behavior:contain;min-height:0}
+.template-icon-dialog .training-icon-modes>button{padding:10px 14px;text-transform:uppercase;font-size:12px}
+.template-icon-dialog :is(.training-icon-grid,.training-icon-modes)>button[aria-pressed=true]{background:var(--accent,#c8f031);color:var(--on-accent,#090c0a);border-color:var(--accent,#c8f031)}

@@ -12,11 +12,20 @@ export function WorkspaceHeader({children}:{children:ReactNode}){
    const vv=window.visualViewport,mobile=matchMedia('(max-width:900px)').matches;
    const footer=mobile?document.querySelector('.workspace-nav:not(:empty)')?.getBoundingClientRect():undefined;
    const bottom=Math.min((vv?.offsetTop||0)+(vv?.height||innerHeight)-12,footer&&footer.height>0?footer.top-8:Infinity);
+   const bell=element.querySelector<HTMLElement>('.notification-bell>button')?.getBoundingClientRect();
+   const account=element.querySelector<HTMLElement>('.user-menu>summary')?.getBoundingClientRect();
    for(const host of element.querySelectorAll<HTMLElement>('.notification-bell,.club-switcher,.user-menu')){
     if(host.matches('details:not([open])'))continue;
     const trigger=host.querySelector<HTMLElement>(':scope > button,:scope > summary'),panel=host.querySelector<HTMLElement>(':scope > .notification-panel,:scope > .club-switcher-panel,:scope > .user-menu-panel');
     if(!trigger||!panel)continue;
-    const p=headerPopoverPosition({trigger:trigger.getBoundingClientRect(),host:host.getBoundingClientRect(),viewport:{left:vv?.offsetLeft||0,width:vv?.width||document.documentElement.clientWidth},preferredWidth:parseFloat(getComputedStyle(panel).getPropertyValue('--popup-preferred-width'))||320,bottom,gutter:mobile?17:12,alignment:mobile?'auto':host.classList.contains('club-switcher')?'left':'right'});
+    const triggerRect=trigger.getBoundingClientRect();
+    let preferredWidth=parseFloat(getComputedStyle(panel).getPropertyValue('--popup-preferred-width'))||320;
+    if(!mobile&&account){
+     // The reference specifies both panel edges, not just the opening direction.
+     if(host.classList.contains('club-switcher'))preferredWidth=account.right-triggerRect.left;
+     else if(host.classList.contains('user-menu')&&bell)preferredWidth=triggerRect.right-bell.left;
+    }
+    const p=headerPopoverPosition({trigger:triggerRect,host:host.getBoundingClientRect(),viewport:{left:vv?.offsetLeft||0,width:vv?.width||document.documentElement.clientWidth},preferredWidth,bottom,gutter:mobile?17:12,alignment:mobile?'auto':host.classList.contains('club-switcher')?'left':'right'});
     for(const [key,value] of Object.entries({left:p.left,top:p.top,width:p.width,'max-height':p.maxHeight}))panel.style.setProperty('--popup-'+key,value+'px');
     panel.dataset.anchorSide=p.side;
    }

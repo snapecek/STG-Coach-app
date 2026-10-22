@@ -224,6 +224,43 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    }
    console.log('PASS app help: member/coach/owner defaults, both guides, accent-insensitive search, empty results, keyboard tabs, accordion, native modal and focus return, desktop/mobile light/dark, no data changes and preserved draft');return;
   }
+  if(process.env.STG_LIGHT_EVENT_ICONS_ONLY==='1'){
+   for(const role of ['coach','member']){
+    const v=await context(role),p=v.page;
+    v.state().events[0].training_icon='running';v.state().events[1].training_icon='ocr';
+    v.state().typeColors.push({id:'80000000-0000-4000-8000-000000000001',club_id:club,event_kind:'training',type_key:'kondice',color:'#70b5ff'});
+    await login(p);await p.locator('.cloud-dashboard').waitFor();await p.evaluate(()=>document.documentElement.dataset.theme='light');
+    const featured=p.locator(role==='coach'?'.spotlight':'.member-featured');await featured.waitFor();
+    const overviewBackground=await featured.evaluate(e=>getComputedStyle(e).backgroundColor);
+    assert.notEqual(overviewBackground,'rgba(0, 0, 0, 0)');
+    const grey=async surface=>{
+     assert.equal(await surface.locator(':scope>.training-watermark').evaluate(e=>getComputedStyle(e).opacity),'0.35');
+     assert.equal(await surface.locator(':scope>.training-watermark>.sport-outline-icon').evaluate(e=>getComputedStyle(e).color),'rgb(75, 75, 75)');
+    };
+    await grey(featured);
+    await p.getByRole('navigation').getByRole('button',{name:'Kalendář',exact:true}).filter({visible:true}).first().click();
+    const card=p.locator('.calendar-event').filter({hasText:events[0].name});await card.waitFor();await grey(card);
+    assert.equal(await card.evaluate(e=>getComputedStyle(e).backgroundColor),overviewBackground,'Calendar and overview share light category tint');
+    assert.equal(await card.locator('.calendar-sport-icon>.sport-outline-icon').evaluate(e=>getComputedStyle(e).color),'rgb(75, 75, 75)');
+    for(const width of [390,1440]){
+     await p.setViewportSize({width,height:900});
+     for(const name of [events[0].name,events[1].name]){
+      await p.locator('.calendar-event').filter({hasText:name}).click();const hero=p.locator('.training-hero-watermark');await hero.waitFor();await grey(hero);
+      const inner=hero.locator('.detail-hero,.member-detail-hero');
+      assert.equal(await inner.evaluate(e=>getComputedStyle(e).backgroundImage),'none','Hero does not paint over watermark');
+      assert.equal(await inner.evaluate(e=>getComputedStyle(e).backgroundColor),'rgba(0, 0, 0, 0)');
+      if(name===events[0].name){assert.equal(await hero.evaluate(e=>getComputedStyle(e).getPropertyValue('--event-color').trim()),'#70b5ff');assert.equal(await hero.evaluate(e=>getComputedStyle(e).backgroundColor),overviewBackground,'Detail uses chosen club colour');}
+      await hero.screenshot({path:'/tmp/trenomi-light-hero-'+engine+'-'+role+'-'+width+'-'+(name===events[0].name?'running':'ocr')+'.png'});
+      assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+      await p.keyboard.press('Escape');await hero.waitFor({state:'detached'});
+     }
+    }
+    await p.evaluate(()=>document.documentElement.dataset.theme='dark');
+    assert.equal(await card.locator('.training-watermark').evaluate(e=>getComputedStyle(e).opacity),'0.15','Dark theme retains original 15% watermark');
+    await v.c.close();
+   }
+   console.log('PASS light sport icons: grey foreground and stronger grey watermarks, non-occluded coach/member training/race heroes, shared custom category tint across overview/calendar/detail, desktop/mobile, original dark opacity');return;
+  }
   if(process.env.STG_CALENDAR_ICONS_ONLY==='1'){
    for(const role of ['coach','member']){
     const v=await context(role),p=v.page;
@@ -246,7 +283,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
        const icon=training.locator('.calendar-sport-icon>.sport-outline-icon');assert(await icon.isVisible());
        assert((await icon.boundingBox()).width>=16);
        if(view==='Seznam')assert.equal(await training.locator('.calendar-sport-icon').evaluate(e=>getComputedStyle(e).flexGrow),'0','Agenda icon does not consume space for the title');
-       assert.equal(await training.locator('.training-watermark').evaluate(e=>getComputedStyle(e).opacity),'0.15');
+       assert.equal(await training.locator('.training-watermark').evaluate(e=>getComputedStyle(e).opacity),theme==='light'?'0.35':'0.15');
        assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'No page overflow');
        assert(await calendar.evaluate(e=>e.scrollWidth<=e.clientWidth+1),'No calendar overflow');
        const rect=await training.boundingBox(),badge=await icon.boundingBox();assert(badge.x>=rect.x&&badge.x+badge.width<=rect.x+rect.width+1,'Icon fits event');
@@ -258,7 +295,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     await calendar.locator('.calendar-event').filter({hasText:'Fiktivní společný trénink'}).click();await p.locator('.training-hero-watermark').waitFor();
     await v.c.close();
    }
-   console.log('PASS calendar sport icons: coach/member month/week/list/day, explicit Trail overrides type, automatic OCR, none, 15% watermarks, 320–1440px light/dark, no overflow, event opening');return;
+   console.log('PASS calendar sport icons: coach/member month/week/list/day, explicit Trail overrides type, automatic OCR, none, theme-specific watermark opacity, 320–1440px light/dark, no overflow, event opening');return;
   }
   if(process.env.STG_TRAINING_WATERMARKS_ONLY==='1'){
    const v=await context('coach'),p=v.page;await login(p);await p.locator('.cloud-dashboard').waitFor();
@@ -273,7 +310,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    for(const width of [320,390,1440])for(const theme of ['dark','light']){
     await p.setViewportSize({width,height:900});await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);await picker.scrollIntoViewIfNeeded();
     assert(await picker.evaluate(e=>e.scrollWidth<=e.clientWidth+1));assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
-    assert.equal(await picker.locator('.training-watermark').evaluate(e=>getComputedStyle(e).opacity),'0.15');
+    assert.equal(await picker.locator('.training-watermark').evaluate(e=>getComputedStyle(e).opacity),theme==='light'?'0.35':'0.15');
     assert.equal(await picker.locator('.training-watermark').evaluate(e=>getComputedStyle(e).pointerEvents),'none');
     const atlas=await p.evaluate(async()=>{const i=new Image();i.src='/icons/sports-outline-atlas.png';await i.decode();return [i.naturalWidth,i.naturalHeight]});assert(atlas[0]>1000&&atlas[1]>500);
     await p.screenshot({path:'/tmp/trenomi-icon-picker-'+engine+'-'+theme+'-'+width+'.png'});
@@ -310,7 +347,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     await featured.locator(role==='coach'?'.spotlight-title':'.member-event-heading').click();const hero=p.locator('.training-hero-watermark');await hero.waitFor();assert.equal(await hero.locator('.training-watermark').getAttribute('data-training-icon'),'swimming');await p.keyboard.press('Escape');
     await p.getByRole('navigation').getByRole('button',{name:'Kalendář',exact:true}).filter({visible:true}).first().click();await p.locator('.calendar-event .training-watermark[data-training-icon=swimming]').first().waitFor();assert(await p.locator('.calendar-event.race .training-watermark').count()>0);await v.c.close();
    }
-   console.log('PASS training watermarks: 42 icons with approved OCR 2 and Trail 1, automatic discipline, visible template selector, standalone create/edit/disable/reset, creation and preserved snapshot after disable, race create/edit/copy/disable, 15% alpha, nonblocking backgrounds, coach/member overview/detail/calendar, mobile/desktop light/dark');return;
+   console.log('PASS training watermarks: 42 icons with approved OCR 2 and Trail 1, automatic discipline, visible template selector, standalone create/edit/disable/reset, creation and preserved snapshot after disable, race create/edit/copy/disable, 15% dark / 35% light alpha, nonblocking backgrounds, coach/member overview/detail/calendar, mobile/desktop light/dark');return;
   }
   if(process.env.STG_UNIFIED_UI_ONLY==='1'){
    fees.enabled=true;

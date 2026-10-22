@@ -29,6 +29,7 @@ async function run(args,extra={}){
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_UNIFIED_UI_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_TRAINING_WATERMARKS_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_CALENDAR_ICONS_ONLY',engine:'webkit'});
+  await run(['scripts/check-member-ui.cjs'],{flag:'STG_LIGHT_EVENT_ICONS_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_LIVE_SYNC_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_AUTO_REFRESH_ONLY',engine:'webkit'});
   await run(['scripts/check-member-ui.cjs'],{flag:'STG_EVENT_WINDOW_ONLY',engine:'webkit'});

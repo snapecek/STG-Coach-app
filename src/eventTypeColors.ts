@@ -8,7 +8,7 @@ export const typeColorPalette=[['Tyrkysová','#78c3ba'],['Oranžová','#ff925c']
 export const displayTypeColor=(color:string)=>color.toLowerCase()==='#ff925c'?'#ffb317':color;
 export const typeColorKey=(type:string)=>type.trim().toLocaleLowerCase('cs');
 export function eventTypeColor(event:Pick<EventRow,'event_kind'|'type'>,colors:EventTypeColor[]=[]){return displayTypeColor(colors.find(c=>c.event_kind===event.event_kind&&c.type_key===typeColorKey(event.type))?.color||(event.event_kind==='race'?'#ffb317':'#78c3ba'));}
-export function overviewEventStyle(event:Pick<EventRow,'event_kind'|'type'>,colors:EventTypeColor[]=[]):CSSProperties{const color=eventTypeColor(event,colors);return {'--event-color':color,backgroundColor:color+'18'} as CSSProperties;}
+export function overviewEventStyle(event:Pick<EventRow,'event_kind'|'type'>,colors:EventTypeColor[]=[]):CSSProperties{const color=eventTypeColor(event,colors);return {'--event-color':color,backgroundColor:'var(--event-tint, '+color+'18)'} as CSSProperties;}
 export async function saveEventTypeColor(client:SupabaseClient,club:ClubAccess,kind:EventRow['event_kind'],type:string,color:string|null){
  if(!['owner','coach'].includes(club.role))throw new Error('Barvy může měnit pouze trenér nebo správce.');
  const type_key=typeColorKey(type);

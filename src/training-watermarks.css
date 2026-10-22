@@ -44,3 +44,10 @@
 .calendar .calendar-event,.calendar .agenda-entry{color:var(--text,#e8edf3);border-left-color:var(--event-color)}
 .calendar .calendar-event>.training-watermark,.calendar .agenda-entry>.training-watermark{color:var(--event-color)}
 html[data-theme="light"] .calendar .calendar-event,html[data-theme="light"] .calendar .agenda-entry{color:#202a33}
+
+/* A child hero must not cover its own background watermark in either theme. */
+html[data-theme] .training-hero-watermark>:is(.detail-hero,.member-detail-hero){background:transparent}
+/* Light surfaces need visible grey outlines and a stronger category tint. */
+html[data-theme="light"] :is(.overview-event-color,.calendar-event,.agenda-entry){--event-tint:color-mix(in srgb,var(--event-color) 22%,white)}
+html[data-theme="light"] .sport-outline-icon{color:#4b4b4b}
+html[data-theme="light"] .watermark-surface>.training-watermark{color:#4b4b4b;opacity:.35}

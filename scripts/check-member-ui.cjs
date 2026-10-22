@@ -5,11 +5,20 @@ const assert=require('node:assert/strict');
 
 // Exercise the visible image buttons and the value submitted by the form.
 function sportPicker(scope,label){
- const grid=scope.getByRole('group',{name:label,exact:true}),fieldset=grid.locator('..');
+ const input=scope.locator('input[name=training_icon]'),fieldset=input.locator('..');
+ const page=typeof scope.page==='function'?scope.page():scope;
+ const dialog=page.getByRole('dialog',{name:'Vybrat ikonu šablony',exact:true});
  return {
-  choose:value=>value===''||value==='none'?fieldset.getByRole('button',{name:value==='none'?'Bez vodoznaku':'Automaticky dle zaměření',exact:true}).click():grid.locator('[data-icon-choice="'+value+'"]').click(),
-  value:()=>fieldset.locator('input[name=training_icon]').inputValue(),
-  waitFor:()=>grid.waitFor(),boundingBox:()=>grid.boundingBox(),isVisible:()=>grid.isVisible()
+  choose:async value=>{
+   const trigger=fieldset.getByRole('button',{name:'Vybrat ikonu',exact:true});
+   const compact=await trigger.count()>0;
+   if(compact)await trigger.click();
+   const target=compact?dialog:fieldset;
+   if(value===''||value==='none')await target.getByRole('button',{name:value==='none'?/^Bez (ikony \/ vodoznaku|vodoznaku)$/: 'Automaticky dle zaměření',exact:true}).click();
+   else await target.locator('[data-icon-choice="'+value+'"]').click();
+   if(compact)await dialog.waitFor({state:'detached'});
+  },
+  value:()=>input.inputValue(),waitFor:()=>fieldset.waitFor(),boundingBox:()=>fieldset.boundingBox(),isVisible:()=>fieldset.isVisible()
  };
 }
 
@@ -318,10 +327,10 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    await nav('Šablony');await p.getByRole('button',{name:'Upravit šablonu Původní šablona',exact:true}).click();
    const picker=p.locator('.training-icon-picker'),select=sportPicker(picker,'Ikona tréninku');
    assert.equal(await select.value(),'');assert.equal(await picker.locator('.training-watermark').getAttribute('data-training-icon'),'running');
-   const options=await picker.locator('.training-icon-grid>button').evaluateAll(nodes=>nodes.map(n=>n.dataset.iconChoice));assert.equal(options.length,23);for(const id of retired)assert(!options.includes(id),'Removed '+id);
+   await picker.getByRole('button',{name:'Vybrat ikonu',exact:true}).click();const chooser=p.getByRole('dialog',{name:'Vybrat ikonu šablony',exact:true});const options=await chooser.locator('.training-icon-grid>button').evaluateAll(nodes=>nodes.map(n=>n.dataset.iconChoice));assert.equal(options.length,23);for(const id of retired)assert(!options.includes(id),'Removed '+id);await chooser.getByRole('button',{name:'Zavřít výběr ikon',exact:true}).click();
    await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await picker.waitFor({state:'detached'});assert.equal(v.state().templates[0].training_icon,null);
    await p.getByRole('button',{name:'Přidat šablonu',exact:true}).click();await p.getByLabel('Název',{exact:true}).fill('Triatlonová šablona');await p.getByLabel('Místo',{exact:true}).fill('Park');await select.choose('triathlon');
-   assert.equal(await picker.locator('select,details').count(),0,'One directly visible image picker');assert.equal(await picker.locator('.training-icon-grid>button').count(),23);
+   assert.equal(await picker.locator('select,details,.training-icon-grid').count(),0,'Template grid stays in chooser');assert(await picker.getByRole('button',{name:'Vybrat ikonu',exact:true}).isVisible());
    for(const theme of ['dark','light'])for(const width of [320,390,1440]){
     await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);await p.setViewportSize({width,height:900});await picker.scrollIntoViewIfNeeded();
     const icon=picker.locator('.training-icon-preview .sport-outline-icon');assert((await icon.evaluate(e=>getComputedStyle(e).maskImage)).includes('triathlon-outline.png'));assert(await icon.isVisible());assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
@@ -362,27 +371,34 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     if(width===1440){await card().scrollIntoViewIfNeeded();await p.screenshot({path:'/tmp/trenomi-race-card-'+engine+'-'+theme+'.png'});}
    }
    await p.reload();await edit(preset.name);assert.equal(await icon().value(),'triathlon');
-   for(const theme of ['light','dark'])for(const width of [320,390,1440]){await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);await p.setViewportSize({width,height:1000});assert(await icon().isVisible());assert.equal(await p.locator('.training-icon-picker select,.training-icon-picker details').count(),0);assert.equal(await p.locator('.training-icon-grid>button').count(),23);assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
+   for(const theme of ['light','dark'])for(const width of [320,390,1440]){await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);await p.setViewportSize({width,height:1000});assert(await icon().isVisible());assert.equal(await p.locator('.training-icon-picker select,.training-icon-picker details').count(),0);assert.equal(await p.locator('.training-icon-picker .training-icon-grid').count(),0);
+    const trigger=p.getByRole('button',{name:'Vybrat ikonu',exact:true});await trigger.click();const chooser=p.getByRole('dialog',{name:'Vybrat ikonu šablony',exact:true});await chooser.waitFor();assert.equal(await chooser.locator('.training-icon-grid>button').count(),23);
+    const contrast=await chooser.locator('button').evaluateAll(nodes=>{const lum=color=>{const rgb=color.match(/[\d.]+/g).slice(0,3).map(n=>{const c=Number(n)/255;return c<=.04045?c/12.92:((c+.055)/1.055)**2.4});return rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722};return nodes.map(e=>{const s=getComputedStyle(e),a=lum(s.color),b=lum(s.backgroundColor);return (Math.max(a,b)+.05)/(Math.min(a,b)+.05)})});assert(contrast.every(r=>r>=4.5),'Icon chooser labels have readable contrast');
+
+    const box=await chooser.boundingBox();assert(box&&box.x>=0&&box.x+box.width<=width+1&&box.y>=0&&box.y+box.height<=1001,'Icon dialog stays inside viewport');
+    const last=chooser.locator('.training-icon-grid>button').last();await last.scrollIntoViewIfNeeded();await last.focus();await p.keyboard.press('Tab');assert(await chooser.evaluate(e=>e.contains(document.activeElement)),'Native dialog contains keyboard focus');
+    if(width!==320)await p.screenshot({path:'/tmp/trenomi-icon-dialog-'+engine+'-'+theme+'-'+width+'.png'});await p.keyboard.press('Escape');await chooser.waitFor({state:'detached'});assert(await p.locator('.preset-editor').isVisible(),'Escape leaves parent editor open');assert.equal(await icon().value(),'triathlon','Cancel preserves the icon');assert(await trigger.evaluate(e=>e===document.activeElement),'Focus returns to chooser trigger');
+    assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
    await icon().choose('trail');await save();assert.equal(preset.settings.training_icon,'trail');await card().locator('.training-watermark[data-training-icon=trail]').waitFor();
    await nav('Kalendář');await p.getByRole('button',{name:'Nová událost',exact:true}).click();await p.getByRole('group',{name:'Druh nové události'}).getByRole('button',{name:/Závod/}).click();await p.getByLabel('Závodní šablona',{exact:true}).selectOption(preset.id);assert.equal(await icon().value(),'trail');
    await icon().choose('ocr');await p.getByLabel('Závodní šablona',{exact:true}).selectOption('40000000-0000-4000-8000-000000000077');assert.equal(await icon().value(),'');assert.equal(await preview().getAttribute('data-training-icon'),'ocr');await p.getByLabel('Závodní šablona',{exact:true}).selectOption(preset.id);assert.equal(await icon().value(),'trail');
    await p.getByLabel('Datum',{exact:true}).fill('2026-10-20');await p.getByRole('button',{name:'Vytvořit závod',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});const event=v.state().events.find(e=>e.name===preset.name);assert.equal(event.training_icon,'trail');
    await edit(preset.name);await icon().choose('none');assert.equal(await preview().count(),0);await save();assert.equal(preset.settings.training_icon,'none');await card().locator('.training-watermark').waitFor({state:'detached'});assert.equal(event.training_icon,'trail','Existing race keeps its icon snapshot');
    await p.reload();await nav('Kalendář');await p.getByRole('button',{name:'Nová událost',exact:true}).click();await p.getByRole('group',{name:'Druh nové události'}).getByRole('button',{name:/Závod/}).click();await p.getByLabel('Závodní šablona',{exact:true}).selectOption(preset.id);assert.equal(await icon().value(),'none');assert.equal(await preview().count(),0);await p.getByLabel('Název',{exact:true}).fill('Závod bez ikony ze šablony');await p.getByLabel('Datum',{exact:true}).fill('2026-10-21');await p.getByRole('button',{name:'Vytvořit závod',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});assert.equal(v.state().events.find(e=>e.name==='Závod bez ikony ze šablony').training_icon,'none');
-   await edit(preset.name);await p.getByRole('button',{name:'Automaticky dle zaměření',exact:true}).click();await p.getByLabel('Disciplína šablony',{exact:true}).fill('Plavání');assert.equal(await preview().getAttribute('data-training-icon'),'swimming');await save();assert.equal(preset.settings.training_icon,null);await card().locator('.training-watermark[data-training-icon=swimming]').waitFor();
+   await edit(preset.name);await icon().choose('');await p.getByLabel('Disciplína šablony',{exact:true}).fill('Plavání');assert.equal(await preview().getAttribute('data-training-icon'),'swimming');await save();assert.equal(preset.settings.training_icon,null);await card().locator('.training-watermark[data-training-icon=swimming]').waitFor();
    await edit('Starší závodní šablona');assert.equal(await icon().value(),'');await save();const legacy=v.state().presets.find(t=>t.name==='Starší závodní šablona');assert.equal(legacy.settings.notes,'Původní pokyny');assert.equal(legacy.settings.distance_km,5);
-   await v.c.close();console.log('PASS race template icons: create/edit/reload, live automatic preview, explicit/none/automatic persistence, preset switching, new race inheritance, existing race snapshot, legacy templates, visible image picker and race card watermarks above actions, 320–1440px light/dark');return;
+   await v.c.close();console.log('PASS race template icons: create/edit/reload, live automatic preview, explicit/none/automatic persistence, preset switching, new race inheritance, existing race snapshot, legacy templates, compact template chooser, cancel/focus/viewport handling and race card watermarks above actions, 320–1440px light/dark');return;
   }
   if(process.env.STG_TRAINING_WATERMARKS_ONLY==='1'){
    const v=await context('coach'),p=v.page;await login(p);await p.locator('.cloud-dashboard').waitFor();
    const nav=async name=>p.getByRole('navigation').getByRole('button',{name,exact:true}).filter({visible:true}).first().click();
    await nav('Šablony');await p.getByRole('button',{name:'Přidat šablonu',exact:true}).click();
-   const visibleIconSelect=sportPicker(p,'Ikona tréninku');await visibleIconSelect.waitFor();assert((await visibleIconSelect.boundingBox()).y<(await p.getByLabel('Místo',{exact:true}).boundingBox()).y,'Template icon choice precedes location/map');
+   const visibleIconSelect=sportPicker(p,'Ikona tréninku');await visibleIconSelect.waitFor();await p.getByRole('button',{name:'Vybrat ikonu',exact:true}).click();await p.getByRole('dialog',{name:'Vybrat ikonu šablony',exact:true}).waitFor();await p.keyboard.press('Escape');await p.getByRole('dialog',{name:'Vybrat ikonu šablony',exact:true}).waitFor({state:'detached'});assert.equal(await p.getByRole('dialog').count(),1,'Cancel icon chooser preserves the parent training template dialog');assert((await visibleIconSelect.boundingBox()).y<(await p.getByLabel('Místo',{exact:true}).boundingBox()).y,'Template icon choice precedes location/map');
    await p.getByLabel('Název',{exact:true}).fill('Fiktivní plavecká šablona');await p.getByLabel('Místo',{exact:true}).fill('Bazén');await p.getByLabel('Zaměření',{exact:true}).selectOption('Plavání');
    const picker=p.locator('.training-icon-picker');assert.equal(await picker.locator('.training-watermark').getAttribute('data-training-icon'),'swimming');
-   assert.equal(await picker.locator('select,details').count(),0,'One directly visible image picker');assert.equal(await picker.locator('.training-icon-grid>button').count(),23);
+   assert.equal(await picker.locator('select,details,.training-icon-grid').count(),0,'Template grid stays in chooser');assert(await picker.getByRole('button',{name:'Vybrat ikonu',exact:true}).isVisible());
    for(const id of ['ocr','trail']){await sportPicker(picker,'Ikona tréninku').choose(id);assert.equal(await picker.locator('.training-watermark').getAttribute('data-training-icon'),id);assert(await picker.locator('.sport-outline-icon--special').count());await picker.locator('.training-icon-preview').screenshot({path:'/tmp/trenomi-selected-'+id+'-'+engine+'.png'})}
-   await picker.getByRole('button',{name:'Ikona Stopky',exact:true}).click();assert.equal(await picker.locator('.training-watermark').getAttribute('data-training-icon'),'stopwatch');
+   await sportPicker(picker,'Ikona tréninku').choose('stopwatch');assert.equal(await picker.locator('.training-watermark').getAttribute('data-training-icon'),'stopwatch');
    for(const width of [320,390,1440])for(const theme of ['dark','light']){
     await p.setViewportSize({width,height:900});await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);await picker.scrollIntoViewIfNeeded();
     assert(await picker.evaluate(e=>e.scrollWidth<=e.clientWidth+1));assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
@@ -391,7 +407,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     const atlas=await p.evaluate(async()=>{const i=new Image();i.src='/icons/sports-outline-atlas.png';await i.decode();return [i.naturalWidth,i.naturalHeight]});assert(atlas[0]>1000&&atlas[1]>500);
     await p.screenshot({path:'/tmp/trenomi-icon-picker-'+engine+'-'+theme+'-'+width+'.png'});
    }
-   await picker.getByRole('button',{name:'Ikona Plavání',exact:true}).click();await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await picker.waitFor({state:'detached'});
+   await sportPicker(picker,'Ikona tréninku').choose('swimming');await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await picker.waitFor({state:'detached'});
    assert.equal(v.state().templates[0].training_icon,'swimming');assert.equal(await p.locator('.template-card .training-watermark').getAttribute('data-training-icon'),'swimming');
    await p.setViewportSize({width:1440,height:900});await nav('Kalendář');await p.getByRole('button',{name:'Nová událost',exact:true}).click();
    await p.getByLabel('Šablona',{exact:true}).selectOption(v.state().templates[0].id);await p.getByLabel('Datum',{exact:true}).fill('2026-10-21');await p.getByRole('button',{name:'Vytvořit trénink',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});
@@ -407,7 +423,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    await editDirect();await sportPicker(eventPicker,'Ikona tréninku').choose('');assert.equal(await eventPicker.locator('.training-watermark').getAttribute('data-training-icon'),'running');await p.getByRole('button',{name:'Uložit změny',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});assert.equal(direct.training_icon,null);
    await nav('Šablony');
    await p.getByRole('button',{name:'Upravit šablonu Fiktivní plavecká šablona',exact:true}).click();await picker.waitFor();assert.equal(await sportPicker(picker,'Ikona tréninku').value(),'swimming');
-   await picker.getByRole('button',{name:'Bez vodoznaku',exact:true}).click();assert.equal(await picker.locator('.training-watermark').count(),0);await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await picker.waitFor({state:'detached'});assert.equal(v.state().templates[0].training_icon,'none');assert.equal(created.training_icon,'swimming');assert.equal(await p.locator('.template-card .training-watermark').count(),0);
+   await sportPicker(picker,'Ikona tréninku').choose('none');assert.equal(await picker.locator('.training-watermark').count(),0);await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await picker.waitFor({state:'detached'});assert.equal(v.state().templates[0].training_icon,'none');assert.equal(created.training_icon,'swimming');assert.equal(await p.locator('.template-card .training-watermark').count(),0);
    await nav('Kalendář');await p.getByRole('button',{name:'Nová událost',exact:true}).click();await p.getByRole('button',{name:'Závod Soupiska a výsledky',exact:true}).click();
    const racePicker=sportPicker(p,'Ikona závodu');await racePicker.waitFor();await p.getByLabel('Název',{exact:true}).fill('Fiktivní závod s ikonou');await p.getByLabel('Místo',{exact:true}).fill('Park');await p.getByLabel('Datum',{exact:true}).fill('2026-10-24');await racePicker.choose('ocr');await p.getByRole('button',{name:'Vytvořit závod',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});
    const race=v.state().events.find(e=>e.name==='Fiktivní závod s ikonou');assert.equal(race.training_icon,'ocr');const card=p.locator('.calendar-event').filter({hasText:race.name});assert.equal(await card.locator('.training-watermark').getAttribute('data-training-icon'),'ocr');

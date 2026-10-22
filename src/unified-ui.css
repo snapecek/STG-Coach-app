@@ -35,3 +35,5 @@
 :is(.cloud-card,.dialog,.app-help-dialog) h1{font-size:var(--ui-title)!important}
 :is(.cloud-card,.dialog,.app-help-dialog) h2{font-size:var(--ui-section)!important}
 :is(.cloud-card,.dialog,.app-help-dialog) h3{font-size:var(--ui-subtitle)!important}
+/* Account actions keep the reference's one-action-per-row layout when wider. */
+@media(min-width:901px){.workspace-header .user-menu-panel>button{display:flex;width:100%;justify-content:flex-start;text-align:left}}

@@ -22,7 +22,7 @@ export function WorkspaceHeader({children}:{children:ReactNode}){
     let preferredWidth=parseFloat(getComputedStyle(panel).getPropertyValue('--popup-preferred-width'))||320;
     if(!mobile&&account){
      // The reference specifies both panel edges, not just the opening direction.
-     if(host.classList.contains('club-switcher'))preferredWidth=account.right-triggerRect.left;
+     if(host.classList.contains('club-switcher')||host.classList.contains('notification-bell'))preferredWidth=account.right-triggerRect.left;
      else if(host.classList.contains('user-menu')&&bell)preferredWidth=triggerRect.right-bell.left;
     }
     const p=headerPopoverPosition({trigger:triggerRect,host:host.getBoundingClientRect(),viewport:{left:vv?.offsetLeft||0,width:vv?.width||document.documentElement.clientWidth},preferredWidth,bottom,gutter:mobile?17:12,alignment:mobile?'auto':host.classList.contains('user-menu')?'right':'left'});

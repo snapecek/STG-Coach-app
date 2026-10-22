@@ -25,7 +25,7 @@ export function WorkspaceHeader({children}:{children:ReactNode}){
      if(host.classList.contains('club-switcher'))preferredWidth=account.right-triggerRect.left;
      else if(host.classList.contains('user-menu')&&bell)preferredWidth=triggerRect.right-bell.left;
     }
-    const p=headerPopoverPosition({trigger:triggerRect,host:host.getBoundingClientRect(),viewport:{left:vv?.offsetLeft||0,width:vv?.width||document.documentElement.clientWidth},preferredWidth,bottom,gutter:mobile?17:12,alignment:mobile?'auto':host.classList.contains('club-switcher')?'left':'right'});
+    const p=headerPopoverPosition({trigger:triggerRect,host:host.getBoundingClientRect(),viewport:{left:vv?.offsetLeft||0,width:vv?.width||document.documentElement.clientWidth},preferredWidth,bottom,gutter:mobile?17:12,alignment:mobile?'auto':host.classList.contains('user-menu')?'right':'left'});
     for(const [key,value] of Object.entries({left:p.left,top:p.top,width:p.width,'max-height':p.maxHeight}))panel.style.setProperty('--popup-'+key,value+'px');
     panel.dataset.anchorSide=p.side;
    }

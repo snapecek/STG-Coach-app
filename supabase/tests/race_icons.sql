@@ -12,13 +12,13 @@ set local role authenticated;
 select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000001"}',true);
 do $$declare r public.events;begin
  if not public.race_icons_ready() then raise exception 'FAIL readiness';end if;
- r:=public.create_club_race('20000000-0000-4000-8000-000000000001','{"id":"50000000-0000-4000-8000-000000000002","name":"Fiktivní závod","place":"Park","type":"OCR","starts_at":"2026-12-01T18:00:00Z","duration_minutes":180,"training_icon":"medal"}'::jsonb,array['30000000-0000-4000-8000-000000000001']::uuid[]);
- if r.training_icon is distinct from 'medal' then raise exception 'FAIL race icon discarded';end if;
+ r:=public.create_club_race('20000000-0000-4000-8000-000000000001','{"id":"50000000-0000-4000-8000-000000000002","name":"Fiktivní závod","place":"Park","type":"OCR","starts_at":"2026-12-01T18:00:00Z","duration_minutes":180,"training_icon":"stopwatch"}'::jsonb,array['30000000-0000-4000-8000-000000000001']::uuid[]);
+ if r.training_icon is distinct from 'stopwatch' then raise exception 'FAIL race icon discarded';end if;
  if (select count(*) from public.participation where event_id=r.id)<>1 then raise exception 'FAIL race roster';end if;
 end $$;
 update public.events set place='Les' where id='50000000-0000-4000-8000-000000000002';
 do $$begin
- if (select training_icon from public.events where id='50000000-0000-4000-8000-000000000002') is distinct from 'medal' then raise exception 'FAIL unrelated update discarded icon';end if;
+ if (select training_icon from public.events where id='50000000-0000-4000-8000-000000000002') is distinct from 'stopwatch' then raise exception 'FAIL unrelated update discarded icon';end if;
  begin
   update public.events set training_icon='invalid' where id='50000000-0000-4000-8000-000000000002';raise exception 'FAIL invalid race icon accepted';
  exception when check_violation then null;end;
@@ -36,7 +36,7 @@ end $$;
 update public.events set training_icon=null where id='50000000-0000-4000-8000-000000000002';
 select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002"}',true);
 do $$declare n integer;begin
- update public.events set training_icon='medal' where event_kind='race';get diagnostics n=row_count;
+ update public.events set training_icon='stopwatch' where event_kind='race';get diagnostics n=row_count;
  if n<>0 then raise exception 'FAIL member changed race icon';end if;
  begin
   perform public.create_club_race('20000000-0000-4000-8000-000000000001','{}'::jsonb,array[]::uuid[]);raise exception 'FAIL member created race';

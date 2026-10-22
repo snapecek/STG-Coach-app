@@ -49,7 +49,7 @@ do $$begin
 end $$;
 select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000002"}',true);
 do $$declare n integer;begin
- update public.events set training_icon='medal';get diagnostics n=row_count;
+ update public.events set training_icon='stopwatch';get diagnostics n=row_count;
  if n<>0 then raise exception 'FAIL member changed training icon';end if;
 end $$;
 rollback;

@@ -76,3 +76,8 @@ html[data-theme="light"] .watermark-surface>.training-watermark{color:#4b4b4b;op
 
 /* Approved BC4: running and pull-ups, kept as a separate alpha mask. */
 .sport-outline-icon--run-workout{mask-image:url('/icons/run-workout-outline.png');-webkit-mask-image:url('/icons/run-workout-outline.png');mask-size:contain;-webkit-mask-size:contain;mask-position:center;-webkit-mask-position:center;aspect-ratio:1.5}
+
+/* Approved H3 (battle ropes and stopwatch) and H1 (kettlebell and stopwatch). */
+.sport-outline-icon--hiit,.sport-outline-icon--kettlebell{mask-size:contain;-webkit-mask-size:contain;mask-position:center;-webkit-mask-position:center}
+.sport-outline-icon--hiit{mask-image:url('/icons/hiit-outline.png');-webkit-mask-image:url('/icons/hiit-outline.png');aspect-ratio:1.5}
+.sport-outline-icon--kettlebell{mask-image:url('/icons/kettlebell-outline.png');-webkit-mask-image:url('/icons/kettlebell-outline.png');aspect-ratio:1312/1199}

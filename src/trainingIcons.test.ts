@@ -11,7 +11,7 @@ describe('Ikony tréninků',()=>{
   expect(resolveTrainingIcon({type:'Plavání'})).toBe('swimming');
  });
  it('odmítne neznámou ikonu před zápisem; zachová rozlišení vynechat/resetovat',()=>{
-  expect(()=>validateTrainingIcon('<svg>')).toThrow();expect(trainingIconFields(undefined)).toEqual({});expect(trainingIconFields(null)).toEqual({training_icon:null});expect(trainingIcons).toHaveLength(24);expect(new Set(trainingIcons.map(([id])=>id)).size).toBe(24);
+  expect(()=>validateTrainingIcon('<svg>')).toThrow();expect(trainingIconFields(undefined)).toEqual({});expect(trainingIconFields(null)).toEqual({training_icon:null});expect(trainingIcons).toHaveLength(26);expect(new Set(trainingIcons.map(([id])=>id)).size).toBe(26);
  });
  it('událost si zachová kopii ikony po změně šablony',()=>{
   const t={id:'t',club_id:'c',name:'Trénink',type:'Běh',place:'Park',minutes:60,plan:'',training_icon:'stopwatch' as const};
@@ -49,4 +49,10 @@ it.each(['Běh a cvičení','STG Run & Workout','Cvičení a běh'])('recognizes
  expect(suggestedTrainingIcon(type)).toBe('run-workout');expect(validateTrainingIcon('run-workout')).toBe('run-workout');
  const rpc=vi.fn().mockResolvedValueOnce({data:null,error:{code:'PGRST202'}}).mockResolvedValueOnce({data:true,error:null});const client={rpc} as unknown as SupabaseClient;
  await expect(requireSelectedSportIconMigration(client,'run-workout')).rejects.toThrow('051');await expect(requireSelectedSportIconMigration(client,'run-workout')).resolves.toBeUndefined();expect(rpc).toHaveBeenCalledWith('run_workout_icons_ready');
+});
+
+it.each([['HIIT v gymu','hiit'],['STG HIIT v hale','hiit'],['Tabata','hiit'],['Kettlebell','kettlebell'],['Kettlbell','kettlebell']])('recognizes %s and gates HIIT/kettlebell persistence on migration 052',async(type,id)=>{
+ expect(suggestedTrainingIcon(type)).toBe(id);expect(validateTrainingIcon(id)).toBe(id);
+ const rpc=vi.fn().mockResolvedValueOnce({data:null,error:{code:'PGRST202'}}).mockResolvedValueOnce({data:true,error:null});const client={rpc} as unknown as SupabaseClient;
+ await expect(requireSelectedSportIconMigration(client,id as 'hiit'|'kettlebell')).rejects.toThrow('052');await expect(requireSelectedSportIconMigration(client,id as 'hiit'|'kettlebell')).resolves.toBeUndefined();expect(rpc).toHaveBeenCalledWith('hiit_kettlebell_icons_ready');
 });

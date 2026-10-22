@@ -51,3 +51,10 @@ html[data-theme] .training-hero-watermark>:is(.detail-hero,.member-detail-hero){
 html[data-theme="light"] :is(.overview-event-color,.calendar-event,.agenda-entry){--event-tint:color-mix(in srgb,var(--event-color) 22%,white)}
 html[data-theme="light"] .sport-outline-icon{color:#4b4b4b}
 html[data-theme="light"] .watermark-surface>.training-watermark{color:#4b4b4b;opacity:.35}
+
+/* Approved TRI 4 emblem with the swimmer from TRI 1, isolated alpha mask. */
+.sport-outline-icon--triathlon{mask-image:url('/icons/triathlon-outline.png');-webkit-mask-image:url('/icons/triathlon-outline.png');mask-size:contain;-webkit-mask-size:contain;mask-position:center;-webkit-mask-position:center;aspect-ratio:1}
+.training-watermark>.sport-outline-icon--triathlon{width:clamp(120px,30%,180px)}
+.training-icon-preview .training-watermark>.sport-outline-icon--triathlon{width:85px}
+.training-hero-watermark>.training-watermark>.sport-outline-icon--triathlon{width:120px;bottom:0}
+.calendar-event .training-watermark>.sport-outline-icon--triathlon{width:48px;bottom:-5px}

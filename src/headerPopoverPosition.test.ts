@@ -16,4 +16,15 @@ describe('header popovers',()=>{
   expect(p.left+base.host.left+p.width).toBeLessThanOrEqual(478);
   expect(headerPopoverPosition({...base,bottom:60,trigger:{left:0,right:44,bottom:64}}).maxHeight).toBe(0);
  });
+ it('anchors clubs to their own left edge even on the right of the screen',()=>{
+  const p=headerPopoverPosition({...base,host:{left:1050,top:20},trigger:{left:1050,right:1150,bottom:64},alignment:'left'});
+  expect(p).toMatchObject({side:'left',left:0,width:320});
+ });
+ it('keeps the requested trigger edge when a desktop panel needs a narrower width',()=>{
+  const p=headerPopoverPosition({...base,host:{left:1250,top:20},trigger:{left:1250,right:1350,bottom:64},alignment:'left'});
+  expect(p).toMatchObject({left:0,width:178,side:'left'});
+  const right=headerPopoverPosition({...base,host:{left:100,top:20},trigger:{left:100,right:144,bottom:64},alignment:'right'});
+  expect(right.left+100+right.width).toBe(144);
+ });
+
 });

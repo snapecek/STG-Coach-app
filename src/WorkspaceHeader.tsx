@@ -16,7 +16,7 @@ export function WorkspaceHeader({children}:{children:ReactNode}){
     if(host.matches('details:not([open])'))continue;
     const trigger=host.querySelector<HTMLElement>(':scope > button,:scope > summary'),panel=host.querySelector<HTMLElement>(':scope > .notification-panel,:scope > .club-switcher-panel,:scope > .user-menu-panel');
     if(!trigger||!panel)continue;
-    const p=headerPopoverPosition({trigger:trigger.getBoundingClientRect(),host:host.getBoundingClientRect(),viewport:{left:vv?.offsetLeft||0,width:vv?.width||document.documentElement.clientWidth},preferredWidth:parseFloat(getComputedStyle(panel).getPropertyValue('--popup-preferred-width'))||320,bottom,gutter:mobile?17:12});
+    const p=headerPopoverPosition({trigger:trigger.getBoundingClientRect(),host:host.getBoundingClientRect(),viewport:{left:vv?.offsetLeft||0,width:vv?.width||document.documentElement.clientWidth},preferredWidth:parseFloat(getComputedStyle(panel).getPropertyValue('--popup-preferred-width'))||320,bottom,gutter:mobile?17:12,alignment:mobile?'auto':host.classList.contains('club-switcher')?'left':'right'});
     for(const [key,value] of Object.entries({left:p.left,top:p.top,width:p.width,'max-height':p.maxHeight}))panel.style.setProperty('--popup-'+key,value+'px');
     panel.dataset.anchorSide=p.side;
    }

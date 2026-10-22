@@ -326,6 +326,32 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    const m=await context('member'),q=m.page;m.state().events[0].type='Triatlon';await login(q);const featured=q.locator('.member-featured');assert.equal(await featured.locator('.training-watermark').getAttribute('data-training-icon'),'triathlon');await m.c.close();
    console.log('PASS curated sports: exactly 20 retired choices absent, legacy edits reset safely, stable 23-icon picker, approved triathlon mask light/dark mobile/desktop, template snapshot, automatic triathlon, race migration gate and calendar/member display');return;
   }
+
+  if(process.env.STG_RACE_TEMPLATE_ICONS_ONLY==='1'){
+   const v=await context('coach'),p=v.page;
+   v.state().presets.push({id:'40000000-0000-4000-8000-000000000077',club_id:club,kind:'race',name:'Starší závodní šablona',settings:{discipline:'OCR',distance_km:5,minutes:180,place:'Park',notes:'Původní pokyny'}});
+   await login(p);await p.locator('.cloud-dashboard').waitFor();
+   const nav=async name=>p.getByRole('navigation').getByRole('button',{name,exact:true}).filter({visible:true}).first().click();
+   const library=async()=>{await nav('Šablony');await p.getByRole('tab',{name:'Závody',exact:true}).click()};
+   const save=async()=>{await p.getByRole('button',{name:'Uložit šablonu',exact:true}).click();await p.locator('.preset-editor').waitFor({state:'detached'})};
+   const edit=async name=>{await library();await p.locator('.preset-library .template-row').filter({hasText:name}).getByRole('button',{name:'Upravit',exact:true}).click()};
+   const icon=()=>p.getByLabel('Ikona závodu',{exact:true}),preview=()=>p.locator('.training-icon-preview .training-watermark');
+   await library();await p.getByRole('button',{name:'Nová šablona závodu',exact:true}).click();
+   await p.getByLabel('Název šablony',{exact:true}).fill('Fiktivní triatlonová šablona');await p.getByLabel('Disciplína šablony',{exact:true}).fill('Triatlon');assert.equal(await preview().getAttribute('data-training-icon'),'triathlon');
+   await icon().selectOption('triathlon');await p.locator('input[name=place]').fill('Park');await save();
+   const preset=v.state().presets.find(t=>t.name==='Fiktivní triatlonová šablona');assert.equal(preset.settings.training_icon,'triathlon');
+   await p.reload();await edit(preset.name);assert.equal(await icon().inputValue(),'triathlon');
+   for(const theme of ['light','dark'])for(const width of [320,390,1440]){await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);await p.setViewportSize({width,height:1000});assert(await icon().isVisible());assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
+   await icon().selectOption('trail');await save();assert.equal(preset.settings.training_icon,'trail');
+   await nav('Kalendář');await p.getByRole('button',{name:'Nová událost',exact:true}).click();await p.getByRole('group',{name:'Druh nové události'}).getByRole('button',{name:/Závod/}).click();await p.getByLabel('Závodní šablona',{exact:true}).selectOption(preset.id);assert.equal(await icon().inputValue(),'trail');
+   await icon().selectOption('ocr');await p.getByLabel('Závodní šablona',{exact:true}).selectOption('40000000-0000-4000-8000-000000000077');assert.equal(await icon().inputValue(),'');assert.equal(await preview().getAttribute('data-training-icon'),'ocr');await p.getByLabel('Závodní šablona',{exact:true}).selectOption(preset.id);assert.equal(await icon().inputValue(),'trail');
+   await p.getByLabel('Datum',{exact:true}).fill('2026-10-20');await p.getByRole('button',{name:'Vytvořit závod',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});const event=v.state().events.find(e=>e.name===preset.name);assert.equal(event.training_icon,'trail');
+   await edit(preset.name);await icon().selectOption('none');assert.equal(await preview().count(),0);await save();assert.equal(preset.settings.training_icon,'none');assert.equal(event.training_icon,'trail','Existing race keeps its icon snapshot');
+   await p.reload();await nav('Kalendář');await p.getByRole('button',{name:'Nová událost',exact:true}).click();await p.getByRole('group',{name:'Druh nové události'}).getByRole('button',{name:/Závod/}).click();await p.getByLabel('Závodní šablona',{exact:true}).selectOption(preset.id);assert.equal(await icon().inputValue(),'none');assert.equal(await preview().count(),0);await p.getByLabel('Název',{exact:true}).fill('Závod bez ikony ze šablony');await p.getByLabel('Datum',{exact:true}).fill('2026-10-21');await p.getByRole('button',{name:'Vytvořit závod',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});assert.equal(v.state().events.find(e=>e.name==='Závod bez ikony ze šablony').training_icon,'none');
+   await edit(preset.name);await p.getByRole('button',{name:'Automaticky dle zaměření',exact:true}).click();await p.getByLabel('Disciplína šablony',{exact:true}).fill('Plavání');assert.equal(await preview().getAttribute('data-training-icon'),'swimming');await save();assert.equal(preset.settings.training_icon,null);
+   await edit('Starší závodní šablona');assert.equal(await icon().inputValue(),'');await save();const legacy=v.state().presets.find(t=>t.name==='Starší závodní šablona');assert.equal(legacy.settings.notes,'Původní pokyny');assert.equal(legacy.settings.distance_km,5);
+   await v.c.close();console.log('PASS race template icons: create/edit/reload, live automatic preview, explicit/none/automatic persistence, preset switching, new race inheritance, existing race snapshot, legacy templates and 320–1440px light/dark');return;
+  }
   if(process.env.STG_TRAINING_WATERMARKS_ONLY==='1'){
    const v=await context('coach'),p=v.page;await login(p);await p.locator('.cloud-dashboard').waitFor();
    const nav=async name=>p.getByRole('navigation').getByRole('button',{name,exact:true}).filter({visible:true}).first().click();

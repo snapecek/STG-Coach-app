@@ -344,6 +344,14 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
      const available=await p.evaluate(()=>document.documentElement.clientWidth);const shell=await p.locator('.cloud-card:has(.workspace-header)').boundingBox();assert(Math.abs(shell.x)<1&&Math.abs(shell.width-available)<2,'Shell uses viewport width '+role+' '+width);
      const content=await p.locator('.club-content').boundingBox(),h=await header.boundingBox();assert(content.width>=available-(width>900?132:36),'Content uses available width '+role+' '+width);assert(content.x>=0&&content.x+content.width<=width+1);assert(h.x>=-1&&h.x+h.width<=width+1);
      assert(await p.evaluate(w=>document.documentElement.scrollWidth<=w+1,width),'No page overflow '+role+' '+width);
+     if(width>900){
+      const items=await header.getByRole('navigation',{name:'Hlavní navigace',exact:true}).getByRole('button').evaluateAll(buttons=>buttons.map(b=>{const r=b.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top}}));
+      for(let i=1;i<items.length;i++){
+       if(Math.abs(items[i].top-items[i-1].top)<2)assert(items[i].left-items[i-1].right>=-1&&items[i].left-items[i-1].right<=8,'Desktop items remain adjacent, including the last item '+role+' '+width);
+       else assert(Math.abs(items[i].left-items[0].left)<2,'Wrapped navigation starts at the left edge');
+      }
+     }
+
      const overflow=await p.locator('.workspace-scroll').evaluate(el=>({width:el.clientWidth,scroll:el.scrollWidth,page:el.querySelector('h1')?.textContent,items:[...el.querySelectorAll('*')].filter(e=>e.getBoundingClientRect().right>el.getBoundingClientRect().right+1).slice(0,10).map(e=>({class:e.className,width:e.getBoundingClientRect().width,right:e.getBoundingClientRect().right}))}));assert(overflow.scroll<=overflow.width+1,'No content-scroller overflow '+role+' '+width+' '+JSON.stringify(overflow));
     };
     for(const width of [320,375,390,430,760,844,900,901,1024,1280,1440,1920,2560,3440]){

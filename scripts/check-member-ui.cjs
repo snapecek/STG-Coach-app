@@ -392,7 +392,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
        assert(Math.abs(r.y-t.y-t.height-8)<2,'Popup starts below its own trigger');assert(r.x>=0&&r.x+r.width<=width+1,'Popup fits viewport');
        if(width>900){
         if(name==='clubs'){assert(Math.abs(r.x-t.x)<2,'Clubs start at club button, not bell');const end=await items[2][1].boundingBox();assert(Math.abs(r.x+r.width-end.x-end.width)<2,'Clubs end at account/header right edge');assert.equal(await panel.getAttribute('data-anchor-side'),'left');}
-        else if(name==='account'){assert(Math.abs(r.x+r.width-t.x-t.width)<2,'Account ends at its own right edge');assert.equal(await panel.getAttribute('data-anchor-side'),'right');const start=await items[0][1].boundingBox();assert(Math.abs(r.x-start.x)<2,'Account starts at the bell left edge');const actions=await panel.locator(':scope>button').evaluateAll(nodes=>nodes.map(n=>{const b=n.getBoundingClientRect();return {top:b.top,bottom:b.bottom}}));for(let i=1;i<actions.length;i++)assert(actions[i].top>=actions[i-1].bottom,'Account actions stay on separate rows');}else{assert(Math.abs(r.x-t.x)<2,'Notifications open right from the bell left edge');assert.equal(await panel.getAttribute('data-anchor-side'),'left');assert(Math.abs(r.width-360)<2,'Notifications keep the reference width');}
+        else if(name==='account'){assert(Math.abs(r.x+r.width-t.x-t.width)<2,'Account ends at its own right edge');assert.equal(await panel.getAttribute('data-anchor-side'),'right');const start=await items[0][1].boundingBox();assert(Math.abs(r.x-start.x)<2,'Account starts at the bell left edge');const actions=await panel.locator(':scope>button').evaluateAll(nodes=>nodes.map(n=>{const b=n.getBoundingClientRect();return {top:b.top,bottom:b.bottom}}));for(let i=1;i<actions.length;i++)assert(actions[i].top>=actions[i-1].bottom,'Account actions stay on separate rows');}else{assert(Math.abs(r.x-t.x)<2,'Notifications open right from the bell left edge');assert.equal(await panel.getAttribute('data-anchor-side'),'left');const end=await items[2][1].boundingBox();assert(Math.abs(r.x+r.width-end.x-end.width)<2,'Notifications end at account/header right edge');}
        }
        assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
        if(width===1920&&theme==='light'&&scroll===0)await p.screenshot({path:'/tmp/trenomi-popup-'+role+'-'+name+'-'+engine+'.png'});
@@ -402,7 +402,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     }
     await v.c.close();
    }
-   console.log('PASS header popups: clubs span own button to header end; account spans bell to header end; bell opens right with 360px width; coach/member dark/light 390–2560px before/after scroll, viewport containment and Escape');return;
+   console.log('PASS header popups: clubs span own button to header end; account and notifications span bell to account right edge; coach/member dark/light 390–2560px before/after scroll, viewport containment and Escape');return;
   }
   if(process.env.STG_UNIFIED_UI_ONLY==='1'){
    fees.enabled=true;

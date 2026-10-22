@@ -11,7 +11,7 @@ describe('Ikony tréninků',()=>{
   expect(resolveTrainingIcon({type:'Plavání'})).toBe('swimming');
  });
  it('odmítne neznámou ikonu před zápisem; zachová rozlišení vynechat/resetovat',()=>{
-  expect(()=>validateTrainingIcon('<svg>')).toThrow();expect(trainingIconFields(undefined)).toEqual({});expect(trainingIconFields(null)).toEqual({training_icon:null});expect(trainingIcons).toHaveLength(23);expect(new Set(trainingIcons.map(([id])=>id)).size).toBe(23);
+  expect(()=>validateTrainingIcon('<svg>')).toThrow();expect(trainingIconFields(undefined)).toEqual({});expect(trainingIconFields(null)).toEqual({training_icon:null});expect(trainingIcons).toHaveLength(24);expect(new Set(trainingIcons.map(([id])=>id)).size).toBe(24);
  });
  it('událost si zachová kopii ikony po změně šablony',()=>{
   const t={id:'t',club_id:'c',name:'Trénink',type:'Běh',place:'Park',minutes:60,plan:'',training_icon:'stopwatch' as const};
@@ -24,7 +24,7 @@ describe('Ikony tréninků',()=>{
 });
 
 it('vybrané OCR a trail ikony jsou samostatné volby a vyžadují migraci 048',async()=>{
- expect(trainingIcons.slice(-3,-1).map(([id])=>id)).toEqual(['ocr','trail']);
+ expect(trainingIcons.filter(([id])=>id==='ocr'||id==='trail').map(([id])=>id)).toEqual(['ocr','trail']);
  expect(validateTrainingIcon('ocr')).toBe('ocr');expect(validateTrainingIcon('trail')).toBe('trail');
  const client={rpc:vi.fn(async()=>({data:null,error:{code:'PGRST202'}}))} as unknown as SupabaseClient;
  await expect(requireSelectedSportIconMigration(client,'ocr')).rejects.toThrow('048');
@@ -43,4 +43,10 @@ it.each(['Triatlon','Triathlon 70.3','IRONMAN','Iron Man','Triatlonový závod']
  expect(suggestedTrainingIcon(type)).toBe('triathlon');expect(validateTrainingIcon('triathlon')).toBe('triathlon');
  const rpc=vi.fn().mockResolvedValueOnce({data:null,error:{code:'PGRST202'}}).mockResolvedValueOnce({data:true,error:null});const client={rpc} as unknown as SupabaseClient;
  await expect(requireSelectedSportIconMigration(client,'triathlon')).rejects.toThrow('050');await expect(requireSelectedSportIconMigration(client,'triathlon')).resolves.toBeUndefined();expect(rpc).toHaveBeenCalledWith('triathlon_icons_ready');
+});
+
+it.each(['Běh a cvičení','STG Run & Workout','Cvičení a běh'])('recognizes combined running/workout %s and gates its persistence on migration 051',async type=>{
+ expect(suggestedTrainingIcon(type)).toBe('run-workout');expect(validateTrainingIcon('run-workout')).toBe('run-workout');
+ const rpc=vi.fn().mockResolvedValueOnce({data:null,error:{code:'PGRST202'}}).mockResolvedValueOnce({data:true,error:null});const client={rpc} as unknown as SupabaseClient;
+ await expect(requireSelectedSportIconMigration(client,'run-workout')).rejects.toThrow('051');await expect(requireSelectedSportIconMigration(client,'run-workout')).resolves.toBeUndefined();expect(rpc).toHaveBeenCalledWith('run_workout_icons_ready');
 });

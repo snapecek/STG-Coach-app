@@ -10,7 +10,7 @@ export const atlasTrainingIcons=[
 export const retiredTrainingIcons=['medal','fencing','archery','nutrition','hurdles','throwing','rowing-pair','high-jump','shot-put','pool','stadium','weightlifting','diving','gym-bag','whistle','gymnastics','bench','golf','steeplechase','podium'] as const;
 const retired=new Set<string>(retiredTrainingIcons);
 const activeAtlasIcons=atlasTrainingIcons.filter((icon):icon is Exclude<typeof atlasTrainingIcons[number],readonly [typeof retiredTrainingIcons[number],string]>=>!retired.has(icon[0]));
-export const trainingIcons=[...activeAtlasIcons,['ocr','OCR – ručkování'],['trail','Trail – běh do kopce'],['triathlon','Triatlon']] as const;
+export const trainingIcons=[...activeAtlasIcons,['ocr','OCR – ručkování'],['trail','Trail – běh do kopce'],['triathlon','Triatlon'],['run-workout','Běh a cvičení']] as const;
 export const normalizeTrainingIcon=(value:unknown)=>value==='none'||isTrainingIcon(value)?value:null;
 export type TrainingIconId=typeof trainingIcons[number][0];
 export type TrainingIconChoice=TrainingIconId|'none'|null;
@@ -22,6 +22,7 @@ export function validateTrainingIcon(value:unknown):TrainingIconChoice{
 }
 export function suggestedTrainingIcon(type:string):TrainingIconId{
  const t=type.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('cs');
+ if(/(beh|run).*(cvic|workout)|(cvic|workout).*(beh|run)/.test(t))return 'run-workout';
  if(/triatlon|triathlon|iron[ -]?man/.test(t))return 'triathlon';
  if(/stolni tenis|ping.?pong/.test(t))return 'table-tennis';
  if(/vodni polo/.test(t))return 'water-polo';
@@ -75,6 +76,12 @@ export async function requireRaceIconMigration(client:import('@supabase/supabase
 
 /** New choices need the extended whitelist; automatic rendering needs no write. */
 export async function requireSelectedSportIconMigration(client:import('@supabase/supabase-js').SupabaseClient,icon:TrainingIconChoice|undefined){
+ if(icon==='run-workout'){
+  const {data,error}=await client.rpc('run_workout_icons_ready');
+  if(error&&!['PGRST202','42883'].includes(error.code))throw new Error('Ikonu nelze ověřit. Zkontrolujte připojení a zkuste to znovu.');
+  if(error||data!==true)throw new Error('Pro uložení ikony Běh a cvičení nejdříve nahrajte migraci 051 v Supabase.');
+  return;
+ }
  if(icon==='triathlon'){
   const {data,error}=await client.rpc('triathlon_icons_ready');
   if(error&&!['PGRST202','42883'].includes(error.code))throw new Error('Ikonu nelze ověřit. Zkontrolujte připojení a zkuste to znovu.');

@@ -53,7 +53,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    const fulfill=options=>route.fulfill({...options,headers:{...cors,...options.headers}});
    if(r.method()==='OPTIONS'){await fulfill({status:204,body:''});return;}
    calls.push({path,method:r.method()});let data=[],status=200;
-   if(path.endsWith('/rpc/race_icons_ready')||path.endsWith('/rpc/special_sport_icons_ready')||path.endsWith('/rpc/triathlon_icons_ready')){await fulfill({status:200,contentType:'application/json',body:'true'});return;}
+   if(path.endsWith('/rpc/race_icons_ready')||path.endsWith('/rpc/special_sport_icons_ready')||path.endsWith('/rpc/triathlon_icons_ready')||path.endsWith('/rpc/run_workout_icons_ready')){await fulfill({status:200,contentType:'application/json',body:'true'});return;}
    if(path.endsWith('/rpc/club_workspace_changes')||path.endsWith('/rpc/notification_preferences_ready')||path.endsWith('/rpc/club_notification_status')){await fulfill({status:404,contentType:'application/json',body:JSON.stringify({code:'PGRST202'})});return;}
    if(path.startsWith('/rest/v1/rpc/')&&['get_club_fees_enabled','set_club_fees_enabled','club_fee_ledger','create_club_fee_plan','archive_club_fee_plan','create_club_fee_charges','record_club_fee_payment','void_club_fee_payment','cancel_club_fee_charge','delete_club_fee_plan','delete_club_fee_charge','delete_club_fee_charges','set_club_fee_recurrence'].includes(path.split('/').pop())){
     const input=r.postDataJSON(),fn=path.split('/').pop();if(fn==='get_club_fees_enabled'&&input.target_club!==club){await fulfill({status:200,contentType:'application/json',body:'false'});return;}assert.equal(input.target_club,club);let result=null;
@@ -318,6 +318,26 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    }
    console.log('PASS calendar sport icons: coach/member month/week/list/day, explicit Trail overrides type, automatic OCR, none, theme-specific watermark opacity, 320–1440px light/dark, no overflow, event opening');return;
   }
+
+  if(process.env.STG_RUN_WORKOUT_ICONS_ONLY==='1'){
+   const v=await context('coach'),p=v.page;await login(p);await p.locator('.cloud-dashboard').waitFor();
+   const nav=async name=>p.getByRole('navigation').getByRole('button',{name,exact:true}).filter({visible:true}).first().click();
+   await nav('Šablony');await p.getByRole('button',{name:'Přidat šablonu',exact:true}).click();await p.getByLabel('Název',{exact:true}).fill('Fiktivní Run & Workout');await p.getByLabel('Místo',{exact:true}).fill('Park');await sportPicker(p,'Ikona tréninku').choose('run-workout');
+   const picker=p.locator('.training-icon-picker');
+   for(const theme of ['dark','light'])for(const width of [320,390,1440]){
+    await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);await p.setViewportSize({width,height:1000});
+    const icon=picker.locator('.training-icon-preview .sport-outline-icon--run-workout');assert(await icon.isVisible());assert((await icon.evaluate(e=>getComputedStyle(e).maskImage)).includes('run-workout-outline.png'));
+    assert.equal(await picker.locator('.training-watermark').getAttribute('data-training-icon'),'run-workout');assert.equal(await picker.locator('.training-watermark').evaluate(e=>getComputedStyle(e).opacity),theme==='light'?'0.35':'0.15');
+    await picker.locator('.training-icon-preview').screenshot({path:'/tmp/trenomi-bc4-preview-'+engine+'-'+theme+'-'+width+'.png'});assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+   }
+   const alpha=await p.evaluate(async()=>{const img=new Image();img.src='/icons/run-workout-outline.png';await img.decode();const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;const x=c.getContext('2d');x.drawImage(img,0,0);const d=x.getImageData(0,0,c.width,c.height).data;let clear=0,solid=0;for(let i=3;i<d.length;i+=4){if(d[i]===0)clear++;if(d[i]>200)solid++;}return {clear,solid,total:c.width*c.height}});assert(alpha.clear>alpha.total*.65&&alpha.solid>alpha.total*.05&&alpha.solid<alpha.total*.3,'Outline asset has transparent background and visible strokes');
+   await v.c.route('**/rest/v1/rpc/run_workout_icons_ready',route=>route.fulfill({contentType:'application/json',body:'false'}));await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await p.getByRole('alert').filter({hasText:'051'}).first().waitFor();assert.equal(v.state().templates.length,0,'Old database cannot silently lose BC4');await v.c.unroute('**/rest/v1/rpc/run_workout_icons_ready');await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await picker.waitFor({state:'detached'});const template=v.state().templates[0];assert.equal(template.training_icon,'run-workout');
+   await p.locator('.template-card .training-watermark[data-training-icon=run-workout]').waitFor();await p.locator('.template-card').screenshot({path:'/tmp/trenomi-bc4-template-'+engine+'.png'});
+   await p.reload();await nav('Kalendář');await p.getByRole('button',{name:'Nová událost',exact:true}).click();await p.getByLabel('Šablona',{exact:true}).selectOption(template.id);assert.equal(await sportPicker(p,'Ikona tréninku').value(),'run-workout');await p.getByLabel('Datum',{exact:true}).fill('2026-10-20');await p.getByRole('button',{name:'Vytvořit trénink',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});const event=v.state().events.find(e=>e.name===template.name);assert.equal(event.training_icon,'run-workout');
+   const card=p.locator('.calendar-event').filter({hasText:template.name});assert.equal(await card.locator('.training-watermark').getAttribute('data-training-icon'),'run-workout');await card.click();await p.locator('.training-hero-watermark .sport-outline-icon--run-workout').waitFor();await p.keyboard.press('Escape');await v.c.close();
+   const m=await context('member'),q=m.page;m.state().events[0].training_icon='run-workout';await login(q);await q.locator('.member-featured .training-watermark[data-training-icon=run-workout]').waitFor();await m.c.close();
+   console.log('PASS BC4: approved alpha mask, mobile/desktop light/dark, chooser/save/reload, migration gate, new training snapshot, calendar/detail and member overview');return;
+  }
   if(process.env.STG_CURATED_ICONS_ONLY==='1'){
    const retired=['medal','fencing','archery','nutrition','hurdles','throwing','rowing-pair','high-jump','shot-put','pool','stadium','weightlifting','diving','gym-bag','whistle','gymnastics','bench','golf','steeplechase','podium'];
    const v=await context('coach'),p=v.page;
@@ -327,7 +347,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    await nav('Šablony');await p.getByRole('button',{name:'Upravit šablonu Původní šablona',exact:true}).click();
    const picker=p.locator('.training-icon-picker'),select=sportPicker(picker,'Ikona tréninku');
    assert.equal(await select.value(),'');assert.equal(await picker.locator('.training-watermark').getAttribute('data-training-icon'),'running');
-   await picker.getByRole('button',{name:'Vybrat ikonu',exact:true}).click();const chooser=p.getByRole('dialog',{name:'Vybrat ikonu šablony',exact:true});const options=await chooser.locator('.training-icon-grid>button').evaluateAll(nodes=>nodes.map(n=>n.dataset.iconChoice));assert.equal(options.length,23);for(const id of retired)assert(!options.includes(id),'Removed '+id);await chooser.getByRole('button',{name:'Zavřít výběr ikon',exact:true}).click();
+   await picker.getByRole('button',{name:'Vybrat ikonu',exact:true}).click();const chooser=p.getByRole('dialog',{name:'Vybrat ikonu šablony',exact:true});const options=await chooser.locator('.training-icon-grid>button').evaluateAll(nodes=>nodes.map(n=>n.dataset.iconChoice));assert.equal(options.length,24);for(const id of retired)assert(!options.includes(id),'Removed '+id);await chooser.getByRole('button',{name:'Zavřít výběr ikon',exact:true}).click();
    await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await picker.waitFor({state:'detached'});assert.equal(v.state().templates[0].training_icon,null);
    await p.getByRole('button',{name:'Přidat šablonu',exact:true}).click();await p.getByLabel('Název',{exact:true}).fill('Triatlonová šablona');await p.getByLabel('Místo',{exact:true}).fill('Park');await select.choose('triathlon');
    assert.equal(await picker.locator('select,details,.training-icon-grid').count(),0,'Template grid stays in chooser');assert(await picker.getByRole('button',{name:'Vybrat ikonu',exact:true}).isVisible());
@@ -344,7 +364,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    await v.c.unroute('**/rest/v1/rpc/triathlon_icons_ready');await p.getByRole('button',{name:'Vytvořit závod',exact:true}).click();await p.locator('.event-editor').waitFor({state:'detached'});const race=v.state().events.find(e=>e.name==='Triatlonový závod');assert.equal(race.training_icon,'triathlon');
    const card=p.locator('.calendar-event').filter({hasText:race.name});assert.equal(await card.locator('.calendar-sport-icon').getAttribute('data-training-icon'),'triathlon');await card.click();await p.locator('.training-hero-watermark .sport-outline-icon--triathlon').waitFor();await v.c.close();
    const m=await context('member'),q=m.page;m.state().events[0].type='Triatlon';await login(q);const featured=q.locator('.member-featured');assert.equal(await featured.locator('.training-watermark').getAttribute('data-training-icon'),'triathlon');await m.c.close();
-   console.log('PASS curated sports: exactly 20 retired choices absent, legacy edits reset safely, stable 23-icon picker, approved triathlon mask light/dark mobile/desktop, template snapshot, automatic triathlon, race migration gate and calendar/member display');return;
+   console.log('PASS curated sports: exactly 20 retired choices absent, legacy edits reset safely, stable 24-icon picker, approved triathlon mask light/dark mobile/desktop, template snapshot, automatic triathlon, race migration gate and calendar/member display');return;
   }
 
   if(process.env.STG_RACE_TEMPLATE_ICONS_ONLY==='1'){
@@ -372,7 +392,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    }
    await p.reload();await edit(preset.name);assert.equal(await icon().value(),'triathlon');
    for(const theme of ['light','dark'])for(const width of [320,390,1440]){await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);await p.setViewportSize({width,height:1000});assert(await icon().isVisible());assert.equal(await p.locator('.training-icon-picker select,.training-icon-picker details').count(),0);assert.equal(await p.locator('.training-icon-picker .training-icon-grid').count(),0);
-    const trigger=p.getByRole('button',{name:'Vybrat ikonu',exact:true});await trigger.click();const chooser=p.getByRole('dialog',{name:'Vybrat ikonu šablony',exact:true});await chooser.waitFor();assert.equal(await chooser.locator('.training-icon-grid>button').count(),23);
+    const trigger=p.getByRole('button',{name:'Vybrat ikonu',exact:true});await trigger.click();const chooser=p.getByRole('dialog',{name:'Vybrat ikonu šablony',exact:true});await chooser.waitFor();assert.equal(await chooser.locator('.training-icon-grid>button').count(),24);
     const contrast=await chooser.locator('button').evaluateAll(nodes=>{const lum=color=>{const rgb=color.match(/[\d.]+/g).slice(0,3).map(n=>{const c=Number(n)/255;return c<=.04045?c/12.92:((c+.055)/1.055)**2.4});return rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722};return nodes.map(e=>{const s=getComputedStyle(e),a=lum(s.color),b=lum(s.backgroundColor);return (Math.max(a,b)+.05)/(Math.min(a,b)+.05)})});assert(contrast.every(r=>r>=4.5),'Icon chooser labels have readable contrast');
 
     const box=await chooser.boundingBox();assert(box&&box.x>=0&&box.x+box.width<=width+1&&box.y>=0&&box.y+box.height<=1001,'Icon dialog stays inside viewport');
@@ -439,7 +459,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     await featured.locator(role==='coach'?'.spotlight-title':'.member-event-heading').click();const hero=p.locator('.training-hero-watermark');await hero.waitFor();assert.equal(await hero.locator('.training-watermark').getAttribute('data-training-icon'),'swimming');await p.keyboard.press('Escape');
     await p.getByRole('navigation').getByRole('button',{name:'Kalendář',exact:true}).filter({visible:true}).first().click();await p.locator('.calendar-event .training-watermark[data-training-icon=swimming]').first().waitFor();assert(await p.locator('.calendar-event.race .training-watermark').count()>0);await v.c.close();
    }
-   console.log('PASS training watermarks: 23 curated icons with OCR, Trail and Triathlon, automatic discipline, visible template selector, standalone create/edit/disable/reset, creation and preserved snapshot after disable, race create/edit/copy/disable, 15% dark / 35% light alpha, nonblocking backgrounds, coach/member overview/detail/calendar, mobile/desktop light/dark');return;
+   console.log('PASS training watermarks: 24 curated icons with OCR, Trail and Triathlon, automatic discipline, visible template selector, standalone create/edit/disable/reset, creation and preserved snapshot after disable, race create/edit/copy/disable, 15% dark / 35% light alpha, nonblocking backgrounds, coach/member overview/detail/calendar, mobile/desktop light/dark');return;
   }
   if(process.env.STG_HEADER_POPUPS_ONLY==='1'){
    for(const role of ['coach','member']){

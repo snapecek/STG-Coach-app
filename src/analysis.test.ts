@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {equipmentTags,filterAnalysis,analysisSummary,noFilters} from './analysis';
+import {equipmentTags,filterAnalysis,analysisSummary,analysisAttendance,noFilters} from './analysis';
 import type {ClubData,EventRow} from './clubData';
 const event:EventRow={id:'done',club_id:'club',template_id:null,name:'Fiktivní běh',starts_at:'2026-10-12T22:30:00Z',place:'Park',type:'Běh',plan:'Plán',duration_minutes:60,event_kind:'training',status:'scheduled',actual_notes:'Průběh',completed_at:'2026-10-13T00:30:00Z',completed_by:'coach',actual_duration_minutes:45,perceived_effort:6,equipment:['gumy','bosu']};
 const data:ClubData={members:[{id:'a',club_id:'club',name:'Fiktivní A',kind:'member',removed_at:null,purge_after:null},{id:'b',club_id:'club',name:'Fiktivní B',kind:'guest',removed_at:null,purge_after:null}],templates:[],events:[event,{...event,id:'pending',completed_at:null},{...event,id:'cancelled',status:'cancelled'},{...event,id:'race',event_kind:'race',type:'Kondice',starts_at:'2026-10-14T10:00:00Z',actual_duration_minutes:null,equipment:[]}],participation:[{club_id:'club',event_id:'done',member_id:'a',response:'maybe',attended:true,confirmed_by:'coach'},{club_id:'club',event_id:'done',member_id:'b',response:'yes',attended:false,confirmed_by:'coach'}]};
@@ -47,4 +47,33 @@ describe('Kilometry závodů',()=>{
   const mixed={...data,events:[race,{...race,id:'companion'},{...race,id:'absent'}],participation:[{club_id:'club',event_id:race.id,member_id:'a',response:'yes' as const,attended:true,confirmed_by:'coach'},{club_id:'club',event_id:'companion',member_id:'a',response:'companion' as const,attended:true,confirmed_by:'coach'},{club_id:'club',event_id:'absent',member_id:'a',response:'no' as const,attended:false,confirmed_by:'coach'}]};
   expect(analysisSummary(mixed,filterAnalysis(mixed,{...noFilters,memberId:'a'}),'a')).toMatchObject({raceDistance:21.1,recordedRaceDistances:1});
  });
+});
+
+describe('Oddělená tréninková a závodní docházka',()=>{
+ const training={...event,id:'training'},race={...event,id:'race',event_kind:'race' as const};
+ const row=(event_id:string,member_id:string,attended:boolean|null,response:'yes'|'companion'='yes',attendance_excused=false)=>({club_id:'club',event_id,member_id,attended,response,attendance_excused,confirmed_by:'coach'});
+ const roster={...data,events:[training,race],participation:[row('training','a',true),row('training','b',false),row('race','a',true,'companion'),row('race','b',true)]};
+ it('nesmíchá součty ani procenta a nezapočítá doprovod do závodění',()=>{
+  const activity=analysisAttendance(roster,roster.events);
+  expect(activity.training).toMatchObject({present:1,absent:1,verified:2,percent:50});
+  expect(activity.races).toMatchObject({present:1,absent:0,verified:1,percent:100});
+  expect(activity.members.find(m=>m.id==='a')).toMatchObject({training:{present:1},races:{present:0,verified:0,percent:null}});
+ });
+ it('filtruje člena a vynechá omluvené a neověřené z procent',()=>{
+  const rows=[row('training','a',true),row('training','b',false,'yes',true),row('race','a',null)];
+  expect(analysisAttendance({...roster,participation:rows},roster.events,'a')).toMatchObject({training:{present:1,verified:1,percent:100},races:{present:0,unverified:1,percent:null}});
+  expect(analysisAttendance({...roster,participation:rows},roster.events).training).toMatchObject({present:1,excused:1,verified:1});
+ });
+ it('prázdný či vyfiltrovaný druh nemá falešnou nulovou docházku',()=>{
+  expect(analysisAttendance(roster,[training]).races).toMatchObject({present:0,verified:0,percent:null});
+  expect(analysisAttendance(roster,[]).members).toHaveLength(2);
+ });
+});
+
+it('u dokončeného tréninku bez záznamu počítá neověřenou docházku oprávněných členů',()=>{
+ const selected={...data,participation:[]};
+ expect(analysisAttendance(selected,[event]).training).toMatchObject({present:0,verified:0,unverified:2,percent:null});
+ expect(analysisAttendance(selected,[event],'a').training.unverified).toBe(1);
+ const guest={...data.members[1],event_guest:true};
+ expect(analysisAttendance({...selected,members:[guest]},[event]).training.unverified).toBe(0);
 });

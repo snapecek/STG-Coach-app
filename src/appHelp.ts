@@ -84,7 +84,7 @@ export const helpTopics:Record<HelpRole,HelpTopic[]>={member:[
  {id:'attendance',title:'Odpovědi členů a skutečná docházka',summary:'Přihlášení říká, co člen plánuje. Docházka potvrzuje, co se skutečně stalo.',items:[
   'V záložce Účast jsou nejprve potvrzení účastníci, dále ostatní odpovědi a nakonec lidé bez odpovědi. Doprovod a čekací listina mají vlastní skupinu.',
   'Po akci ověřte seznam tlačítky A (ano), O (omluvil se), N (ne). Přijdu se předvyplní jako A, ostatní odpovědi a lidé bez odpovědi jako N. Omluvení vyberte ručně pomocí O.',
-  'Opravte jen rozdíly a zvolte Uložit docházku. Pokud seznam souhlasí, použijte Schválit docházku bez úprav: ověří se celý seznam najednou. Samotné přepnutí A/O/N nic neukládá; dříve ověřené záznamy zůstávají zachované.',
+  'Opravte jen rozdíly a zvolte Schválit docházku s úpravami (v přehledu docházky Uložit docházku). Pokud seznam souhlasí, použijte Schválit docházku bez úprav: ověří se celý seznam najednou. Samotné přepnutí A/O/N nic neukládá; dříve ověřené záznamy zůstávají zachované.',
   'V hromadné Docházce přepínejte Tréninky / Závody a použijte období, skupinu či hledání. Členové a hosté mají vlastní oddíly; na mobilu se tabulka posouvá vodorovně.',
   'U uplynulého tréninku můžete přidat nového hosta nebo vybrat uloženého. Zkontrolujte jeho docházku a nezakládejte stejného člověka opakovaně.',
  ],note:'Čekací listina není potvrzené místo. Omluvení se do procenta skutečné účasti nepočítají.'},
@@ -92,7 +92,7 @@ export const helpTopics:Record<HelpRole,HelpTopic[]>={member:[
   'V Deníku otevřete záznam, vyplňte průběh a skutečné údaje, například délku, vzdálenost a zátěž RPE. Před dokončením ověřte docházku všech uvedených lidí.',
   'U závodu doplňte výsledky závodníků, případně týmů. Doprovod výsledek nepotřebuje, ale jeho skutečná účast má být vyplněná.',
   'Minihru lze přidat i dodatečně, pokud původně nebyla v plánu. Vyberte účastníky, jednotlivce či týmy a zapište výsledek.',
-  'Dokončit událost je závěrečná kontrola. Pokud tlačítko není dostupné, ověřte skončení události, průběh, docházku a u závodu požadované výsledky. Pozdější změna může událost znovu otevřít ke kontrole.',
+  'U tlačítka Dokončit událost je vypsáno, co chybí, včetně jmen u docházky a výsledků. Po skončení můžete zvolit Ukončit bez doplnění dat a volbu potvrdit. Uložené údaje se zachovají, chybějící zůstanou nevyplněné. Pozdější změna událost znovu otevře ke kontrole.',
  ],note:'Uplynutí času samo nepotvrzuje vyplněný deník. V Analýze kontrolujte období, filtry a to, zda nechybí skutečně zapsané hodnoty.'},
  {id:'photos',title:'Fotografie, hlavní fotka a sdílení',summary:'Hlavní fotografie patří společnému deníku, fotku pro sdílení si každý vybírá sám.',items:[
   'U fotografií v deníku označte hlavní fotku pro společné zobrazení tréninku. Tato volba nemění osobní výběr pro sdílení.',

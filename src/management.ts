@@ -21,3 +21,27 @@ export function trainingCompletionIssues(data:ClubData,event:EventRow,now:number
  else{const missing=roster.filter(m=>!data.participation.some(p=>p.event_id===event.id&&p.member_id===m.id&&p.attended!=null));if(missing.length)issues.push({kind:'attendance',members:missing});}
  return issues;
 }
+
+export type EventCompletionIssue={kind:TrainingCompletionIssue['kind']|'results'|'conflict';members?:MemberRow[]};
+export function eventCompletionIssues(data:ClubData,event:EventRow,now:number,results:RaceResult[]=[]):EventCompletionIssue[]{
+ if(event.event_kind!=='race')return trainingCompletionIssues(data,event,now);
+ if(event.completed_at)return [];
+ if(event.status==='cancelled')return [{kind:'cancelled'}];
+ const issues:EventCompletionIssue[]=[];
+ if(eventEnd(event)>now)issues.push({kind:'time'});
+ const roster=reviewMembers(data,event);
+ if(!roster.length)issues.push({kind:'empty'});
+ const attendance:MemberRow[]=[],missing:MemberRow[]=[],conflicts:MemberRow[]=[];
+ for(const member of roster){
+  const p=data.participation.find(p=>p.event_id===event.id&&p.member_id===member.id);
+  const result=results.find(r=>r.event_id===event.id&&r.member_id===member.id);
+  if(p?.attended==null)attendance.push(member);
+  if(p?.response==='companion')continue;
+  if(!result)missing.push(member);
+  else if(p?.attended!=null&&p.attended!==(result.status!=='dns'))conflicts.push(member);
+ }
+ if(attendance.length)issues.push({kind:'attendance',members:attendance});
+ if(missing.length)issues.push({kind:'results',members:missing});
+ if(conflicts.length)issues.push({kind:'conflict',members:conflicts});
+ return issues;
+}

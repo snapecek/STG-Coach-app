@@ -39,6 +39,9 @@ describe('Cloudový adaptér',()=>{
  it('smazání šablony filtruje klub i ID',async()=>{const m=mock();await deleteTemplate(m.client,club,'template');expect(m.filters).toEqual([['club_id',club.id],['id','template']])});
  it('smazání události filtruje klub i ID',async()=>{const m=mock();await deleteEvent(m.client,club,'50000000-0000-4000-8000-000000000001');expect(m.filters).toEqual([['club_id',club.id],['id','50000000-0000-4000-8000-000000000001']])});
  it('změna události filtruje klub i ID',async()=>{const m=mock();await updateEvent(m.client,club,'event',{status:'cancelled'});expect(m.filters).toEqual([['club_id',club.id],['id','event']]);expect(m.writes[0]).toEqual({status:'cancelled'})});
+ it('ukončení bez dat používá oddělenou serverovou kontrolu a vyžaduje potvrzení',async()=>{const m=mock();m.rpc.mockResolvedValue({data:{id:'event',completed_at:'2026-11-02T10:00:00Z'},error:null} as never);await completeEvent(m.client,club,'event',true);expect(m.rpc).toHaveBeenCalledWith('complete_event_without_data',{target_club:club.id,target_event:'event'});expect(m.writes).toEqual([]);});
+ it('nepotvrdí přeskočení, pokud server neuložil dokončení',async()=>{const m=mock();await expect(completeEvent(m.client,club,'event',true)).rejects.toThrow('nebyla dokončena')});
+ it('člen nemůže ukončit událost bez dat',async()=>{const m=mock();await expect(completeEvent(m.client,{...club,role:'member'},'event',true)).rejects.toThrow();expect(m.rpc).not.toHaveBeenCalled()});
  it('nepotvrdí dokončení, pokud jej server nepřijal',async()=>{const m=mock();await expect(completeEvent(m.client,club,'event')).rejects.toThrow('nebyla dokončena')});
 
 });

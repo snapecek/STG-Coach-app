@@ -848,3 +848,8 @@ html[data-theme="light"] button.studio-entry{background:linear-gradient(110deg,v
  .workspace-header .notification-bell{position:relative;inset:auto}
  .workspace-header .notification-bell .notification-panel{top:calc(100% + 8px);left:auto;right:0;width:360px;max-width:calc(100vw - 32px);max-height:calc(100dvh - var(--workspace-header-height,140px) - 40px)}
 }
+
+/* Keep the two review actions visible and equally sized on phones as well. */
+.attendance-review-actions{align-items:stretch}
+.attendance-review-actions>button.primary{flex:1;min-width:0}
+@media(max-width:600px){.attendance-review-actions>button:not(.primary){flex-basis:100%}}

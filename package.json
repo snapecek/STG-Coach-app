@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:cloud": "python3 scripts/check-cloud.py",
+    "test:result-entry-ui": "node scripts/check-result-entry-ui.cjs",
     "test:ui": "node scripts/check-ui.cjs",
     "test:member-ui": "node scripts/check-member-ui.cjs",
     "test:member-cloud": "python3 scripts/check-member-cloud.py",

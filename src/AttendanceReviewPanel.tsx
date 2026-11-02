@@ -12,15 +12,15 @@ export function AttendanceReview({event,members,rows,now,busy,onSave,children}:{
  const lock=useRef(false),ready=event.status==='scheduled'&&eventEnd(event)<=now;
  const updates=reviewUpdates(event.id,members.map(m=>m.id),rows,drafts),dirty=Object.keys(drafts).length>0;
  const choice=(id:string)=>ready?drafts[id]||reviewChoice(rows.find(p=>p.event_id===event.id&&p.member_id===id)):undefined;
- async function save(){
-  if(lock.current||busy||!ready||!updates.length)return;
+ async function save(withoutChanges=false){
+  if(lock.current||busy||!ready||!updates.length||(withoutChanges&&dirty))return;
   lock.current=true;setSaving(true);setError('');setNotice('');
   try{if(!await onSave(updates))throw new Error('Docházku se nepodařilo uložit. Výběr zůstává zachovaný, zkuste to znovu.');setDrafts({});setNotice('Docházka byla ověřena a uložena.');}
   catch(e){setError(e instanceof Error?e.message:'Docházku se nepodařilo uložit.');}
   finally{lock.current=false;setSaving(false);}
  }
  return <div className="attendance-review" data-unsaved-changes={dirty?'true':undefined} data-auto-refresh-blocked={dirty||saving?'true':undefined}>
-  {ready?<><div className="attendance-review-toolbar"><p><b>A</b> ano · <b>O</b> omluvil se · <b>N</b> ne. Opravte jen rozdíly a potvrďte celý seznam.</p><p className="muted">Přijdu → A. Nepřijdu, Možná, bez odpovědi a čekací listina → N. Omluvení označte O. Již ověřená docházka zůstává zachovaná.</p></div><div className="attendance-review-actions"><button className="primary" disabled={busy||saving||!updates.length} onClick={()=>void save()}>{saving?'Ukládám…':dirty?'Schválit docházku s úpravami':updates.length?'Schválit docházku bez úprav':'Docházka je ověřená'}</button>{dirty&&<button disabled={busy||saving} onClick={()=>{setDrafts({});setError('')}}>Zrušit úpravy</button>}</div></>:<p className="muted">Skutečnou docházku ověříte po skončení události.</p>}
+  {ready?<><div className="attendance-review-toolbar"><p><b>A</b> ano · <b>O</b> omluvil se · <b>N</b> ne. Opravte jen rozdíly a potvrďte celý seznam.</p><p className="muted">Přijdu → A. Nepřijdu, Možná, bez odpovědi a čekací listina → N. Omluvení označte O. Již ověřená docházka zůstává zachovaná.</p></div><div className="attendance-review-actions"><button className="primary" disabled={busy||saving||!updates.length} onClick={()=>void save()}>{saving?'Ukládám…':updates.length?'Schválit docházku':'Docházka je ověřená'}</button><button className="primary" disabled={busy||saving||dirty||!updates.length} title={dirty?'Nejprve schvalte provedené změny nebo je zrušte.':undefined} onClick={()=>void save(true)}>Schválit docházku bez úprav</button>{dirty&&<button disabled={busy||saving} onClick={()=>{setDrafts({});setError('')}}>Zrušit úpravy</button>}</div>{dirty&&<p className="muted">Provedené změny uložíte tlačítkem Schválit docházku. Volba bez úprav je do té doby zablokovaná.</p>}</>:<p className="muted">Skutečnou docházku ověříte po skončení události.</p>}
   {error&&<p className="auth-error" role="alert">{error}</p>}{notice&&<p className="notice" role="status">{notice}</p>}
   {children(choice,(id,value)=>{if(!ready||saving||busy)return;setNotice('');setDrafts(old=>({...old,[id]:value}))})}
  </div>;

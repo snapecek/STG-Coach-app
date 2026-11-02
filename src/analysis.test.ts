@@ -27,3 +27,24 @@ it('ve statistice zachová hosty i jejich potvrzenou účast za abecedně seřaz
  const participation=members.map(m=>({club_id:'club',event_id:'done',member_id:m.id,response:'yes' as const,attended:true,confirmed_by:'coach'}));
  const s=analysisSummary({...data,members,participation},[event]);expect(s.members.map(m=>[m.name,m.kind,m.present])).toEqual([['Zdeněk Černý','member',1],['Adam Žák','member',1],['Host Adam','guest',1]]);expect(s.present).toBe(3);expect(analysisSummary({...data,members,participation},[event],'g').members.map(m=>m.id)).toEqual(['g']);
 });
+
+describe('Kilometry závodů',()=>{
+ const race={...event,id:'race-km',event_kind:'race' as const,race_distance_km:21.1,actual_distance_km:null};
+ it('započítá délku trasy jednou bez násobení počtem závodníků',()=>{
+  const roster={...data,participation:data.members.map(m=>({club_id:'club',event_id:race.id,member_id:m.id,response:'yes' as const,attended:true,confirmed_by:'coach'}))};
+  expect(analysisSummary(roster,[race])).toMatchObject({raceDistance:21.1,recordedRaceDistances:1,distance:0,recordedDistances:0});
+ });
+ it('upřednostní skutečnou vzdálenost a zachová vyplněnou nulu',()=>{
+  expect(analysisSummary(data,[{...race,actual_distance_km:18},{...race,id:'zero',actual_distance_km:0},{...race,id:'unknown',race_distance_km:null}])).toMatchObject({raceDistance:18,recordedRaceDistances:2});
+ });
+ it('respektuje dokončení, zrušení, období a druh události',()=>{
+  const mixed={...data,events:[{...event,actual_distance_km:5},race,{...race,id:'pending',completed_at:null},{...race,id:'cancelled',status:'cancelled' as const},{...race,id:'old',starts_at:'2025-01-01T10:00:00Z'}]};
+  const selected=filterAnalysis(mixed,{...noFilters,kind:'race',from:'2026-10-13',to:'2026-10-13'});
+  expect(analysisSummary(mixed,selected)).toMatchObject({raceDistance:21.1,recordedRaceDistances:1,distance:0});
+  expect(analysisSummary(mixed,filterAnalysis(mixed,{...noFilters,kind:'training'}))).toMatchObject({raceDistance:0,recordedRaceDistances:0,distance:5});
+ });
+ it('při výběru člena počítá účast závodníka a vynechá doprovod i nepřítomnost',()=>{
+  const mixed={...data,events:[race,{...race,id:'companion'},{...race,id:'absent'}],participation:[{club_id:'club',event_id:race.id,member_id:'a',response:'yes' as const,attended:true,confirmed_by:'coach'},{club_id:'club',event_id:'companion',member_id:'a',response:'companion' as const,attended:true,confirmed_by:'coach'},{club_id:'club',event_id:'absent',member_id:'a',response:'no' as const,attended:false,confirmed_by:'coach'}]};
+  expect(analysisSummary(mixed,filterAnalysis(mixed,{...noFilters,memberId:'a'}),'a')).toMatchObject({raceDistance:21.1,recordedRaceDistances:1});
+ });
+});

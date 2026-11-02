@@ -1197,6 +1197,27 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     await login(p);await p.locator('.cloud-dashboard').waitFor();for(const width of [320,390,1440]){await p.setViewportSize({width,height:1000});assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));const image=p.locator(width<=640?'.brand-symbol':'.brand-wordmark');assert(await image.isVisible());assert((await image.getAttribute('src')).endsWith(width<=640?'trenomi-symbol-dark.svg':'trenomi-logo-dark.svg'));assert.equal(await p.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--orange').trim().toLowerCase()),'#c8f031');await p.screenshot({path:'/tmp/trenomi-'+role+'-'+width+'.png'});}await v.c.close();
    }console.log('PASS Trenomi: desktop/mobile coach and member headers, login, manifest identity, SVG/PNG decoding, favicon, Apple icon and lime UI accent');return;
   }
+  if(process.env.STG_RACE_DISTANCE_ANALYSIS_ONLY==='1'){
+   const v=await context('coach'),p=v.page,state=v.state(),other='30000000-0000-4000-8000-000000000002';
+   state.people.push({id:other,club_id:club,name:'Další závodník',kind:'member',removed_at:null,purge_after:null});
+   const training={...base,id:'50000000-0000-4000-8000-000000000090',name:'Trénink se vzdáleností',type:'Běh',event_kind:'training',starts_at:'2026-10-12T10:00:00Z',completed_at:'2026-10-12T12:00:00Z',actual_distance_km:5.5};
+   const first={...training,id:'50000000-0000-4000-8000-000000000091',name:'První závod',event_kind:'race',actual_distance_km:null,race_distance_km:21.1};
+   const second={...first,id:'50000000-0000-4000-8000-000000000092',name:'Druhý závod',starts_at:'2026-10-13T10:00:00Z',actual_distance_km:7,race_distance_km:10};
+   const unknown={...first,id:'50000000-0000-4000-8000-000000000093',name:'Nezadaná vzdálenost',race_distance_km:null};
+   state.events.push(training,first,second,unknown,{...first,id:'50000000-0000-4000-8000-000000000094',completed_at:null},{...first,id:'50000000-0000-4000-8000-000000000095',status:'cancelled'});
+   for(const [eventId,memberId,response,attended] of [[first.id,member,'yes',true],[first.id,other,'no',false],[second.id,member,'companion',true],[second.id,other,'yes',true]])state.participation.push({club_id:club,event_id:eventId,member_id:memberId,response,attended,confirmed_by:uid});
+   await p.setViewportSize({width:1440,height:1000});await login(p);await p.locator('.cloud-dashboard').waitFor();await p.getByRole('navigation',{name:'Hlavní navigace',exact:true}).getByRole('button',{name:'Analýza',exact:true}).click();
+   const race=p.locator('.analysis-stats .stat').filter({has:p.getByText('Vzdálenost závodů',{exact:true})}),train=p.locator('.analysis-stats .stat').filter({has:p.getByText('Vzdálenost tréninků',{exact:true})});
+   assert.equal(await race.locator('strong').textContent(),'28,1 km');assert.equal(await train.locator('strong').textContent(),'5,5 km');assert((await race.textContent()).includes('Závodů se vzdáleností: 2'));
+   await p.getByLabel('Druh událostí',{exact:true}).selectOption('race');assert.equal(await race.locator('strong').textContent(),'28,1 km');assert.equal(await train.locator('strong').textContent(),'—');
+   await p.getByLabel('Analyzovaný člen',{exact:true}).selectOption(member);assert.equal(await race.locator('strong').textContent(),'21,1 km');
+   await p.getByLabel('Analyzovaný člen',{exact:true}).selectOption(other);assert.equal(await race.locator('strong').textContent(),'7 km');
+   await p.getByLabel('Analýza od',{exact:true}).fill('2026-10-14');assert.equal(await race.locator('strong').textContent(),'—');
+   await p.getByRole('button',{name:'Vymazat filtry',exact:true}).click();await p.getByLabel('Druh událostí',{exact:true}).selectOption('race');
+   const downloading=p.waitForEvent('download');await p.getByRole('button',{name:'Export filtrovaných dat',exact:true}).click();const download=await downloading,stream=await download.createReadStream();let content='';for await(const chunk of stream)content+=chunk.toString();const exported=JSON.parse(content);assert.equal(exported.summary.raceDistance,28.1);assert.equal(exported.summary.recordedRaceDistances,2);
+   for(const width of [320,390,760,1440]){await p.setViewportSize({width,height:1000});assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Race distance card overflow '+width);}
+   await v.c.close();console.log('PASS race distance analysis: course fallback, actual override, once per race, no unknown/pending/cancelled distances, event/date/member filters, companion excluded, JSON export, mobile layout');await browser.close();return;
+  }
   if(process.env.STG_SIMPLIFY_ONLY==='1'){
    const v=await context('coach',false,false,true),p=v.page,state=v.state();const layout=async page=>{for(const width of [320,390,1440]){await page.setViewportSize({width,height:1000});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}};state.events[0].starts_at=new Date(Date.now()-2*86400000).toISOString();state.participation.splice(state.participation.findIndex(r=>r.event_id===events[1].id),1);
    for(let n=0;n<4;n++)state.events.push({...events[2],id:'50000000-0000-4000-8000-00000000008'+n,name:'Fiktivní další závod '+n});

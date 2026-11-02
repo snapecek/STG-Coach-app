@@ -922,7 +922,7 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    for(const width of [390,1440]){await p.setViewportSize({width,height:1000});assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await p.screenshot({path:'/tmp/trenomi-attendance-guests-'+width+'.png',fullPage:true})}
    await p.getByLabel('Hledat člena v docházce',{exact:true}).fill('Bílá');assert.deepEqual(await p.locator('.attendance-matrix tbody th').allTextContents(),['Hosté','Alena Bílá']);await p.getByLabel('Hledat člena v docházce',{exact:true}).fill('');
    await p.getByRole('tab',{name:'Závody',exact:true}).click();await p.locator('.race-attendance-board').waitFor();assert.deepEqual((await p.locator('.attendance-matrix tbody th').allTextContents()).slice(0,7),expected);
-   await navigate('Analýza');await p.getByRole('heading',{name:'Statistika účasti',exact:true}).waitFor();assert.deepEqual(await p.locator('.member-analysis h3').allTextContents(),['Členové','Hosté']);assert.deepEqual(await p.locator('.member-analysis .analysis-row>span').allTextContents(),['Zdeněk Černý','Petr Novák','Adam Žák','Boris Adam · archiv','Alena Bílá','Nepřiřazený Host']);assert.equal(await p.locator('.analysis-stats .stat').filter({hasText:'Potvrzené účasti'}).locator('strong').textContent(),'10');
+   await navigate('Analýza');await p.getByRole('heading',{name:'Statistika účasti',exact:true}).waitFor();await p.locator('.attendance-details>summary').click();assert.deepEqual(await p.locator('.member-analysis h3').allTextContents(),['Členové','Hosté']);assert.deepEqual(await p.locator('.member-analysis .attendance-compact-row>span').allTextContents(),['Zdeněk Černý','Petr Novák','Adam Žák','Boris Adam · archiv','Alena Bílá','Nepřiřazený Host']);assert.equal(await p.locator('.analysis-stats .stat').filter({hasText:'Potvrzené účasti'}).locator('strong').textContent(),'10');
    await v.c.close();console.log('PASS attendance guests: training/race sections, Czech surname order, archived guest history, event guest eligibility, regularity, analysis totals, search, 390/1440');return;
   }
   if(process.env.STG_LIVE_SYNC_ONLY==='1'){
@@ -1196,6 +1196,30 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
     for(const src of ['/brand/trenomi-icon-180.png','/brand/trenomi-logo.svg','/brand/trenomi-logo-light.svg','/brand/trenomi-logo-dark.svg','/brand/trenomi-symbol-dark.svg'])assert(await p.evaluate(async src=>{const i=new Image();i.src=src;await i.decode();return i.naturalWidth>0},src));
     await login(p);await p.locator('.cloud-dashboard').waitFor();for(const width of [320,390,1440]){await p.setViewportSize({width,height:1000});assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));const image=p.locator(width<=640?'.brand-symbol':'.brand-wordmark');assert(await image.isVisible());assert((await image.getAttribute('src')).endsWith(width<=640?'trenomi-symbol-dark.svg':'trenomi-logo-dark.svg'));assert.equal(await p.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--orange').trim().toLowerCase()),'#c8f031');await p.screenshot({path:'/tmp/trenomi-'+role+'-'+width+'.png'});}await v.c.close();
    }console.log('PASS Trenomi: desktop/mobile coach and member headers, login, manifest identity, SVG/PNG decoding, favicon, Apple icon and lime UI accent');return;
+  }
+  if(process.env.STG_COMPACT_ANALYSIS_ACTIVITY_ONLY==='1'){
+   const v=await context('coach'),p=v.page,state=v.state();
+   const person=(id,name,kind='member')=>({id,club_id:club,name,kind,removed_at:null,purge_after:null});
+   state.people.splice(0,state.people.length,person(member,'Alena Bílá'),person('b','Boris Černý'),person('c','Cyril Dlouhý'),person('g','Host Závodník','guest'),...Array.from({length:36},(_,i)=>person('extra'+i,'Další člen '+i)));
+   const t1={...base,id:'50000000-0000-4000-8000-000000000091',name:'První trénink',type:'Běh',event_kind:'training',starts_at:'2026-10-12T10:00:00Z',completed_at:'2026-10-12T12:00:00Z'};
+   const t2={...t1,id:'50000000-0000-4000-8000-000000000092',name:'Druhý trénink'};
+   const r1={...t1,id:'50000000-0000-4000-8000-000000000093',event_kind:'race',name:'První závod',starts_at:'2026-10-13T10:00:00Z'};
+   const r2={...r1,id:'50000000-0000-4000-8000-000000000094',name:'Druhý závod'};
+   state.events.splice(0,state.events.length,t1,t2,r1,r2,{...r1,id:'50000000-0000-4000-8000-000000000095',completed_at:null});state.participation.splice(0,state.participation.length);
+   const row=(eventId,memberId,response='yes',attended=true,attendance_excused=false)=>state.participation.push({club_id:club,event_id:eventId,member_id:memberId,response,attended,attendance_excused,confirmed_by:uid});
+   for(const id of [member,'b','g']){row(t1.id,id);row(t2.id,id);}row(r1.id,'c');row(r2.id,'c');row(r1.id,'g');row(r2.id,'g');row(r1.id,member,'companion');row(r1.id,'b','yes',false);row(r2.id,'b','yes',null);row(r2.id,member,'yes',false,true);
+   await p.setViewportSize({width:1440,height:1000});await login(p);await p.locator('.cloud-dashboard').waitFor();await p.getByRole('navigation',{name:'Hlavní navigace',exact:true}).getByRole('button',{name:'Analýza',exact:true}).click();
+   const panel=p.locator('.member-analysis'),details=panel.locator('details'),leaders=panel.locator('.attendance-leader');
+   assert.equal(await details.getAttribute('open'),null);assert.equal(await panel.locator('progress').count(),0);assert.equal(await leaders.count(),2);
+   assert((await leaders.nth(0).textContent()).includes('Alena Bílá'));assert((await leaders.nth(0).textContent()).includes('3 potvrzených účastí'));assert(!(await leaders.nth(0).textContent()).includes('Host Závodník'));
+   assert((await leaders.nth(1).textContent()).includes('Cyril Dlouhý'));assert((await leaders.nth(1).textContent()).includes('Host Závodník'));assert((await leaders.nth(1).textContent()).includes('shoda 2 závodníků'));assert(!(await leaders.nth(1).textContent()).includes('Alena Bílá'));
+   for(const theme of ['light','dark'])for(const width of [320,390,760,1440]){await p.evaluate(t=>document.documentElement.dataset.theme=t,theme);await p.setViewportSize({width,height:1000});assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert((await panel.boundingBox()).height<380,'Collapsed attendance stays compact with 40 people');}
+   await details.locator('summary').click();await panel.getByRole('region',{name:'Podrobná účast · Členové',exact:true}).waitFor();assert.equal(await panel.locator('.attendance-compact-row').count(),40);await details.locator('summary').click();
+   await p.getByLabel('Druh událostí',{exact:true}).selectOption('race');assert((await leaders.nth(0).textContent()).includes('Cyril Dlouhý'));assert((await leaders.nth(0).textContent()).includes('2 potvrzených účastí'));
+   await p.getByLabel('Analyzovaný člen',{exact:true}).selectOption(member);assert((await leaders.nth(1).textContent()).includes('Zatím bez potvrzené účasti na závodě'));
+   await p.getByRole('button',{name:'Vymazat filtry',exact:true}).click();await p.getByLabel('Druh událostí',{exact:true}).selectOption('training');assert((await leaders.nth(0).textContent()).includes('shoda 2 členů'));assert((await leaders.nth(1).textContent()).includes('Závody nejsou ve výběru'));
+   await p.getByLabel('Analýza od',{exact:true}).fill('2027-01-01');assert.deepEqual(await leaders.locator('strong').allTextContents(),['—','—']);
+   await v.c.close();console.log('PASS compact analysis activity: 40 people, collapsed details, no full-width bars, confirmed leaders, ties, guest racer, companion excluded from racing, filters, no-data state, 320/390/760/1440 light/dark');await browser.close();return;
   }
   if(process.env.STG_RACE_DISTANCE_ANALYSIS_ONLY==='1'){
    const v=await context('coach'),p=v.page,state=v.state(),other='30000000-0000-4000-8000-000000000002';

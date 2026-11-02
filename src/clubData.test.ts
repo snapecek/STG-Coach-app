@@ -47,8 +47,8 @@ describe('Bezpečné vytvoření závodu',()=>{
  const input={id:'race',name:'Závod',place:'Park',type:'OCR',plan:'Pokyny',starts_at:'2026-10-13T08:00:00Z',duration_minutes:180,race_distance_km:8,race_registration_url:'https://example.invalid/race'};
  it('závod a soupisku zapisuje v jedné transakční RPC',async()=>{const m=mock();await createClubRace(m.client,club,input,['member']);expect(m.rpc).toHaveBeenCalledWith('create_club_race',{target_club:club.id,race:input,entrants:['member']});expect(m.tables).toEqual([])});
  it('uloží ikonu závodu přes atomickou RPC až po ověření migrace 047',async()=>{const m=mock();m.rpc.mockResolvedValueOnce({data:true,error:null} as never);await createClubRace(m.client,club,{...input,training_icon:'stopwatch'},[]);expect(m.rpc).toHaveBeenNthCalledWith(1,'race_icons_ready');expect(m.rpc).toHaveBeenNthCalledWith(2,'create_club_race',{target_club:club.id,race:{...input,training_icon:'stopwatch'},entrants:[]});});
- it('před migrací 047 nevytvoří závod s tiše ztracenou ikonou',async()=>{const m=mock();m.rpc.mockResolvedValueOnce({data:null,error:{code:'PGRST202'}} as never);await expect(createClubRace(m.client,club,{...input,training_icon:'stopwatch'},[])).rejects.toThrow('047');expect(m.rpc).toHaveBeenCalledTimes(1);expect(m.tables).toEqual([]);});
- it('před migrací 047 neprovede ani změnu ikony závodu',async()=>{const m=mock();await expect(updateEvent(m.client,club,'event',{event_kind:'race',training_icon:'none'})).rejects.toThrow('047');expect(m.writes).toEqual([]);});
+ it('před migrací 047 nevytvoří závod s tiše ztracenou ikonou',async()=>{const m=mock();m.rpc.mockResolvedValueOnce({data:null,error:{code:'PGRST202'}} as never);await expect(createClubRace(m.client,club,{...input,training_icon:'stopwatch'},[])).rejects.toThrow('053');expect(m.rpc).toHaveBeenCalledTimes(1);expect(m.tables).toEqual([]);});
+ it('před migrací 047 neprovede ani změnu ikony závodu',async()=>{const m=mock();await expect(updateEvent(m.client,club,'event',{event_kind:'race',training_icon:'none'})).rejects.toThrow('053');expect(m.writes).toEqual([]);});
  it('povoluje závod bez účastníků',async()=>{const m=mock();await createClubRace(m.client,club,input,[]);expect(m.rpc).toHaveBeenCalledWith('create_club_race',{target_club:club.id,race:input,entrants:[]})});
  it('odmítá duplicitní soupisku před zápisem',async()=>{const m=mock();await expect(createClubRace(m.client,club,input,['member','member'])).rejects.toThrow();expect(m.rpc).not.toHaveBeenCalled()});
  it('odmítá nebezpečné odkazy a neplatné vzdálenosti',()=>{for(const url of ['javascript:alert(1)','http://example.invalid','https://user:password@example.invalid','https://example.invalid/a b'])expect(()=>validateRaceDetails({race_registration_url:url})).toThrow();for(const distance of [0,-1,Infinity,1001])expect(()=>validateRaceDetails({race_distance_km:distance})).toThrow()});
@@ -72,4 +72,15 @@ it('před migrací 048 neuloží novou sportovní ikonu se zavádějící chybou
 });
 it('po migraci 048 uloží do šablony samostatnou trailovou ikonu',async()=>{
  const m=mock();m.rpc.mockResolvedValueOnce({data:true,error:null} as never);await addTemplate(m.client,club,{...template,training_icon:'trail'});expect(m.writes[0]).toMatchObject({training_icon:'trail'});
+});
+
+it('rejects malformed and duplicate draft race guests before writing a race',async()=>{
+ const m=mock();const race={id:'race',name:'Závod',place:'Park',type:'OCR',plan:'',starts_at:'2027-01-01T18:00:00Z',duration_minutes:180,race_distance_km:5,race_registration_url:''};
+ await expect(createClubRace(m.client,club,{...race,guests:[{name:' ',role:'yes'}]} as never,[])).rejects.toThrow('jméno');
+ await expect(createClubRace(m.client,club,{...race,guests:[{name:'Jana Host',role:'yes'},{name:' jana   host ',role:'companion'}]} as never,[])).rejects.toThrow('dvakrát');
+ expect(m.rpc).not.toHaveBeenCalled();
+});
+it('shows the race result/team restriction when changing someone to companion',async()=>{
+ const m=mock();m.q.single.mockResolvedValueOnce({data:null,error:{message:'Nejprve odeberte závodní výsledek a zařazení do týmu.'}} as never);
+ await expect(saveParticipation(m.client,club,'race','member',{response:'companion'})).rejects.toThrow('Nejprve odeberte závodní výsledek a zařazení do týmu.');
 });

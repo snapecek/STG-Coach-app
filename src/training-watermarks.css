@@ -81,3 +81,10 @@ html[data-theme="light"] .watermark-surface>.training-watermark{color:#4b4b4b;op
 .sport-outline-icon--hiit,.sport-outline-icon--kettlebell{mask-size:contain;-webkit-mask-size:contain;mask-position:center;-webkit-mask-position:center}
 .sport-outline-icon--hiit{mask-image:url('/icons/hiit-outline.png');-webkit-mask-image:url('/icons/hiit-outline.png');aspect-ratio:1.5}
 .sport-outline-icon--kettlebell{mask-image:url('/icons/kettlebell-outline.png');-webkit-mask-image:url('/icons/kettlebell-outline.png');aspect-ratio:1312/1199}
+
+.new-race-guest{margin:16px 0;padding:16px;border:1px solid var(--border)}
+.new-race-guest h4{margin:0 0 8px}
+.new-race-guest fieldset{min-width:0;border:0;padding:0}
+.race-guest-draft{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.race-guest-draft span{min-width:0;overflow-wrap:anywhere}
+.race-guest-draft button{flex:none}

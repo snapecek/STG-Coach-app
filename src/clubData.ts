@@ -1,3 +1,4 @@
+import {normalizeRaceGuests,requireRaceGuestsMigration,type RaceGuestDraft} from './raceGuests';
 import {requireSelectedSportIconMigration,requireRaceIconMigration,requireTrainingIconMigration,trainingIconFields,type TrainingIconChoice} from './trainingIcons';
 import {locationFields,requireLocationMigration,type EventLocation} from './eventLocation';
 import type {EventTypeColor} from './eventTypeColors';
@@ -84,7 +85,9 @@ export async function saveParticipation(client:SupabaseClient,club:ClubAccess,ev
  if('response' in patch&&patch.response!==null&&!['yes','no','maybe','companion'].includes(patch.response))throw new Error('Neplatná odpověď.');
  const row:Partial<ParticipationRow>={club_id:club.id,event_id:eventId,member_id:memberId,...patch,...('attended' in patch?{confirmed_by:userId}:{})};
  // Send only the changed fields: RSVP must not overwrite actual attendance (or vice versa).
- checked<ParticipationRow>(await client.from('participation').upsert(row,{onConflict:'event_id,member_id'}).select('*').single(),'Účast se nepodařilo uložit.');
+ const saved=await client.from('participation').upsert(row,{onConflict:'event_id,member_id'}).select('*').single();
+ if(saved.error?.message==='Nejprve odeberte závodní výsledek a zařazení do týmu.')throw new Error(saved.error.message);
+ checked<ParticipationRow>(saved,'Účast se nepodařilo uložit.');
  return checked<ParticipationRow>(await client.from('participation').select('*').eq('club_id',club.id).eq('event_id',eventId).eq('member_id',memberId).single(),'Aktuální přihlášení nelze načíst.');
 }
 export async function saveAttendanceBatch(client:SupabaseClient,club:ClubAccess,updates:import('./attendanceReview').AttendanceUpdate[]){
@@ -140,11 +143,12 @@ export function validateRaceDetails(input:{race_distance_km?:number|null;race_re
  if(input.race_distance_km!==undefined&&input.race_distance_km!==null&&(!Number.isFinite(input.race_distance_km)||input.race_distance_km<=0||input.race_distance_km>1000))throw new Error('Délka trasy musí být větší než 0 a nejvýše 1000 km.');
  if(input.race_registration_url){try{const url=new URL(input.race_registration_url);if(url.protocol!=='https:'||url.username||url.password||input.race_registration_url.length>1000||/\s/.test(input.race_registration_url))throw new Error();}catch{throw new Error('Odkaz na registraci musí být platná HTTPS adresa bez přihlašovacích údajů.');}}
 }
-export async function createClubRace(client:SupabaseClient,club:ClubAccess,input:{training_icon?:TrainingIconChoice;event_location?:EventLocation|null;id:string;name:string;place:string;type:string;plan:string;starts_at:string;duration_minutes:number;race_distance_km:number|null;race_registration_url:string},entrants:string[]){
- staff(club);const mapFields=locationFields(input.event_location),iconFields=trainingIconFields(input.training_icon);validateRaceDetails(input);if(entrants.length>500||new Set(entrants).size!==entrants.length)throw new Error('Vyberte nejvýše 500 různých účastníků.');await verify(client);
+export async function createClubRace(client:SupabaseClient,club:ClubAccess,input:{guests?:RaceGuestDraft[];training_icon?:TrainingIconChoice;event_location?:EventLocation|null;id:string;name:string;place:string;type:string;plan:string;starts_at:string;duration_minutes:number;race_distance_km:number|null;race_registration_url:string},entrants:string[]){
+ staff(club);const guests=normalizeRaceGuests(input.guests||[]),mapFields=locationFields(input.event_location),iconFields=trainingIconFields(input.training_icon);validateRaceDetails(input);if(entrants.length+guests.length>500||new Set(entrants).size!==entrants.length)throw new Error('Vyberte nejvýše 500 různých účastníků.');await verify(client);
  if(input.event_location)await requireLocationMigration(client,club.id);
+ if(guests.length)await requireRaceGuestsMigration(client);
  await requireRaceIconMigration(client,input.training_icon);
- return checked<EventRow>(await client.rpc('create_club_race',{target_club:club.id,race:{...input,...mapFields,...iconFields,name:text(input.name,'Název',80),place:text(input.place,'Místo'),type:text(input.type,'Disciplína',40)},entrants}),'Závod se nepodařilo vytvořit. Zkontrolujte soupisku a migraci databáze.');
+ return checked<EventRow>(await client.rpc('create_club_race',{target_club:club.id,race:{...input,...(input.guests!==undefined?{guests}:{}),...mapFields,...iconFields,name:text(input.name,'Název',80),place:text(input.place,'Místo'),type:text(input.type,'Disciplína',40)},entrants}),'Závod se nepodařilo vytvořit. Zkontrolujte soupisku a migraci databáze.');
 }
 export async function removeRaceEntrant(client:SupabaseClient,club:ClubAccess,eventId:string,memberId:string){
  staff(club);await verify(client);return checked<{member_id:string}>(await client.from('participation').delete().eq('club_id',club.id).eq('event_id',eventId).eq('member_id',memberId).select('member_id').single(),'Účastníka nelze odebrat. Nejprve odeberte jeho výsledek.');

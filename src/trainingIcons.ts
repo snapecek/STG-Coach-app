@@ -73,7 +73,7 @@ export async function requireRaceIconMigration(client:import('@supabase/supabase
  await requireSelectedSportIconMigration(client,icon);
  const {data,error}=await client.rpc('race_icons_ready');
  if(error&&!['PGRST202','42883'].includes(error.code))throw new Error('Ikonu závodu nelze ověřit. Zkontrolujte připojení a zkuste to znovu.');
- if(error||data!==true)throw new Error('Pro uložení ikony závodu nejdříve nahrajte migraci 047 v Supabase.');
+ if(error||data!==true)throw new Error('Pro uložení ikony závodu nejdříve nahrajte opravnou migraci 053 v Supabase.');
 }
 
 /** New choices need the extended whitelist; automatic rendering needs no write. */
@@ -99,5 +99,5 @@ export async function requireSelectedSportIconMigration(client:import('@supabase
  if(icon!=='ocr'&&icon!=='trail')return;
  const {data,error}=await client.rpc('special_sport_icons_ready');
  if(error&&!['PGRST202','42883'].includes(error.code))throw new Error('Ikonu nelze ověřit. Zkontrolujte připojení a zkuste to znovu.');
- if(error||data!==true)throw new Error('Pro uložení ikony OCR nebo trailu nejdříve nahrajte migraci 048 v Supabase.');
+ if(error||data!==true)throw new Error('Pro uložení ikony OCR nebo trailu nejdříve nahrajte opravnou migraci 053 v Supabase (doplní chybějící části 048).');
 }

@@ -92,7 +92,7 @@ export const helpTopics:Record<HelpRole,HelpTopic[]>={member:[
   'V Deníku otevřete záznam, vyplňte průběh a skutečné údaje, například délku, vzdálenost a zátěž RPE. Před dokončením ověřte docházku všech uvedených lidí.',
   'U závodu doplňte výsledky závodníků, případně týmů. Doprovod výsledek nepotřebuje, ale jeho skutečná účast má být vyplněná.',
   'Minihru lze přidat i dodatečně, pokud původně nebyla v plánu. Vyberte účastníky, jednotlivce či týmy a zapište výsledek.',
-  'Dokončit událost je závěrečná kontrola. Pokud tlačítko není dostupné, ověřte skončení události, průběh, docházku a u závodu požadované výsledky. Pozdější změna může událost znovu otevřít ke kontrole.',
+  'U tlačítka Dokončit událost je vypsáno, co chybí, včetně jmen u docházky a výsledků. Po skončení můžete zvolit Ukončit bez doplnění dat a volbu potvrdit. Uložené údaje se zachovají, chybějící zůstanou nevyplněné. Pozdější změna událost znovu otevře ke kontrole.',
  ],note:'Uplynutí času samo nepotvrzuje vyplněný deník. V Analýze kontrolujte období, filtry a to, zda nechybí skutečně zapsané hodnoty.'},
  {id:'photos',title:'Fotografie, hlavní fotka a sdílení',summary:'Hlavní fotografie patří společnému deníku, fotku pro sdílení si každý vybírá sám.',items:[
   'U fotografií v deníku označte hlavní fotku pro společné zobrazení tréninku. Tato volba nemění osobní výběr pro sdílení.',

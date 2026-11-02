@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {calendarCells,pendingReviews,reviewReady,reviewMembers,trainingCompletionIssues} from './management';
+import {calendarCells,pendingReviews,reviewReady,reviewMembers,trainingCompletionIssues,eventCompletionIssues} from './management';
 import type {EventRow,ClubData,MemberRow} from './clubData';
 const event:EventRow={id:'event',club_id:'club',template_id:null,name:'Fiktivní trénink',starts_at:'2026-10-12T16:00:00Z',place:'Park',type:'Běh',plan:'Plán',duration_minutes:60,event_kind:'training',status:'scheduled',actual_notes:'',completed_at:null,completed_by:null,actual_duration_minutes:null,perceived_effort:null,equipment:[]};
 const member:MemberRow={id:'member',club_id:'club',name:'Fiktivní člen',kind:'member',removed_at:null,purge_after:null};
@@ -63,3 +63,24 @@ it('explains missing journal notes and only actually unverified attendance',()=>
 });
 
 it('includes a member-invited guest only in the booked event roster',()=>{const event={id:'event',event_kind:'training',starts_at:'2026-10-15T10:00:00Z'} as import('./clubData').EventRow;const guest={id:'guest',name:'Guest',kind:'guest',event_guest:true,removed_at:null} as import('./clubData').MemberRow;const data={members:[guest],participation:[]} as unknown as import('./clubData').ClubData;expect(reviewMembers(data,event)).toEqual([]);data.participation=[{member_id:'guest',event_id:'event'} as import('./clubData').ParticipationRow];expect(reviewMembers(data,event)).toEqual([guest]);expect(reviewMembers(data,{...event,id:'other'})).toEqual([])});
+
+describe('Konkrétní překážky dokončení závodu',()=>{
+ const race={...event,event_kind:'race' as const};
+ const guest={...member,id:'guest',name:'Doprovod'};
+ const p={club_id:'club',event_id:event.id,member_id:member.id,response:'yes' as const,attended:null,confirmed_by:null};
+ const result={club_id:'club',event_id:event.id,member_id:member.id,status:'finished' as const,elapsed_ms:1000,notes:''};
+ it('vypíše neověřenou docházku i při uloženém čase; doprovod nepotřebuje výsledek',()=>{
+  const roster={...data,members:[member,guest],participation:[p,{...p,member_id:guest.id,response:'companion' as const}]};
+  expect(eventCompletionIssues(roster,race,now,[result])).toEqual([{kind:'attendance',members:[member,guest]}]);
+ });
+ it('rozlišuje chybějící výsledek a docházku odporující výsledku',()=>{
+  expect(eventCompletionIssues({...data,participation:[{...p,attended:false}]},race,now,[result])).toEqual([{kind:'conflict',members:[member]}]);
+  expect(eventCompletionIssues({...data,participation:[{...p,attended:true}]},race,now,[])).toEqual([{kind:'results',members:[member]}]);
+ });
+ it('shoduje se s běžnou kontrolou a ignoruje výsledky jiné události',()=>{
+  const roster={...data,participation:[{...p,attended:true}]};
+  expect(eventCompletionIssues(roster,race,now,[result])).toEqual([]);
+  expect(eventCompletionIssues(roster,race,now,[{...result,event_id:'other'}]).map(i=>i.kind)).toEqual(['results']);
+  expect(eventCompletionIssues(data,event,now)).toEqual(trainingCompletionIssues(data,event,now));
+ });
+});

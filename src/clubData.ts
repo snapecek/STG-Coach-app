@@ -122,8 +122,11 @@ export async function updateEvent(client:SupabaseClient,club:ClubAccess,id:strin
  if(patch.actual_notes!==undefined&&patch.actual_notes.length>5000)throw new Error('Skutečný průběh je příliš dlouhý.');
  await verify(client);if(patch.event_kind==='race')await requireRaceIconMigration(client,patch.training_icon);else await requireSelectedSportIconMigration(client,patch.training_icon);const result=await client.from('events').update(patch).eq('club_id',club.id).eq('id',id).select(eventColumns).single();if(result.error?.code==='PGRST204'&&patch.event_location!==undefined)throw new Error('Pro uložení mapy nejdříve nahrajte migraci 038 v Supabase.');if(result.error?.code==='PGRST204'&&patch.cover_photo_path!==undefined)throw new Error('Pro uložení titulní fotografie nejdříve nahrajte migraci 036 v Supabase.');if(result.error?.message.includes('Capacity below confirmed'))throw new Error('Kapacitu nelze snížit pod počet potvrzených míst. Nejprve upravte přihlášení účastníků.');if(result.error?.message.includes('Capacity is closed'))throw new Error('Po zahájení tréninku nelze kapacitu měnit.');if(result.error?.message.includes('Remove race results'))throw new Error('Před změnou závodu na trénink odeberte jeho výsledky.');return checked<EventRow>(result,'Událost se nepodařilo změnit.');
 }
-export async function completeEvent(client:SupabaseClient,club:ClubAccess,id:string){
- staff(club);await verify(client);const row=checked<EventRow>(await client.from('events').update({completed_at:new Date().toISOString()}).eq('club_id',club.id).eq('id',id).select(eventColumns).single(),'Událost nelze dokončit. Doplňte průběh a docházku po skončení.');
+export async function completeEvent(client:SupabaseClient,club:ClubAccess,id:string,withoutData=false){
+ staff(club);await verify(client);
+ const result=withoutData?await client.rpc('complete_event_without_data',{target_club:club.id,target_event:id}):await client.from('events').update({completed_at:new Date().toISOString()}).eq('club_id',club.id).eq('id',id).select(eventColumns).single();
+ if(withoutData&&result.error?.code==='PGRST202')throw new Error('Ukončení bez dat vyžaduje databázovou migraci 054.');
+ const row=checked<EventRow>(result,'Událost nelze dokončit. Ověřte seznam chybějících údajů a zda událost již skončila.');
  if(!row.completed_at)throw new Error('Událost nebyla dokončena. Obnovte data a zkontrolujte její stav.');return row;
 }
 export async function deleteEvent(client:SupabaseClient,club:ClubAccess,id:string){

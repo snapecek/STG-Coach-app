@@ -13,6 +13,20 @@ it('does not retry an unavailable notification write as a silent ordinary update
  const m=mock();m.rpc.mockResolvedValueOnce({data:null,error:{code:'PGRST202'}} as never);
  await expect(updateEvent(m.client,club,'event',{status:'cancelled'},true)).rejects.toThrow('055');expect(m.writes).toEqual([]);
 });
+it('creates a training and its notifications in the same RPC when requested',async()=>{
+ const m=mock();await createClubEvents(m.client,club,{name:'Nový běh',place:'Park',type:'Běh',plan:'',duration_minutes:60,event_kind:'training',template_id:null,date:'2027-01-01',time:'18:00',count:1},true);
+ expect(m.rpc).toHaveBeenCalledWith('create_training_series_with_notice',expect.objectContaining({target_club:club.id,sessions:[expect.objectContaining({name:'Nový běh',starts_at:'2027-01-01T17:00:00.000Z'})]}));expect(m.writes).toEqual([]);
+});
+it('creates race notifications atomically with entrants and draft guests',async()=>{
+ const m=mock();m.rpc.mockResolvedValueOnce({data:true,error:null} as never);
+ await createClubRace(m.client,club,{id:'new-race',name:'Nový závod',place:'Park',type:'OCR',plan:'',duration_minutes:120,starts_at:'2027-01-01T18:00:00Z',race_distance_km:null,race_registration_url:'',guests:[{name:'Host',role:'companion'}]},['entrant'],true);
+ expect(m.rpc).toHaveBeenLastCalledWith('create_club_race_with_notice',expect.objectContaining({target_club:club.id,entrants:['entrant'],race:expect.objectContaining({guests:[{name:'Host',role:'companion'}]})}));
+});
+it('does not create a silent duplicate when the creation notification migration is missing',async()=>{
+ const m=mock();m.rpc.mockResolvedValueOnce({data:null,error:{code:'PGRST202'}} as never);
+ await expect(createClubEvents(m.client,club,{name:'Běh',place:'Park',type:'Běh',plan:'',duration_minutes:60,event_kind:'training',template_id:null,date:'2027-01-01',time:'18:00',count:1},true)).rejects.toThrow('056');
+ expect(m.rpc).toHaveBeenCalledTimes(1);expect(m.writes).toEqual([]);
+});
 describe('Čas a opakování',()=>{
  it('převede letní a zimní pražský čas',()=>{expect(pragueTimestamp('2026-07-01','18:00')).toBe('2026-07-01T16:00:00.000Z');expect(pragueTimestamp('2026-12-01','18:00')).toBe('2026-12-01T17:00:00.000Z')});
  it('zachová 18:00 přes změnu času',()=>expect(buildEventRows(club.id,template,'2026-10-21','18:00',2).map(e=>e.starts_at)).toEqual(['2026-10-21T16:00:00.000Z','2026-10-28T17:00:00.000Z']));

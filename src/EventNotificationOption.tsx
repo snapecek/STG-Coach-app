@@ -1,3 +1,3 @@
-export function EventNotificationOption({checked,onChange}:{checked:boolean;onChange:(checked:boolean)=>void}){
- return <div className="event-notification-option"><label className="checkbox-label"><input type="checkbox" checked={checked} onChange={e=>onChange(e.target.checked)}/>Upozornit členy a trenéry</label><p className="muted">Změna se zobrazí ve zvonečku členům, kterým je událost určená, a trenérům klubu. Na zařízeních s povolenými oznámeními přijde také mobilní upozornění.</p></div>;
+export function EventNotificationOption({checked,onChange,creation=false,count=1}:{checked:boolean;onChange:(checked:boolean)=>void;creation?:boolean;count?:number}){
+ return <div className="event-notification-option"><label className="checkbox-label"><input type="checkbox" checked={checked} onChange={e=>onChange(e.target.checked)}/>Upozornit členy a trenéry</label><p className="muted">{creation?'Nová událost':'Změna'} se zobrazí ve zvonečku členům, kterým je událost určená, a trenérům klubu. Na zařízeních s povolenými oznámeními přijde také mobilní upozornění.</p>{creation&&count>1&&<p className="muted">Upozornění se odešle pro každý ze {count} termínů.</p>}</div>;
 }

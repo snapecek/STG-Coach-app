@@ -132,26 +132,26 @@ export async function completeEvent(client:SupabaseClient,club:ClubAccess,id:str
 export async function deleteEvent(client:SupabaseClient,club:ClubAccess,id:string){
  staff(club);await verify(client);await removeAllEventPhotos(client,club.id,id);return checked<{id:string}>(await client.from('events').delete().eq('club_id',club.id).eq('id',id).select('id').single(),'Událost se nepodařilo smazat.');
 }
-export async function createClubEvents(client:SupabaseClient,club:ClubAccess,input:{training_icon?:TrainingIconChoice;event_location?:EventLocation|null;template_id:string|null;name:string;place:string;type:string;plan:string;duration_minutes:number;event_kind:'training'|'race';date:string;time:string;count:number;selectedDates?:string[];capacity?:number|null}){
+export async function createClubEvents(client:SupabaseClient,club:ClubAccess,input:{training_icon?:TrainingIconChoice;event_location?:EventLocation|null;template_id:string|null;name:string;place:string;type:string;plan:string;duration_minutes:number;event_kind:'training'|'race';date:string;time:string;count:number;selectedDates?:string[];capacity?:number|null},notifyPeople=false){
  staff(club);validateCapacity(input.capacity);if(!Number.isInteger(input.duration_minutes)||input.duration_minutes<5||input.duration_minutes>480||input.plan.length>5000)throw new Error('Zkontrolujte délku a plán.');
  const mapFields=locationFields(input.event_location);
  const rows=trainingDates(input.date,input.count,input.selectedDates).map(date=>({...mapFields,...trainingIconFields(input.training_icon),id:crypto.randomUUID(),club_id:club.id,template_id:input.template_id,name:text(input.name,'Název',80),place:text(input.place,'Místo'),type:text(input.type,'Typ',40),plan:input.plan.trim(),duration_minutes:input.duration_minutes,event_kind:input.event_kind,...(input.capacity!=null?{capacity:input.capacity}:{}),starts_at:pragueTimestamp(date,input.time)}));await verify(client);
  if(input.event_location)await requireLocationMigration(client,club.id);
  await requireTrainingIconMigration(client,club.id,input.training_icon);
  if(input.event_kind!=='training')throw new Error('Závod vytvořte samostatně se soupiskou.');
- return checked<EventRow[]>(await client.rpc('create_training_series',{target_club:club.id,sessions:rows}),'Tréninky se nepodařilo uložit. Ověřte migraci 011 a údaje série.');
+ const result=await client.rpc(notifyPeople?'create_training_series_with_notice':'create_training_series',{target_club:club.id,sessions:rows});if(notifyPeople&&result.error?.code==='PGRST202')throw new Error('Upozornění na nové události vyžadují migraci 056. Události se nevytvořily.');return checked<EventRow[]>(result,'Tréninky se nepodařilo uložit. Ověřte migraci 011 a údaje série.');
 }
 
 export function validateRaceDetails(input:{race_distance_km?:number|null;race_registration_url?:string}){
  if(input.race_distance_km!==undefined&&input.race_distance_km!==null&&(!Number.isFinite(input.race_distance_km)||input.race_distance_km<=0||input.race_distance_km>1000))throw new Error('Délka trasy musí být větší než 0 a nejvýše 1000 km.');
  if(input.race_registration_url){try{const url=new URL(input.race_registration_url);if(url.protocol!=='https:'||url.username||url.password||input.race_registration_url.length>1000||/\s/.test(input.race_registration_url))throw new Error();}catch{throw new Error('Odkaz na registraci musí být platná HTTPS adresa bez přihlašovacích údajů.');}}
 }
-export async function createClubRace(client:SupabaseClient,club:ClubAccess,input:{guests?:RaceGuestDraft[];training_icon?:TrainingIconChoice;event_location?:EventLocation|null;id:string;name:string;place:string;type:string;plan:string;starts_at:string;duration_minutes:number;race_distance_km:number|null;race_registration_url:string},entrants:string[]){
+export async function createClubRace(client:SupabaseClient,club:ClubAccess,input:{guests?:RaceGuestDraft[];training_icon?:TrainingIconChoice;event_location?:EventLocation|null;id:string;name:string;place:string;type:string;plan:string;starts_at:string;duration_minutes:number;race_distance_km:number|null;race_registration_url:string},entrants:string[],notifyPeople=false){
  staff(club);const guests=normalizeRaceGuests(input.guests||[]),mapFields=locationFields(input.event_location),iconFields=trainingIconFields(input.training_icon);validateRaceDetails(input);if(entrants.length+guests.length>500||new Set(entrants).size!==entrants.length)throw new Error('Vyberte nejvýše 500 různých účastníků.');await verify(client);
  if(input.event_location)await requireLocationMigration(client,club.id);
  if(guests.length)await requireRaceGuestsMigration(client);
  await requireRaceIconMigration(client,input.training_icon);
- return checked<EventRow>(await client.rpc('create_club_race',{target_club:club.id,race:{...input,...(input.guests!==undefined?{guests}:{}),...mapFields,...iconFields,name:text(input.name,'Název',80),place:text(input.place,'Místo'),type:text(input.type,'Disciplína',40)},entrants}),'Závod se nepodařilo vytvořit. Zkontrolujte soupisku a migraci databáze.');
+ const result=await client.rpc(notifyPeople?'create_club_race_with_notice':'create_club_race',{target_club:club.id,race:{...input,...(input.guests!==undefined?{guests}:{}),...mapFields,...iconFields,name:text(input.name,'Název',80),place:text(input.place,'Místo'),type:text(input.type,'Disciplína',40)},entrants});if(notifyPeople&&result.error?.code==='PGRST202')throw new Error('Upozornění na nové události vyžadují migraci 056. Závod se nevytvořil.');return checked<EventRow>(result,'Závod se nepodařilo vytvořit. Zkontrolujte soupisku a migraci databáze.');
 }
 export async function removeRaceEntrant(client:SupabaseClient,club:ClubAccess,eventId:string,memberId:string){
  staff(club);await verify(client);return checked<{member_id:string}>(await client.from('participation').delete().eq('club_id',club.id).eq('event_id',eventId).eq('member_id',memberId).select('member_id').single(),'Účastníka nelze odebrat. Nejprve odeberte jeho výsledek.');

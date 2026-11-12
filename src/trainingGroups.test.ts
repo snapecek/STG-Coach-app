@@ -6,6 +6,11 @@ const club={id:'club-a',name:'Fiktivní klub',role:'coach' as const};
 const group:TrainingGroup={id:'group-a',club_id:club.id,name:'Fiktivní skupina',description:'',archived_at:null,member_ids:['a','b']};
 const draft={name:' Fiktivní skupina ',description:' Popis ',member_ids:['a','b']};
 function mock(){const rpc=vi.fn(async()=>({data:[],error:null}));const from=vi.fn();const getUser=vi.fn(async()=>({data:{user:{id:'coach'}},error:null}));return {rpc,from,getUser,client:{rpc,from,auth:{getUser}} as unknown as SupabaseClient};}
+it('uses the atomic group creation notification RPC with a server-selected roster',async()=>{
+ const m=mock();await createGroupTrainings(m.client,club,group.id,{name:'Skupinový běh',place:'Park',type:'Běh',plan:'',date:'2027-01-01',time:'18:00',count:1,template_id:null,duration_minutes:60,capacity:null},true);
+ expect(m.rpc).toHaveBeenCalledWith('create_group_trainings_with_notice',{target_club:club.id,target_group:group.id,sessions:[expect.objectContaining({name:'Skupinový běh'})]});
+ expect(m.from).not.toHaveBeenCalled();
+});
 describe('Tréninkové skupiny',()=>{
  it('přijme prázdnou skupinu a odmítne duplicitní nebo příliš dlouhé údaje',()=>{expect(()=>validateGroup({...draft,member_ids:[]})).not.toThrow();for(const invalid of [{...draft,name:' '},{...draft,description:'a'.repeat(1001)},{...draft,member_ids:['a','a']},{...draft,member_ids:Array.from({length:501},(_,i)=>String(i))}])expect(()=>validateGroup(invalid)).toThrow()});
  it('ukládá skupinu i členy jednou klubovou RPC',async()=>{const m=mock();await saveTrainingGroup(m.client,club,group.id,draft);expect(m.rpc).toHaveBeenCalledWith('save_training_group',{target_club:club.id,target_group:group.id,label:'Fiktivní skupina',details:'Popis',entrants:['a','b']});expect(m.from).not.toHaveBeenCalled()});

@@ -156,11 +156,15 @@ export function ClubDashboard({userId,pushTarget,onPushOpened,client,club,chatRe
   const {date,time,count,selectedDates,entrants,group_id,guests,notify_people,...fields}=draft;
   if(modal==='edit-event'&&current){setEvent(await updateEvent(client,club,current.id,{...(fields.event_location!==undefined?{event_location:fields.event_location}:{}),...(fields.training_icon!==undefined?{training_icon:fields.training_icon}:{}),name:fields.name,place:fields.place,type:fields.type,plan:fields.plan,duration_minutes:fields.duration_minutes,event_kind:fields.event_kind,template_id:fields.template_id,race_distance_km:fields.race_distance_km,race_registration_url:fields.race_registration_url,...(current.capacity!==undefined||fields.capacity!=null?{capacity:fields.capacity}:{}),starts_at:pragueTimestamp(date,time)},notify_people));await refreshReservations();return;}
   if(fields.event_kind==='race'){
-   const row=await createClubRace(client,club,{...(guests?.length?{guests}:{}),...(fields.event_location?{event_location:fields.event_location}:{}),id:crypto.randomUUID(),training_icon:fields.training_icon,name:fields.name,place:fields.place,type:fields.type,plan:fields.plan,duration_minutes:fields.duration_minutes,starts_at:pragueTimestamp(date,time),race_distance_km:fields.race_distance_km,race_registration_url:fields.race_registration_url},entrants);
+   const row=await createClubRace(client,club,{...(guests?.length?{guests}:{}),...(fields.event_location?{event_location:fields.event_location}:{}),id:crypto.randomUUID(),training_icon:fields.training_icon,name:fields.name,place:fields.place,type:fields.type,plan:fields.plan,duration_minutes:fields.duration_minutes,starts_at:pragueTimestamp(date,time),race_distance_km:fields.race_distance_km,race_registration_url:fields.race_registration_url},entrants,notify_people);
    // Creation has committed. A failed read must not invite a duplicate save.
    setData(s=>({...s,events:[...s.events.filter(e=>e.id!==row.id),row].sort((a,b)=>a.starts_at.localeCompare(b.starts_at)),participation:[...s.participation,...entrants.map(member_id=>({club_id:club.id,event_id:row.id,member_id,response:null,attended:null,confirmed_by:null}))]}));
    try{await refreshReservations()}catch{if(mounted.current)setRefreshError('Závod byl uložen, ale aktuální soupisku se nepodařilo načíst. Automaticky ji obnovíme.')}
-  }else if(group_id){await createGroupTrainings(client,club,group_id,{...fields,date,time,count,selectedDates});await refreshReservations();}else{const rows=await createClubEvents(client,club,{...fields,date,time,count,selectedDates});setData(s=>({...s,events:[...s.events,...rows].sort((a,b)=>a.starts_at.localeCompare(b.starts_at))}));}
+  }else if(group_id){
+   const rows=await createGroupTrainings(client,club,group_id,{...fields,date,time,count,selectedDates},notify_people);
+   setData(s=>({...s,events:[...s.events,...rows].sort((a,b)=>a.starts_at.localeCompare(b.starts_at))}));
+   try{await refreshReservations()}catch{if(mounted.current)setRefreshError('Tréninky byly uloženy, ale aktuální soupisku se nepodařilo načíst. Automaticky ji obnovíme.')}
+  }else{const rows=await createClubEvents(client,club,{...fields,date,time,count,selectedDates},notify_people);setData(s=>({...s,events:[...s.events,...rows].sort((a,b)=>a.starts_at.localeCompare(b.starts_at))}));}
  },modal==='edit-event'?'Událost byla změněna.':'Události byly uloženy.',true);
  const submit=(event:React.FormEvent<HTMLFormElement>)=>{
   event.preventDefault();const f=new FormData(event.currentTarget);

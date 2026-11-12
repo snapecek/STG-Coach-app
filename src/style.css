@@ -201,6 +201,8 @@ html[data-theme="light"] .conversation-total{color:#8a5200}
 .notification-panel h2{font-size:18px;margin:0 0 12px}
 .notification-panel h3{font-size:14px;margin:18px 0 6px}
 .notification-panel>button{border-color:var(--border)}
+.notification-panel .event-change-notice{display:block;width:100%;padding:12px;text-align:left;white-space:normal;margin:8px 0}
+.event-change-notice small{display:block;overflow-wrap:anywhere}
 .notification-panel button p{font-size:13px;margin:8px 0;overflow-wrap:anywhere}
 html[data-theme="light"] .chat-mention,html[data-theme="light"] .conversation-archive-tabs button[aria-pressed=true]{color:#8a5200}
 .notification-bell .member-bell{background:var(--surface);border-color:var(--border);color:inherit}

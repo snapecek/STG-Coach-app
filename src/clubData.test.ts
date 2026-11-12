@@ -4,6 +4,15 @@ import {addTemplate,editTemplate,createClubEvents,buildEventRows,pragueTimestamp
 const club={id:'20000000-0000-4000-8000-000000000001',name:'Fiktivní A',role:'coach' as const};
 const template:TemplateRow={id:'template-a',club_id:club.id,name:'Fiktivní běh',type:'Běh',place:'Testovací park',minutes:45,plan:'Fiktivní plán'};
 function mock(returnData:unknown=[]){const tables:string[]=[];const filters:unknown[][]=[];const writes:unknown[]=[];const q={select:vi.fn(()=>q),eq:vi.fn((...args:unknown[])=>{filters.push(args);return q}),order:vi.fn(()=>q),abortSignal:vi.fn(()=>q),range:vi.fn(()=>q),update:vi.fn((data:unknown)=>{writes.push(data);return q}),delete:vi.fn(()=>q),insert:vi.fn((data:unknown)=>{writes.push(data);return q}),upsert:vi.fn((data:unknown)=>{writes.push(data);return q}),single:vi.fn(async()=>({data:{id:'new'},error:null})),then:(fn:(v:unknown)=>unknown)=>Promise.resolve({data:returnData,error:null}).then(fn)};const client={storage:{from:()=>({list:async()=>({data:[],error:null})})},rpc:vi.fn(async()=>({data:{id:'member'},error:null})),auth:{getUser:vi.fn(async()=>({data:{user:{id:'trainer'}},error:null}))},from:vi.fn((table:string)=>{tables.push(table);return q})};return {client:client as unknown as SupabaseClient,tables,filters,writes,q,auth:client.auth,rpc:client.rpc};}
+it('sends an event change and its notification through one atomic write',async()=>{
+ const m=mock();await updateEvent(m.client,club,'event',{starts_at:'2027-01-01T18:00:00Z',place:'Hala'},true);
+ expect(m.writes).toEqual([]);
+ expect(m.rpc).toHaveBeenCalledWith('update_event_with_notice',{target_club:club.id,target_event:'event',patch:{starts_at:'2027-01-01T18:00:00Z',place:'Hala'}});
+});
+it('does not retry an unavailable notification write as a silent ordinary update',async()=>{
+ const m=mock();m.rpc.mockResolvedValueOnce({data:null,error:{code:'PGRST202'}} as never);
+ await expect(updateEvent(m.client,club,'event',{status:'cancelled'},true)).rejects.toThrow('055');expect(m.writes).toEqual([]);
+});
 describe('Čas a opakování',()=>{
  it('převede letní a zimní pražský čas',()=>{expect(pragueTimestamp('2026-07-01','18:00')).toBe('2026-07-01T16:00:00.000Z');expect(pragueTimestamp('2026-12-01','18:00')).toBe('2026-12-01T17:00:00.000Z')});
  it('zachová 18:00 přes změnu času',()=>expect(buildEventRows(club.id,template,'2026-10-21','18:00',2).map(e=>e.starts_at)).toEqual(['2026-10-21T16:00:00.000Z','2026-10-28T17:00:00.000Z']));

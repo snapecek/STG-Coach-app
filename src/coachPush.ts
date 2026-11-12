@@ -15,8 +15,8 @@ export async function enableCoachPush(client:SupabaseClient){
  await navigator.serviceWorker.register('/sw.js');const reg=await navigator.serviceWorker.ready;
  let sub=await reg.pushManager.getSubscription();
  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:keyBytes(data.publicKey)});
- const json=sub.toJSON();const saved=await client.rpc('register_coach_push',{push_endpoint:sub.endpoint,push_p256dh:json.keys?.p256dh,push_auth:json.keys?.auth});
- if(saved.error){await sub.unsubscribe();throw new Error('Zařízení nelze přihlásit k oznámením. Ověřte migraci 040 a trenérská práva.');}
+ const json=sub.toJSON();const saved=await client.rpc('register_event_push',{push_endpoint:sub.endpoint,push_p256dh:json.keys?.p256dh,push_auth:json.keys?.auth});
+ if(saved.error){await sub.unsubscribe();throw new Error('Zařízení nelze přihlásit k oznámením. Ověřte migraci 055 a aktivní členství v klubu.');}
  localStorage.setItem(pushOwnerKey,user.data.user.id);
 }
 export async function disableCoachPush(client?:SupabaseClient){
@@ -26,5 +26,5 @@ export async function disableCoachPush(client?:SupabaseClient){
  if(reg)for(const n of await reg.getNotifications())n.close();localStorage.removeItem(pushOwnerKey);
 }
 export async function reconcilePushIdentity(userId:string|null){if(!pushSupported())return;const owner=localStorage.getItem(pushOwnerKey);if(owner&&owner!==userId)await disableCoachPush()}
-export type PushTarget={clubId:string;eventId:string};
-export function readPushTarget(url:string):PushTarget|null{const u=new URL(url),prefix=u.searchParams.has('rsvp-club')?'rsvp':'push',clubId=u.searchParams.get(prefix+'-club')||'',eventId=u.searchParams.get(prefix+'-event')||'',uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;return uuid.test(clubId)&&uuid.test(eventId)?{clubId,eventId}:null}
+export type PushTarget={clubId:string;eventId:string;kind?:'change'};
+export function readPushTarget(url:string):PushTarget|null{const u=new URL(url),prefix=u.searchParams.has('rsvp-club')?'rsvp':'push',clubId=u.searchParams.get(prefix+'-club')||'',eventId=u.searchParams.get(prefix+'-event')||'',uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;return uuid.test(clubId)&&uuid.test(eventId)?{clubId,eventId,...(prefix==='push'&&u.searchParams.get('push-kind')==='change'?{kind:'change' as const}:{})}:null}

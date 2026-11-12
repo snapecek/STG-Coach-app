@@ -13,7 +13,7 @@ self.addEventListener('push',event=>{
  })());
 });
 function notificationUrl(value){
- try{const u=new URL(typeof value==='string'?value:'/',self.location.origin),uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;if(u.origin!==self.location.origin||u.pathname!=='/'||!uuid.test(u.searchParams.get('push-club')||'')||!uuid.test(u.searchParams.get('push-event')||''))return '/';return '/?push-club='+u.searchParams.get('push-club')+'&push-event='+u.searchParams.get('push-event')}catch{return '/'}
+ try{const u=new URL(typeof value==='string'?value:'/',self.location.origin),uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;if(u.origin!==self.location.origin||u.pathname!=='/'||!uuid.test(u.searchParams.get('push-club')||'')||!uuid.test(u.searchParams.get('push-event')||''))return '/';return '/?push-club='+u.searchParams.get('push-club')+'&push-event='+u.searchParams.get('push-event')+(u.searchParams.get('push-kind')==='change'?'&push-kind=change':'')}catch{return '/'}
 }
 self.addEventListener('notificationclick',event=>{
  event.notification.close();const url=notificationUrl(event.notification.data?.url);

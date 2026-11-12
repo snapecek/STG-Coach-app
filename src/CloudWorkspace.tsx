@@ -1,3 +1,5 @@
+import {BetaWelcome} from './BetaWelcome';
+import {hasBetaAuthIntent} from './betaEntry';
 import {CoachPushSettings} from './CoachPushSettings';
 import {authRedirectUrl,isNativeApp} from './nativePlatform';
 import {AppHelp} from './AppHelpDialog';
@@ -12,7 +14,7 @@ import {LoadBoundary} from './LoadBoundary';
 import {ClubFeesButton} from './ClubFeesEntry';
 import {useClubLiveSync} from './clubLiveSync';
 import {useAutoRefresh} from './useAutoRefresh';
-import {disableCoachPush,reconcilePushIdentity,readPushTarget} from './coachPush';
+import {disableCoachPush,reconcilePushIdentity,readPushTarget,type PushTarget} from './coachPush';
 import {ClubSwitcher} from './ClubSwitcher';
 import {ClubIdentity} from './ClubIdentity';
 import {useClubProfile} from './clubSettings';
@@ -59,17 +61,49 @@ function initializeAuthLink(client:SupabaseClient,link:AuthLink){
 }
 export function CloudWorkspace(){
  const [brandTarget,setBrandTarget]=useState<HTMLDivElement|null>(null);
+ const [pushTarget,setPushTarget]=useState(()=>readPushTarget(window.location.href));
  const [setup]=useState(()=>{try{return {client:configuredClient(),error:''}}catch(error){return {client:undefined,error:error instanceof Error?error.message:'Konfigurace není dostupná.'}}});
+ function authIntent(){
+  let pending=false;try{pending=[invitationKey,passwordSetupKey,joinInvitationKey].some(key=>!!sessionStorage.getItem(key))}catch{}
+  return hasBetaAuthIntent(window.location.href,pending||!!pushTarget);
+ }
+ const [showWelcome,setShowWelcome]=useState(()=>!isNativeApp()&&!authIntent());
+ const [sessionKnown,setSessionKnown]=useState(!setup.client),[hasSession,setHasSession]=useState(false);
+ useEffect(()=>{
+  if(!setup.client)return;let alive=true,revision=0;
+  const {data:{subscription}}=setup.client.auth.onAuthStateChange((event,next)=>{if(alive){revision++;setHasSession(!!next);setSessionKnown(true);if(event==='SIGNED_OUT')setShowWelcome(true)}});
+  const snapshot=revision;
+  void setup.client.auth.getSession().then(({data})=>{if(alive&&revision===snapshot){setHasSession(!!data.session);setSessionKnown(true)}}).catch(()=>{if(alive)setSessionKnown(true)});
+  return()=>{alive=false;subscription.unsubscribe()};
+ },[setup.client]);
+ useEffect(()=>{
+  const receive=(event:MessageEvent)=>{
+   if(event.data?.type!=='trenomi-open-event')return;
+   try{
+    const url=new URL(String(event.data.url),location.origin);if(url.origin!==location.origin||url.pathname!=='/')return;
+    const target=readPushTarget(url.href);if(!target)return;
+    const current=new URL(location.href);for(const key of ['rsvp-club','rsvp-event'])current.searchParams.delete(key);
+    current.searchParams.set('push-club',target.clubId);current.searchParams.set('push-event',target.eventId);
+    if(target.kind)current.searchParams.set('push-kind',target.kind);else current.searchParams.delete('push-kind');
+    history.replaceState(history.state,'',current.pathname+current.search+current.hash);
+    setPushTarget(target);setShowWelcome(false);
+   }catch{/* Ignore malformed external messages. */}
+  };
+  navigator.serviceWorker?.addEventListener('message',receive);return()=>navigator.serviceWorker?.removeEventListener('message',receive);
+ },[]);
+ if(!isNativeApp()&&showWelcome&&!authIntent()){
+  if(!sessionKnown)return <div className="auth-screen"><p role="status">Ověřuji přihlášení…</p></div>;
+  if(!hasSession)return <BetaWelcome onEnter={()=>setShowWelcome(false)}/>;
+ }
  const brand=<a className="brand" href="/"><BrandLogo/></a>;
- return <div className="auth-screen cloud-screen"><div className="auth-card cloud-card">{brandTarget?createPortal(brand,brandTarget):brand}<div className="eyebrow">KLUBOVÝ PROSTOR</div>{setup.client?<AuthWorkspace client={setup.client} onBrandTarget={setBrandTarget}/>:<><h1>Připoj svůj klub</h1><p role="status">{setup.error}</p><p>Připojení klubu vyžaduje nastavení Supabase. Členské údaje se bez něj nenačítají.</p></>}</div></div>;
+ return <div className="auth-screen cloud-screen"><div className="auth-card cloud-card">{brandTarget?createPortal(brand,brandTarget):brand}<div className="eyebrow">KLUBOVÝ PROSTOR</div>{setup.client?<AuthWorkspace client={setup.client} onBrandTarget={setBrandTarget} pushTarget={pushTarget} onPushConsumed={()=>setPushTarget(null)}/>:<><h1>Připoj svůj klub</h1><p role="status">{setup.error}</p><p>Připojení klubu vyžaduje nastavení Supabase. Členské údaje se bez něj nenačítají.</p></>}</div></div>;
 }
-function AuthWorkspace({client,onBrandTarget}:{client:SupabaseClient;onBrandTarget:(node:HTMLDivElement|null)=>void}){
+function AuthWorkspace({client,onBrandTarget,pushTarget,onPushConsumed}:{client:SupabaseClient;onBrandTarget:(node:HTMLDivElement|null)=>void;pushTarget:PushTarget|null;onPushConsumed:()=>void}){
  const [notificationTarget,setNotificationTarget]=useState<HTMLDivElement|null>(null);
  const [navigationTarget,setNavigationTarget]=useState<HTMLDivElement|null>(null);
  const [desktopNavigationTarget,setDesktopNavigationTarget]=useState<HTMLDivElement|null>(null);
  const [guideRequest,setGuideRequest]=useState(0);
  const [helpOpen,setHelpOpen]=useState(false);
- const [pushTarget,setPushTarget]=useState(()=>readPushTarget(window.location.href));
  const [rememberLogin,setRememberLoginChecked]=useState(rememberLoginEnabled);
  const [registering,setRegistering]=useState(false),[applying,setApplying]=useState(false),[pendingJoin,setPendingJoin]=useState(()=>sessionStorage.getItem(joinInvitationKey)||'');
  const [archiveVersion,setArchiveVersion]=useState(0);
@@ -86,14 +120,14 @@ function AuthWorkspace({client,onBrandTarget}:{client:SupabaseClient;onBrandTarg
  useEffect(()=>{setFeedbackOpen(false);setSettingsRequest(null);setChatRequest(null);setChatState({unread:0,active:false})},[activeClub,session?.user.id]);
  useEffect(()=>{setPendingJoin(sessionStorage.getItem(joinInvitationKey)||'')},[]);
  useEffect(()=>{if(!initializing)void reconcilePushIdentity(session?.user.id||null).catch(()=>{})},[initializing,session?.user.id]);
- useEffect(()=>{const receive=(event:MessageEvent)=>{if(event.data?.type!=='trenomi-open-event')return;const target=readPushTarget(new URL(String(event.data.url),location.origin).href);if(target){setPushTarget(target);if(clubs.some(c=>c.id===target.clubId)){setActiveClub(target.clubId);setApplying(false);setSettingsRequest(null);setChatRequest(null)}}};navigator.serviceWorker?.addEventListener('message',receive);return()=>navigator.serviceWorker?.removeEventListener('message',receive)},[clubs]);
+ useEffect(()=>{if(pushTarget&&clubs.some(c=>c.id===pushTarget.clubId)){setActiveClub(pushTarget.clubId);setApplying(false);setSettingsRequest(null);setChatRequest(null)}},[pushTarget,clubs]);
  const headerBranding=useClubProfile(client,activeClub,0);
  const identityId=useRef<string|undefined>(undefined),preferredClub=useRef('');
  useEffect(()=>{
    let mounted=true,revision=0;
    const {data:{subscription}}=client.auth.onAuthStateChange((_event,next)=>{revision++;if(mounted){if(identityId.current!==next?.user.id){setClubs([]);setActiveClub('');setError('');}identityId.current=next?.user.id;setSession(next);}});
    const snapshot=revision;
-   initializeAuthLink(client,link).then(()=>client.auth.getSession()).then(({data,error})=>{if(mounted&&revision===snapshot){if(error)setError('Přihlášení nelze obnovit.');identityId.current=error?undefined:data.session?.user.id;setSession(error?null:data.session);}}).catch(err=>{if(mounted){setError(err instanceof Error?err.message:'Odkaz nelze ověřit.');sessionStorage.removeItem(passwordSetupKey);setPasswordSetup(false);setSession(null);}}).finally(()=>{if(mounted)setInitializing(false)});
+   initializeAuthLink(client,link).then(()=>client.auth.getSession()).then(({data,error})=>{if(mounted&&revision===snapshot){if(error)setError('Přihlášení nelze obnovit.');identityId.current=error?undefined:data.session?.user.id;setSession(error?null:data.session);}}).catch(err=>{if(mounted){setError(err instanceof Error?err.message:'Odkaz nelze ověřit.');link.passwordSetup=false;sessionStorage.removeItem(passwordSetupKey);setPasswordSetup(false);setSession(null);}}).finally(()=>{if(mounted)setInitializing(false)});
    return ()=>{mounted=false;subscription.unsubscribe();};
  },[client,link]);
  useEffect(()=>{
@@ -118,18 +152,18 @@ function AuthWorkspace({client,onBrandTarget}:{client:SupabaseClient;onBrandTarg
    link.tokenHash=null;setSession(data.session);setConfirmingLink(false);
   }catch(e){setError(e instanceof Error?e.message:'Ověření se nepodařilo. Zkontrolujte připojení a zkuste to znovu.');}finally{setBusy(false)}
  }
- function leaveEmailConfirmation(recover=false){link.tokenHash=null;setConfirmingLink(false);setPasswordSetup(false);sessionStorage.removeItem(passwordSetupKey);setForgot(recover);setError('');setNotice('');}
+ function leaveEmailConfirmation(recover=false){link.tokenHash=null;link.passwordSetup=false;setConfirmingLink(false);setPasswordSetup(false);sessionStorage.removeItem(passwordSetupKey);setForgot(recover);setError('');setNotice('');}
  async function signIn(form:HTMLFormElement){const fields=new FormData(form);setBusy(true);setError('');try{await setRememberLogin(fields.get('remember_login')==='on');const {error}=await client.auth.signInWithPassword({email:String(fields.get('email')).trim(),password:String(fields.get('password'))});if(error)setError('Přihlášení se nepodařilo. Zkontrolujte údaje a ověření e-mailu.');else form.reset();}catch(e){setError(e instanceof Error&&e.message.startsWith('Zařízení nepovoluje')?e.message:'Přihlášení se nepodařilo. Zkontrolujte připojení.');}finally{setBusy(false);}}
- async function signOut(){setApplying(false);setRegistering(false);setBusy(true);setError('');setClubs([]);setActiveClub('');try{await disableCoachPush(client);const {error}=await client.auth.signOut({scope:'local'});if(error)setError('Odhlášení se nepodařilo.');else {sessionStorage.removeItem(passwordSetupKey);setSession(null);setPasswordSetup(false);}}catch{setError('Odhlášení se nepodařilo.');}finally{setBusy(false);}}
+ async function signOut(){setApplying(false);setRegistering(false);setBusy(true);setError('');setClubs([]);setActiveClub('');try{await disableCoachPush(client);const {error}=await client.auth.signOut({scope:'local'});if(error)setError('Odhlášení se nepodařilo.');else {link.passwordSetup=false;sessionStorage.removeItem(passwordSetupKey);setSession(null);setPasswordSetup(false);}}catch{setError('Odhlášení se nepodařilo.');}finally{setBusy(false);}}
  async function resetPassword(form:HTMLFormElement){setBusy(true);setError('');try{const redirect=authRedirectUrl('recovery');if(pendingInvite)redirect.searchParams.set('club-invite',pendingInvite);if(pendingJoin)redirect.searchParams.set('join-invite',pendingJoin);const {error}=await client.auth.resetPasswordForEmail(String(new FormData(form).get('email')).trim(),{redirectTo:redirect.href});if(error)throw new Error();setNotice('Pokud má tento e-mail účet, přijde odkaz na obnovu hesla. Zkontrolujte i nevyžádanou poštu.');}catch{setError('Požadavek na obnovu hesla nelze odeslat. Zkuste to později.');}finally{setBusy(false);}}
- async function setPassword(form:HTMLFormElement){setBusy(true);setError('');try{const f=new FormData(form),password=String(f.get('password'));validateNewPassword(password,String(f.get('confirm')));const {error}=await client.auth.updateUser({password});if(error)throw new Error('Heslo nelze uložit. Ověřovací odkaz mohl vypršet.');form.reset();sessionStorage.removeItem(passwordSetupKey);setPasswordSetup(false);setNotice('Heslo je uložené.');}catch(e){setError(e instanceof Error?e.message:'Heslo nelze uložit.');}finally{setBusy(false);}}
+ async function setPassword(form:HTMLFormElement){setBusy(true);setError('');try{const f=new FormData(form),password=String(f.get('password'));validateNewPassword(password,String(f.get('confirm')));const {error}=await client.auth.updateUser({password});if(error)throw new Error('Heslo nelze uložit. Ověřovací odkaz mohl vypršet.');form.reset();link.passwordSetup=false;sessionStorage.removeItem(passwordSetupKey);setPasswordSetup(false);setNotice('Heslo je uložené.');}catch(e){setError(e instanceof Error?e.message:'Heslo nelze uložit.');}finally{setBusy(false);}}
  async function accept(){setBusy(true);setError('');try{preferredClub.current=await acceptInvitation(client,pendingInvite);sessionStorage.removeItem(invitationKey);setPendingInvite('');setNotice('Pozvánka přijata. Vaše historie zůstává zachovaná.');setRetry(n=>n+1);}catch(e){setError(e instanceof Error?e.message:'Pozvánku nelze přijmout.');}finally{setBusy(false);}}
  function dismissInvite(){sessionStorage.removeItem(invitationKey);setPendingInvite('');setError('');}
- function consumeEventLink(){setPushTarget(null);const u=new URL(location.href);for(const key of ['push-club','push-event','push-kind','rsvp-club','rsvp-event'])u.searchParams.delete(key);history.replaceState(history.state,'',u.pathname+u.search+u.hash)}
+ function consumeEventLink(){onPushConsumed();const u=new URL(location.href);for(const key of ['push-club','push-event','push-kind','rsvp-club','rsvp-event'])u.searchParams.delete(key);history.replaceState(history.state,'',u.pathname+u.search+u.hash)}
  if(initializing)return <p role="status">Ověřuji přihlášení…</p>;
  if(confirmingLink)return <><h1>Potvrďte otevření odkazu</h1><p>Pokračujte tlačítkem níže. Teprve tím se ověří váš e-mail a použije přihlašovací odkaz.</p>{error&&<p className="auth-error" role="alert">{error}</p>}<button className="primary" disabled={busy} onClick={()=>void confirmEmailLink()}>{busy?'Ověřuji…':'Pokračovat do Trenomi'}</button>{error&&<button className="text-button" disabled={busy} onClick={()=>leaveEmailConfirmation(true)}>Získat nový odkaz pro nastavení hesla</button>}<button className="text-button" disabled={busy} onClick={()=>leaveEmailConfirmation()}>Zpět k přihlášení</button></>;
  if(!session&&registering)return <LoadBoundary fallback={<p role="status">Načítám registraci…</p>}><Registration invitationToken={pendingJoin} client={client} onBack={()=>setRegistering(false)}/></LoadBoundary>;
- if(!session)return <><h1>{forgot?'Obnova hesla':'Vítej v Trenomi.'}</h1><p>{pendingInvite?'Přihlaste se e-mailem uvedeným v klubové pozvánce.':pendingJoin?'Otevřeli jste registrační pozvánku. Přihlaste se nebo si vytvořte účet; potom odešlete přihlášku trenérovi.':'Přihlas se účtem pozvaným do svého klubu.'}</p>{error&&<p className="auth-error" role="alert">{error}</p>}{notice&&<p className="notice" role="status">{notice}</p>}{link.error&&!forgot&&<button className="text-button" disabled={busy} onClick={()=>{setForgot(true);setError('');setNotice('Zadejte e-mail z pozvánky. Nový odkaz vám umožní nastavit heslo; použijte vždy nejnovější e-mail.')}}>Získat nový odkaz pro nastavení hesla</button>}<form onSubmit={event=>{event.preventDefault();void (forgot?resetPassword:signIn)(event.currentTarget)}}><label>E-mail<input aria-label="E-mail" name="email" type="email" autoComplete="username" required disabled={busy}/></label>{!forgot&&<><PasswordInput label="Heslo" name="password" autoComplete="current-password" disabled={busy}/><label className="remember-login"><input name="remember_login" type="checkbox" checked={rememberLogin} disabled={busy} onChange={e=>setRememberLoginChecked(e.target.checked)}/><span>Zapamatovat přihlášení</span></label><p className="muted remember-login-hint">{rememberLogin?'Zůstanete přihlášení i po zavření aplikace na tomto zařízení.':'Přihlášení platí jen pro tuto otevřenou relaci prohlížeče.'}</p></>}<button className="primary" disabled={busy}>{busy?'Odesílám…':forgot?'Poslat odkaz na obnovu':'Přihlásit se'}</button></form><button className="text-button" disabled={busy} onClick={()=>{setForgot(!forgot);setError('');setNotice('')}}>{forgot?'Zpět k přihlášení':'Zapomenuté heslo'}</button><p className="muted">Přicházíte poprvé? Vytvořte účet a požádejte o vstup do klubu.</p><button className="text-button" onClick={()=>{setRegistering(true);setError('');setNotice('')}}>Vytvořit účet a přihlásit se do klubu</button><a className="text-button" href="/navod-clenove.html" target="_blank" rel="noopener noreferrer">Obrázkový návod pro nové členy</a>{!isNativeApp()&&<a className="text-button" href="/navod-na-plochu.html" target="_blank" rel="noopener noreferrer">Přidat Trenomi na plochu</a>}{pendingInvite&&<button className="text-button" onClick={dismissInvite}>Zavřít klubovou pozvánku</button>}</>;
+ if(!session)return <><h1>{forgot?'Obnova hesla':'Vítej v Trenomi.'}</h1><p>{pendingInvite?'Přihlaste se e-mailem uvedeným v klubové pozvánce.':pendingJoin?'Otevřeli jste registrační pozvánku. Přihlaste se nebo si vytvořte účet; potom odešlete přihlášku trenérovi.':'Přihlas se účtem pozvaným do svého klubu.'}</p>{error&&<p className="auth-error" role="alert">{error}</p>}{notice&&<p className="notice" role="status">{notice}</p>}{link.error&&!forgot&&<button className="text-button" disabled={busy} onClick={()=>{setForgot(true);setError('');setNotice('Zadejte e-mail z pozvánky. Nový odkaz vám umožní nastavit heslo; použijte vždy nejnovější e-mail.')}}>Získat nový odkaz pro nastavení hesla</button>}<form onSubmit={event=>{event.preventDefault();void (forgot?resetPassword:signIn)(event.currentTarget)}}><label>E-mail<input aria-label="E-mail" name="email" type="email" autoComplete="username" required disabled={busy}/></label>{!forgot&&<><PasswordInput label="Heslo" name="password" autoComplete="current-password" disabled={busy}/><label className="remember-login"><input name="remember_login" type="checkbox" checked={rememberLogin} disabled={busy} onChange={e=>setRememberLoginChecked(e.target.checked)}/><span>Zapamatovat přihlášení</span></label><p className="muted remember-login-hint">{rememberLogin?'Zůstanete přihlášení i po zavření aplikace na tomto zařízení.':'Přihlášení platí jen pro tuto otevřenou relaci prohlížeče.'}</p></>}<button className="primary" disabled={busy}>{busy?'Odesílám…':forgot?'Poslat odkaz na obnovu':'Přihlásit se'}</button></form><button className="text-button" disabled={busy} onClick={()=>{setForgot(!forgot);setError('');setNotice('')}}>{forgot?'Zpět k přihlášení':'Zapomenuté heslo'}</button>{pendingJoin&&<><p className="muted">Máte pozvánku? Vytvořte účet a odešlete přihlášku trenérovi.</p><button className="text-button" onClick={()=>{setRegistering(true);setError('');setNotice('')}}>Vytvořit účet a přihlásit se do klubu</button></>}<a className="text-button" href="/navod-clenove.html" target="_blank" rel="noopener noreferrer">Obrázkový návod pro nové členy</a>{!isNativeApp()&&<a className="text-button" href="/navod-na-plochu.html" target="_blank" rel="noopener noreferrer">Přidat Trenomi na plochu</a>}{pendingInvite&&<button className="text-button" onClick={dismissInvite}>Zavřít klubovou pozvánku</button>}</>;
  if(passwordSetup)return <><span className="event-symbol training"><KeyRound/></span><h1>Nastavit heslo</h1><p>Zvolte nové heslo pro svůj ověřený účet. Minimálně 12 znaků.</p>{error&&<p role="alert" className="auth-error">{error}</p>}<form onSubmit={e=>{e.preventDefault();void setPassword(e.currentTarget)}}><PasswordInput label="Nové heslo" name="password" autoComplete="new-password" minLength={12} maxLength={128} disabled={busy}/><PasswordInput label="Potvrdit heslo" name="confirm" autoComplete="new-password" minLength={12} maxLength={128} disabled={busy}/><button className="primary" disabled={busy}>Uložit nové heslo</button></form><button className="text-button" disabled={busy} onClick={()=>requestLeave(()=>void signOut())}>Odhlásit se</button></>;
  const selected=clubs.find(club=>club.id===activeClub);
  const personalSettings=<><CoachPushSettings client={client} staff={selected?.role!=='member'}/><NotificationSettings client={client} club={selected||{id:'',name:'',role:'member'}} experience={experience}/><PrimaryClubSetting client={client} clubs={clubs} value={typeof session.user.user_metadata?.primary_club_id==='string'?session.user.user_metadata.primary_club_id:''}/><section className="settings-panel" aria-label="Členství v klubech"><h2>Členství v klubech</h2><button className="text-button" onClick={()=>{setApplying(true);if(userMenu.current)userMenu.current.open=false}}>Přihláška do dalšího klubu</button></section></>;

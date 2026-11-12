@@ -1,5 +1,7 @@
 # Trenomi
 
+Upozornění členům a trenérům na změny termínu, místa a zrušení událostí: [nastavení a nasazení migrace 055](docs/EVENT_CHANGE_NOTIFICATIONS.md). Volba při úpravě, rušení a změně série ovládá zvoneček i Web Push; mobilní odběr je dostupný také členům.
+
 Mobilní aplikace pro malé sportovní kluby: React, TypeScript, Vite, Tailwind CSS a Supabase. České tmavé rozhraní s oranžovými akcenty. OCR Timer není součástí projektu.
 
 ## Spuštění a nasazení

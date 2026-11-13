@@ -15,7 +15,7 @@ export function overviewStats(data:ClubData,now:number){
  return {days,buckets,leaders,regularity,attention,delta,volume:[...volume],known:known.length,rate:known.length?Math.round(known.filter(p=>p.attended).length/known.length*100):null};
 }
 
-// One actionable row per event, even when notes, attendance and tasks all need work.
+// One actionable row per event. Attendance trends are informational, not unfinished work.
 export function coachWorkQueue(data:ClubData,tasks:import('./eventTasks').EventTask[],now:number,userId?:string){
  const rows=new Map<string,{event:import('./clubData').EventRow;labels:string[];tabs:('attendance'|'record'|'tasks')[];priority:number}>();
  function add(event:import('./clubData').EventRow,label:string,tab:'attendance'|'record'|'tasks',priority:number){let row=rows.get(event.id);if(!row){row={event,labels:[],tabs:[],priority};rows.set(event.id,row)}if(!row.labels.includes(label))row.labels.push(label);if(!row.tabs.includes(tab))row.tabs.push(tab);row.priority=Math.min(row.priority,priority);}
@@ -24,6 +24,5 @@ export function coachWorkQueue(data:ClubData,tasks:import('./eventTasks').EventT
   if(Date.parse(e.starts_at)>now&&Date.parse(e.starts_at)<=now+7*86400000){const self=userId?reviewMembers(data,e).find(m=>!m.removed_at&&m.user_id===userId):undefined;if(self&&!data.participation.some(p=>p.event_id===e.id&&p.member_id===self.id&&p.response))add(e,'Potvrdit vlastní účast','attendance',2);}
   const pending=tasks.filter(t=>t.event_id===e.id&&!t.completed_at);if(pending.length)add(e,`${pending.length} organizačních úkolů${pending.some(t=>t.due_at&&Date.parse(t.due_at)<now)?' · po termínu':''}`,'tasks',pending.some(t=>t.due_at&&Date.parse(t.due_at)<now)?0:1);
  }
- for(const a of overviewStats(data,now).attention)add(a.event,`Delší absence: ${a.member.name}`,'attendance',1);
  return [...rows.values()].sort((a,b)=>a.priority-b.priority||a.event.starts_at.localeCompare(b.event.starts_at)||a.event.id.localeCompare(b.event.id));
 }

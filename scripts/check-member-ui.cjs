@@ -1549,6 +1549,22 @@ const events=[{...base,id:'50000000-0000-4000-8000-000000000001',name:'Fiktivní
    await nav('Šablony');assert.equal(await p.locator('.template-card').count(),2);await p.getByLabel('Hledat v tréninkových šablonách',{exact:true}).fill('Judo');assert.equal(await p.locator('.template-card').count(),1);await p.getByRole('button',{name:'Upravit šablonu STG HIIT v gymu',exact:true}).click();await p.getByLabel('Název',{exact:true}).fill('STG HIIT upravený');await p.getByRole('button',{name:'Uložit do klubu',exact:true}).click();await p.getByRole('status').filter({hasText:'Šablona byla uložena.'}).waitFor();assert.equal(state.events[0].name,events[0].name);await p.getByLabel('Hledat v tréninkových šablonách',{exact:true}).fill('');await p.getByLabel('Zaměření šablon',{exact:true}).selectOption('Běh');assert.equal(await p.locator('.template-card').count(),1);await p.getByRole('button',{name:'Smazat šablonu STG Run & Workout',exact:true}).click();await p.getByRole('alertdialog',{name:'Smazat šablonu?',exact:true}).getByRole('button',{name:'Smazat šablonu',exact:true}).click();await p.getByRole('status').filter({hasText:'Šablona smazána.'}).waitFor();assert.equal(v.state().templates.length,1);assert.equal(await p.locator('.template-card').count(),1);assert.equal(v.state().events.length,state.events.length);
    await v.c.close();console.log('PASS technical UI: all coach pages responsive 390/1440, eight account palettes and reload, light/dark, template search/filter/edit/delete preserves events');await browser.close();return;
   }
+  if(process.env.STG_COMPLETED_QUEUE_ONLY==='1'){
+   const v=await context('coach'),p=v.page,s=v.state(),recent=s.events[0];
+   s.events.splice(1);s.tasks.splice(0);
+   Object.assign(recent,{starts_at:new Date(Date.now()-86400000).toISOString(),actual_notes:'Uložený průběh',completed_at:new Date(Date.now()-3600000).toISOString()});
+   const old={...recent,id:'50000000-0000-4000-8000-000000000099',name:'Dřívější účast',starts_at:new Date(Date.now()-35*86400000).toISOString()};s.events.push(old);
+   s.participation.splice(0,s.participation.length,{club_id:club,event_id:old.id,member_id:member,response:'yes',attended:true,confirmed_by:'coach'},{club_id:club,event_id:recent.id,member_id:member,response:'no',attended:false,attendance_excused:false,confirmed_by:'coach'});
+   await login(p);await p.getByRole('heading',{name:'Týdenní plán',exact:true}).waitFor();
+   assert.equal(await p.getByRole('region',{name:'K vyřízení',exact:true}).count(),0,'Closed and verified training is not pending because of a long absence');
+   await p.reload();await p.getByRole('heading',{name:'Týdenní plán',exact:true}).waitFor();
+   assert.equal(await p.getByRole('region',{name:'K vyřízení',exact:true}).count(),0);
+   s.tasks.push({id:'60000000-0000-4000-8000-000000000099',event_id:recent.id,title:'Vrátit pomůcky',assignee_id:null,due_at:null,completed_at:null});
+   await p.reload();const row=p.locator('.work-queue-row');await row.getByRole('button',{name:'Úkoly',exact:true}).waitFor();
+   assert.equal(await row.count(),1);assert((await row.textContent()).includes('1 organizačních úkolů'));assert(!(await row.textContent()).includes('Delší absence'));
+   for(const width of [390,1440]){await p.setViewportSize({width,height:1000});assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}
+   await v.c.close();console.log('PASS completed queue: verified absence does not reopen closed training, reload stays clear, real tasks remain actionable, 390/1440');return;
+  }
   if(process.env.STG_COMPLETION_ONLY==='1'){
    const v=await context('coach');const p=v.page,eid=events[0].id;v.state().events.find(e=>e.id===eid).starts_at=new Date(Date.now()-2*86400000).toISOString();v.state().participation.find(r=>r.event_id===eid).attended=null;
    await p.setViewportSize({width:1440,height:1000});await login(p);await p.getByRole('navigation',{name:'Hlavní navigace',exact:true}).getByRole('button',{name:'Deník',exact:true}).click();await p.getByRole('button',{name:'Otevřít záznam '+events[0].name,exact:true}).click();

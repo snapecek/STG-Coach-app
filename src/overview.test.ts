@@ -12,6 +12,21 @@ describe('Přehled trenéra',()=>{
 });
 it('upozorní na delší absenci pouze s doloženou dřívější účastí a nedávnou absencí',()=>{const d=data();d.events=[event('old',{starts_at:'2026-09-01T16:00:00Z'}),event('recent')];d.participation=[{club_id:'club',event_id:'old',member_id:'m',response:'yes',attended:true,confirmed_by:null},{club_id:'club',event_id:'recent',member_id:'m',response:'no',attended:false,confirmed_by:null}];expect(overviewStats(d,now).attention.map(a=>a.member.id)).toEqual(['m']);d.participation[1].attended=null;expect(overviewStats(d,now).attention).toEqual([])});
 
+it('uzavřený trénink s ověřenou absencí nezůstane k vyřízení, ale skutečné úkoly zůstanou',()=>{
+ const d=data();
+ d.events=[event('old',{starts_at:'2026-09-01T16:00:00Z',actual_notes:'Hotovo',completed_at:'2026-09-01T18:00:00Z'}),event('recent',{actual_notes:'Hotovo',completed_at:'2026-10-13T18:00:00Z'})];
+ d.participation=[{club_id:'club',event_id:'old',member_id:'m',response:'yes',attended:true,confirmed_by:'coach'},{club_id:'club',event_id:'recent',member_id:'m',response:'no',attended:false,attendance_excused:false,confirmed_by:'coach'}];
+ expect(overviewStats(d,now).attention.map(a=>a.member.id)).toEqual(['m']);
+ expect(coachWorkQueue(d,[],now)).toEqual([]);
+ const task={id:'t',event_id:'recent',title:'Vrátit pomůcky',assignee_id:null,due_at:null,completed_at:null};
+ expect(coachWorkQueue(d,[task],now).map(r=>({id:r.event.id,labels:r.labels,tabs:r.tabs}))).toEqual([{id:'recent',labels:['1 organizačních úkolů'],tabs:['tasks']}]);
+ expect(coachWorkQueue(d,[{...task,completed_at:'2026-10-14T12:00:00Z'}],now)).toEqual([]);
+ d.events[1].completed_at=null;
+ expect(coachWorkQueue(d,[],now).map(r=>r.labels)).toEqual([['Uzavřít trénink']]);
+ d.participation[1].attended=null;
+ expect(coachWorkQueue(d,[],now)[0].labels).toEqual(['1 neověřených účastí','Uzavřít trénink']);
+});
+
 it('sloučí nedokončenou událost a úkol do jednoho řádku se zachovanými cíli',()=>{const d=data();d.events=[event('e'),event('cancelled',{status:'cancelled'})];const tasks=[{id:'t',event_id:'e',title:'Pomůcky',assignee_id:null,due_at:null,completed_at:null},{id:'ignored',event_id:'cancelled',title:'Zrušený úkol',assignee_id:null,due_at:null,completed_at:null}];const work=coachWorkQueue(d,tasks,now);expect(work).toHaveLength(1);expect(work[0].event.id).toBe('e');expect(work[0].tabs).toEqual(['attendance','record','tasks']);expect(work[0].labels.some(l=>l.includes('organizačních'))).toBe(true)});
 it('otevřený závod bez přihlášených nevytváří povinnost odpovědět všem členům',()=>{const d=data();d.events=[event('race',{event_kind:'race',starts_at:'2026-10-15T16:00:00Z'})];expect(coachWorkQueue(d,[],now)).toEqual([])});
 

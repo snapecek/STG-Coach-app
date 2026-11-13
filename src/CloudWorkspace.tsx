@@ -56,7 +56,12 @@ function initializeAuthLink(client:SupabaseClient,link:AuthLink){
    if(error)throw new Error('Odkaz nelze ověřit. Požádejte o nový.');
    const user=await client.auth.getUser();if(user.error||!user.data.user)throw new Error('Přihlášení z odkazu nelze ověřit.');
   }else if(link.code){const {error}=await client.auth.exchangeCodeForSession(link.code);if(error)throw new Error('Odkaz nelze ověřit. Otevřete jej v původním prohlížeči nebo požádejte o nový.');}
- })().finally(()=>{link.accessToken=null;link.refreshToken=null;link.code=null});
+ })().finally(()=>{
+  link.accessToken=null;link.refreshToken=null;link.code=null;
+  // Keep the result for concurrent mounts, but consume it before the beta
+  // welcome screen can mount a fresh login form after logout.
+  linkPromise=Promise.resolve();
+ });
  return linkPromise;
 }
 export function CloudWorkspace(){
@@ -154,7 +159,7 @@ function AuthWorkspace({client,onBrandTarget,pushTarget,onPushConsumed}:{client:
  }
  function leaveEmailConfirmation(recover=false){link.tokenHash=null;link.passwordSetup=false;setConfirmingLink(false);setPasswordSetup(false);sessionStorage.removeItem(passwordSetupKey);setForgot(recover);setError('');setNotice('');}
  async function signIn(form:HTMLFormElement){const fields=new FormData(form);setBusy(true);setError('');try{await setRememberLogin(fields.get('remember_login')==='on');const {error}=await client.auth.signInWithPassword({email:String(fields.get('email')).trim(),password:String(fields.get('password'))});if(error)setError('Přihlášení se nepodařilo. Zkontrolujte údaje a ověření e-mailu.');else form.reset();}catch(e){setError(e instanceof Error&&e.message.startsWith('Zařízení nepovoluje')?e.message:'Přihlášení se nepodařilo. Zkontrolujte připojení.');}finally{setBusy(false);}}
- async function signOut(){setApplying(false);setRegistering(false);setBusy(true);setError('');setClubs([]);setActiveClub('');try{await disableCoachPush(client);const {error}=await client.auth.signOut({scope:'local'});if(error)setError('Odhlášení se nepodařilo.');else {link.passwordSetup=false;sessionStorage.removeItem(passwordSetupKey);setSession(null);setPasswordSetup(false);}}catch{setError('Odhlášení se nepodařilo.');}finally{setBusy(false);}}
+ async function signOut(){setApplying(false);setRegistering(false);setBusy(true);setError('');setClubs([]);setActiveClub('');try{await disableCoachPush(client);const {error}=await client.auth.signOut({scope:'local'});if(error)setError('Odhlášení se nepodařilo.');else {link.error=false;link.passwordSetup=false;sessionStorage.removeItem(passwordSetupKey);setSession(null);setPasswordSetup(false);}}catch{setError('Odhlášení se nepodařilo.');}finally{setBusy(false);}}
  async function resetPassword(form:HTMLFormElement){setBusy(true);setError('');try{const redirect=authRedirectUrl('recovery');if(pendingInvite)redirect.searchParams.set('club-invite',pendingInvite);if(pendingJoin)redirect.searchParams.set('join-invite',pendingJoin);const {error}=await client.auth.resetPasswordForEmail(String(new FormData(form).get('email')).trim(),{redirectTo:redirect.href});if(error)throw new Error();setNotice('Pokud má tento e-mail účet, přijde odkaz na obnovu hesla. Zkontrolujte i nevyžádanou poštu.');}catch{setError('Požadavek na obnovu hesla nelze odeslat. Zkuste to později.');}finally{setBusy(false);}}
  async function setPassword(form:HTMLFormElement){setBusy(true);setError('');try{const f=new FormData(form),password=String(f.get('password'));validateNewPassword(password,String(f.get('confirm')));const {error}=await client.auth.updateUser({password});if(error)throw new Error('Heslo nelze uložit. Ověřovací odkaz mohl vypršet.');form.reset();link.passwordSetup=false;sessionStorage.removeItem(passwordSetupKey);setPasswordSetup(false);setNotice('Heslo je uložené.');}catch(e){setError(e instanceof Error?e.message:'Heslo nelze uložit.');}finally{setBusy(false);}}
  async function accept(){setBusy(true);setError('');try{preferredClub.current=await acceptInvitation(client,pendingInvite);sessionStorage.removeItem(invitationKey);setPendingInvite('');setNotice('Pozvánka přijata. Vaše historie zůstává zachovaná.');setRetry(n=>n+1);}catch(e){setError(e instanceof Error?e.message:'Pozvánku nelze přijmout.');}finally{setBusy(false);}}
